@@ -1,0 +1,27 @@
+{
+  "name": "monoreposetup",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "backend": "npm run dev -w backend",
+    "frontend": "npm run dev -w frontend",
+    "start": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "author": "Tushar Chand Thakur",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "dependencies": {
+    "cookie-parser": "^1.4.7",
+    "module-alias": "^2.2.3",
+    "mongodb": "^6.10.0",
+    "nconf": "^0.12.1",
+    "swc": "^1.0.11",
+    "tsconfig-paths": "^4.2.0"
+  }
+}

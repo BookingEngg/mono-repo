@@ -1,0 +1,18 @@
+{
+  "service": "backend",
+  "service_route": "backend",
+  "server": {
+    "port": "8080"
+  },
+  "databases": {
+    "mongodb": {
+      "praman": {
+        "name": "praman",
+        "url": "localhost:27017",
+        "username": "",
+        "password": "",
+        "port": 27017
+      }
+    }
+  }
+}
