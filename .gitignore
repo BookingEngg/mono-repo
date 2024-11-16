@@ -1,3 +1,9 @@
+# Root Ignore
 node_modules/
 .next
 dist
+
+# Backend Ignore
+backend/src/config/config.*
+
+# Frontend Ignore
