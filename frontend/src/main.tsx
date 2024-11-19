@@ -1,8 +1,9 @@
+import React from "react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "rsuite/dist/rsuite.min.css";
 import { CustomProvider } from "rsuite";
-import App from "./App.tsx";
+import App from '@/App';
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

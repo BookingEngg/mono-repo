@@ -1,8 +1,9 @@
+import React from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import "./App.css";
-import LoginRoutes from "./pages/Login";
-import PaymentRoutes from "./pages/Payment";
-import { TRoutes } from "./typings/common";
+import LoginRoutes from "@/pages/Login/Login.routes";
+import PaymentRoutes from "@/pages/Payment/Payment.routes";
+import {TRoutes} from '@/typings/common'
 
 /**
  * Get all the routes passing in the routes parameter

@@ -1,5 +1,6 @@
+import React from "react";
 import { Outlet } from "react-router-dom";
-import { TRoutes } from "../../typings/common";
+import { TRoutes } from "@/typings/common";
 
 export const BASE_URL = "/login";
 
