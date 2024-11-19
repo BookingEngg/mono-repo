@@ -1,21 +1,30 @@
-import { useEffect } from 'react'
-import './App.css'
-import {Button} from 'rsuite'
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import "./App.css";
+import LoginRoutes from "./pages/Login";
+import PaymentRoutes from "./pages/Payment";
+import { TRoutes } from "./typings/common";
+
+/**
+ * Get all the routes passing in the routes parameter
+ */
+const getAllRoutes = (routes: TRoutes[]) => {
+  return routes.map((route) => (
+    <Route path={route.path} element={route.element}>
+      {route.children && getAllRoutes(route.children)}
+    </Route>
+  ));
+};
 
 function App() {
-  useEffect(() => {
-    const getBooks = async () => {
-      const response = await fetch('http://localhost:8080/api/v1/platform/users')
-      const data = await response.json()
-      console.log("RESPONSE FROM BE>>>>>>>>>>", data);
-    }
-    getBooks()
-  }, [])
+  // Contain all pages routes
+  const allRoutes: TRoutes[] = [...LoginRoutes(), ...PaymentRoutes()];
+
   return (
     <>
-      <h1>Hello FE Started</h1>
-      <Button>Hello world</Button>
+      <BrowserRouter>
+        <Routes>{getAllRoutes(allRoutes)}</Routes>
+      </BrowserRouter>
     </>
-  )
+  );
 }
-export default App
+export default App;
