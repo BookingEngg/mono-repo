@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import { TRoutes } from "@/typings/common";
 import Profitability from "@/atoms/icons/Profitablity";
+import Payment from "@/atoms/icons/Payment";
 
 export const BASE_URL = "/login";
 
@@ -14,7 +15,7 @@ const getLoginRoutes = () => {
           Login Page <Outlet />
         </>
       ),
-      icon: <Profitability />,
+      icon: <Payment />,
       showOnSideNav: true,
       key: "login",
       label: "Login",

@@ -29,19 +29,19 @@ const MainLayout = (props: { routes: TRoutes[] }) => {
     return flatternRoutes(routes);
   }, [routes]);
 
-  const getCurrentRoute = () => React.useCallback(() => {
+  const getCurrentRoute = React.useMemo(() => {
     const currentRoute = flatternRoutesTree.find(route => {
       return route.path === location.pathname
     })
+    console.log(">>>>>>>>>>>", currentRoute);
 
-    console.log(currentRoute)
-
+    return currentRoute || flatternRoutesTree[0];
   }, [routes, location])
 
   return (
     <>
-      {/* <SideNav routes={routes} selectedRoute={location} />
-      <Header routes={routes} selectedRoute={location} /> */}
+      <SideNav routes={routes} selectedRoute={getCurrentRoute} />
+      {/* <Header routes={routes} selectedRoute={location} /> */}
     </>
   );
 };
