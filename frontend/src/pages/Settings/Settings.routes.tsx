@@ -1,27 +1,27 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { TRoutes } from "@/typings/common";
-import Payment from "@/atoms/icons/Payment";
+import SettingsIcon from "@/atoms/icons/Settings";
 
-export const BASE_URL = "/pmt";
+export const BASE_URL = "/setting";
 
-const getPaymentRoutes = () => {
+const getSettingsRoutes = () => {
   const routes: TRoutes[] = [
     {
       path: BASE_URL,
       element: (
         <>
-          Payment Page <Outlet />
+          Setting Page <Outlet />
         </>
       ),
-      icon: <Payment />,
+      icon: <SettingsIcon />,
       showOnSideNav: true,
-      key: "payment",
-      label: "Payment",
+      label: "Setting",
+      key: "setting",
     },
   ];
 
   return routes;
 };
 
-export default getPaymentRoutes;
+export default getSettingsRoutes;
