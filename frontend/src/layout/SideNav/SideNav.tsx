@@ -1,7 +1,7 @@
 import React from "react";
 import { TRoutes } from "@/typings/common";
 import { Nav, Sidenav } from "rsuite";
-import { Location, Route, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export interface SideNavProps {
   routes: TRoutes[];
@@ -44,10 +44,10 @@ const SideNav = (props: SideNavProps) => {
             <Nav.Item
               key="customer_info"
               eventKey={"info"}
-              style={{ paddingLeft: 20 }}
+              style={{ height: 45 }}
               active={false}
             >
-              Home
+              {" "}
             </Nav.Item>
             {validRoutesForNav.map((route) => {
               if (route.children && route.children.filter(child => child.showOnSideNav).length) {

@@ -1,0 +1,68 @@
+.sidenav-container {
+  background-color: #f3f4f6;
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.04);
+  display: inline-block;
+  position: fixed;
+  z-index: 10;
+  left: 0;
+  overflow: auto;
+  height: 100vh;
+
+  > nav {
+
+    .sidenav-item-container {
+      display: flex;
+      flex-direction: column;
+
+      .sidenav-iconholder {
+        padding: 15px;
+
+        &:hover {
+          cursor: pointer;
+          background-color: var(--lowlight-1);
+        }
+      }
+
+      .menuitem-holder {
+        padding: 16px;
+        transition: all .1s;
+
+        &:hover {
+          cursor: pointer;
+          background-color: var(--lowlight-1);
+        }
+      }
+
+      .submenuitem-holder {
+        
+        transition: all .5s ease-in;
+        overflow: hidden;
+
+        >a {
+          color: unset;
+          text-decoration: none;
+
+          > div {
+            padding: 12px 12px 12px 10px;
+            margin-left: 56px;
+
+            &:hover {
+              cursor: pointer;
+              color: #4764cd7e;
+            }
+
+          }
+        }
+      }
+
+      .selected-menuitem {
+        color: #4764cd;
+      }
+
+    }
+  } 
+}
+
+.sidenav-not-expanded {
+  overflow: hidden;
+}

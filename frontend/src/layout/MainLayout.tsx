@@ -1,8 +1,11 @@
 import React from "react";
 import { TRoutes } from "@/typings/common";
 import SideNav from "@/layout/SideNav";
+import SideNavV2 from "@/layout/SideNavV2";
 import Header from "@/layout/Header";
 import { useLocation } from "react-router-dom";
+import { FlexboxGrid } from "rsuite";
+import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 
 const flatternRoutes = (routes: TRoutes[]): TRoutes[] => {
   let flatRoutes: TRoutes[] = [];
@@ -39,15 +42,32 @@ const MainLayout = (props: { routes: TRoutes[] }) => {
     const currentRoute = flatternRoutesTree.find((route) => {
       return route.path === location.pathname;
     });
-    // console.log("Current>>>>>>>>>>>", currentRoute);
 
     return currentRoute || flatternRoutesTree[0];
   }, [routes, location]);
 
   return (
     <>
-      <Header routes={routes} selectedRoute={getCurrentRoute} />
-      <SideNav routes={routes} selectedRoute={getCurrentRoute} />
+      <section>
+        <SideNavV2 routes={routes} selectedRoute={getCurrentRoute} />
+        <Header routes={routes} selectedRoute={getCurrentRoute} />
+      </section>
+
+      {/* <FlexboxGrid>
+        <FlexboxGridItem colspan={2}>
+          <SideNavV2 routes={routes} selectedRoute={getCurrentRoute} />
+        </FlexboxGridItem>
+        <FlexboxGridItem colspan={22}>
+          <FlexboxGrid>
+            <FlexboxGridItem colspan={24}>
+              <Header routes={routes} selectedRoute={getCurrentRoute} />
+            </FlexboxGridItem>
+            <FlexboxGridItem>
+              BODY
+            </FlexboxGridItem>
+          </FlexboxGrid>
+        </FlexboxGridItem>
+      </FlexboxGrid> */}
     </>
   );
 };

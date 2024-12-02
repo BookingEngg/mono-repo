@@ -14,7 +14,8 @@
   "author": "Tushar Chand Thakur",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "sass": "^1.81.0"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

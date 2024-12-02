@@ -17,14 +17,15 @@ const Header = (props: { routes: TRoutes[]; selectedRoute: TRoutes }) => {
 
   const validRoutesForNav: TRoutes[] =
     React.useMemo(() => {
-      const allValidRoutes =
-        validAvailableTabs.children?.filter((route) => !!route.showOnTab) || [];
-      navigate(
-        allValidRoutes.length ? allValidRoutes[0].path : selectedRoute.path
+      return (
+        validAvailableTabs.children?.filter((route) => !!route.showOnTab) || []
       );
-
-      return allValidRoutes;
     }, [selectedRoute, validAvailableTabs]) || [];
+
+  React.useEffect(() => {
+    console.log("USE>>>>", validRoutesForNav)
+    navigate(validRoutesForNav?.[0]?.path);
+  }, []);
 
   return (
     <Nav appearance="subtle" defaultActiveKey={validRoutesForNav?.[0]?.key}>
