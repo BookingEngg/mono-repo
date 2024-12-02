@@ -50,7 +50,7 @@ const SideNav = (props: SideNavProps) => {
               Home
             </Nav.Item>
             {validRoutesForNav.map((route) => {
-              if (route.children) {
+              if (route.children && route.children.filter(child => child.showOnSideNav).length) {
                 return (
                   <Nav.Menu
                     key={route.key}
@@ -78,9 +78,7 @@ const SideNav = (props: SideNavProps) => {
                   }
                   style={{ paddingLeft: 20 }}
                   onClick={() => {
-                    if (!route.children?.length) {
-                      navigate(route.path);
-                    }
+                    navigate(route.path);
                   }}
                   active={route.key === selectedRoute.key}
                 >

@@ -1,28 +1,45 @@
 import { TRoutes } from "@/typings/common";
 import React from "react";
-import { Location } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Nav } from "rsuite";
 
-const Header = (props: { routes: TRoutes[], selectedRoute: Location }) => {
-  const { routes } = props;
+const Header = (props: { routes: TRoutes[]; selectedRoute: TRoutes }) => {
+  const navigate = useNavigate();
+  const { selectedRoute } = props;
 
-  return routes.map((route) => {
+  const validAvailableTabs = React.useMemo(() => {
+    const { handle } = selectedRoute;
+    if (handle?.identifier === "root") {
+      return selectedRoute;
+    }
+    return selectedRoute.parent || selectedRoute;
+  }, [selectedRoute]);
 
-    return <></>;
-  });
-};
+  const validRoutesForNav: TRoutes[] =
+    React.useMemo(() => {
+      const allValidRoutes =
+        validAvailableTabs.children?.filter((route) => !!route.showOnTab) || [];
+      navigate(
+        allValidRoutes.length ? allValidRoutes[0].path : selectedRoute.path
+      );
 
-const SetAvailableTab = ({...props}) => {
+      return allValidRoutes;
+    }, [selectedRoute, validAvailableTabs]) || [];
+
   return (
-    <Nav {...props} appearance="subtle">
-      <Nav.Item eventKey="home">Home</Nav.Item>
-      <Nav.Item eventKey="news">News</Nav.Item>
-      <Nav.Item eventKey="solutions">Solutions</Nav.Item>
-      <Nav.Item eventKey="products">Products</Nav.Item>
-      <Nav.Item eventKey="about">About</Nav.Item>
-
-      
-
+    <Nav appearance="subtle" defaultActiveKey={validRoutesForNav?.[0]?.key}>
+      {validRoutesForNav.map((route) => {
+        return (
+          <Nav.Item
+            eventKey={route.key}
+            onClick={() => {
+              navigate(route.path);
+            }}
+          >
+            {route.label}
+          </Nav.Item>
+        );
+      })}
     </Nav>
   );
 };

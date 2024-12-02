@@ -12,6 +12,12 @@ const flatternRoutes = (routes: TRoutes[]): TRoutes[] => {
 
     if (route.children) {
       flatRoutes.push(route);
+      route.children = route.children.map((child) => {
+        return {
+          ...child,
+          parent: route,
+        };
+      });
       flatRoutes = [...flatRoutes, ...flatternRoutes(route.children)];
     } else {
       flatRoutes.push(route);
@@ -30,18 +36,18 @@ const MainLayout = (props: { routes: TRoutes[] }) => {
   }, [routes]);
 
   const getCurrentRoute = React.useMemo(() => {
-    const currentRoute = flatternRoutesTree.find(route => {
-      return route.path === location.pathname
-    })
-    console.log(">>>>>>>>>>>", currentRoute);
+    const currentRoute = flatternRoutesTree.find((route) => {
+      return route.path === location.pathname;
+    });
+    // console.log("Current>>>>>>>>>>>", currentRoute);
 
     return currentRoute || flatternRoutesTree[0];
-  }, [routes, location])
+  }, [routes, location]);
 
   return (
     <>
+      <Header routes={routes} selectedRoute={getCurrentRoute} />
       <SideNav routes={routes} selectedRoute={getCurrentRoute} />
-      {/* <Header routes={routes} selectedRoute={location} /> */}
     </>
   );
 };

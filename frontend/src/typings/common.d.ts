@@ -1,4 +1,3 @@
-
 export type TRoutes = {
   path: string;
   label: string;
@@ -11,4 +10,6 @@ export type TRoutes = {
   //props will tell where to show the route or not
   showOnSideNav?: boolean;
   showOnTab?: boolean;
+  parent?: TRoutes;
+  handle?: { identifier: string };
 };

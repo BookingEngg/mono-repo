@@ -18,6 +18,29 @@ const getPaymentRoutes = () => {
       showOnSideNav: true,
       key: "payment",
       label: "Payment",
+      handle: { identifier: "root" },
+      children: [
+        {
+          path: `${BASE_URL}/upi`,
+          element: <>UPI</>,
+          label: "UPI",
+          key: "upi-payment",
+          showOnTab: true,
+          handle: { 
+            identifier: "upi"
+          },
+        },
+        {
+          path: `${BASE_URL}/net-banking`,
+          element: <>Netbanking</>,
+          label: "Netbanking",
+          key: "net-banking",
+          showOnTab: true,
+          handle: {
+            identifier: "net-banking",
+          },
+        },
+      ],
     },
   ];
 
