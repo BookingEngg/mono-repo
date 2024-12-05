@@ -1,21 +1,22 @@
-import React from "react";
+import React, { useContext } from "react";
 import { TRoutes } from "@/typings/common";
 import { FlexboxGrid, Nav, Sidenav, Text } from "rsuite";
 import { Link, useNavigate } from "react-router-dom";
 import "./SideNav.scss";
-import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import DropDown from "@/atoms/icons/DropDown";
+import CurrentRouteContext from "@/contextProvider/routeContext";
 
 export interface SideNavProps {
   routes: TRoutes[];
-  selectedRoute: TRoutes;
 }
 
 const SideNavV2 = (props: SideNavProps) => {
-  const { routes, selectedRoute } = props;
+  const { routes } = props;
+  const { currentRoute: selectedRoute } = useContext(CurrentRouteContext);
+  if (!selectedRoute) return <></>;
 
   //states
-  const [expanded, setExpanded] = React.useState(true);
+  const [expanded, setExpanded] = React.useState(false);
 
   const validRoutesForNav =
     React.useMemo(() => {
@@ -38,7 +39,9 @@ const SideNavV2 = (props: SideNavProps) => {
               // ${selectedRoute.key === route.key ? 'selected-menuitem' : ''
               // this code is work only for routes who does not have any child
               return (
-                <div className={`sidenav-iconholder ${selectedRoute.key === route.key ? 'selected-menuitem' : ''}`}>
+                <div
+                  className={`sidenav-iconholder ${selectedRoute.key === route.key ? "selected-menuitem" : ""}`}
+                >
                   <span>{route.icon}</span>
                 </div>
               );
@@ -59,21 +62,18 @@ const SideNavV2 = (props: SideNavProps) => {
           setExpanded(false);
         }}
       >
-        <ExpandedSideNav
-          routes={validRoutesForNav}
-          selectedRoute={selectedRoute}
-        />
+        <ExpandedSideNav routes={validRoutesForNav} />
       </nav>
     </div>
   );
 };
 
-const ExpandedSideNav = (props: {
-  routes: TRoutes[];
-  selectedRoute: TRoutes;
-}) => {
-  const { routes, selectedRoute } = props;
+const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
+  const { routes } = props;
   const navigate = useNavigate();
+  const { currentRoute: selectedRoute } = useContext(CurrentRouteContext);
+
+  if (!selectedRoute) return <></>;
 
   const [selectedSubTab, setSelectedSubTab] = React.useState("");
 

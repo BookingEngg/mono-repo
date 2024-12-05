@@ -1,12 +1,16 @@
 import { TRoutes } from "@/typings/common";
-import React from "react";
+import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Nav } from "rsuite";
+import CurrentRouteContext from "@/contextProvider/routeContext";
 
-const Header = (props: { routes: TRoutes[]; selectedRoute: TRoutes }) => {
+const Header = () => {
+  const { currentRoute: selectedRoute } = useContext(CurrentRouteContext);
+  if (!selectedRoute) {
+    return <></>;
+  }
+
   const navigate = useNavigate();
-  const { selectedRoute } = props;
-
   const validAvailableTabs = React.useMemo(() => {
     const { handle } = selectedRoute;
     if (handle?.identifier === "root") {
@@ -23,7 +27,7 @@ const Header = (props: { routes: TRoutes[]; selectedRoute: TRoutes }) => {
     }, [selectedRoute, validAvailableTabs]) || [];
 
   React.useEffect(() => {
-    console.log("USE>>>>", validRoutesForNav)
+    console.log("USE>>>>", validRoutesForNav);
     navigate(validRoutesForNav?.[0]?.path);
   }, []);
 
