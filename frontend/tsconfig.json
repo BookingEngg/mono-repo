@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
+
     "module": "commonjs",
     "outDir": "./dist",
     "esModuleInterop": true,
@@ -11,7 +12,7 @@
     "paths": {
       "@/*": ["src/*"]
     },
-    "jsx": "react"
+    "jsx": "react-jsx"
   },
   "include": ["src"]
 }

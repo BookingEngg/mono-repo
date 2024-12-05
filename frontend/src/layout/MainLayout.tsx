@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useReducer } from "react";
+import { Connect, useSelector, useDispatch } from "react-redux";
 import { TRoutes } from "@/typings/common";
 import SideNav from "@/layout/SideNav";
 import SideNavV2 from "@/layout/SideNavV2";
@@ -6,6 +7,9 @@ import Header from "@/layout/Header";
 import { useLocation } from "react-router-dom";
 import { FlexboxGrid } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
+import { createContext } from "react";
+import { RootState } from "@/store";
+import { incrementByValue } from "@/store/auth";
 
 const flatternRoutes = (routes: TRoutes[]): TRoutes[] => {
   let flatRoutes: TRoutes[] = [];
@@ -46,14 +50,19 @@ const MainLayout = (props: { routes: TRoutes[] }) => {
     return currentRoute || flatternRoutesTree[0];
   }, [routes, location]);
 
+  const count = useSelector((state: RootState) => state.user.value);
+  const dispatch = useDispatch()
+
   return (
     <>
-      <section>
+      {/* {count} */}
+      {/* <section>
         <SideNavV2 routes={routes} selectedRoute={getCurrentRoute} />
         <Header routes={routes} selectedRoute={getCurrentRoute} />
-      </section>
+      </section> */}
+      {/* <button onClick={()=> {dispatch(incrementByValue(4))}}>Click me</button> */}
 
-      {/* <FlexboxGrid>
+      <FlexboxGrid>
         <FlexboxGridItem colspan={2}>
           <SideNavV2 routes={routes} selectedRoute={getCurrentRoute} />
         </FlexboxGridItem>
@@ -62,12 +71,12 @@ const MainLayout = (props: { routes: TRoutes[] }) => {
             <FlexboxGridItem colspan={24}>
               <Header routes={routes} selectedRoute={getCurrentRoute} />
             </FlexboxGridItem>
-            <FlexboxGridItem>
+            {/* <FlexboxGridItem>
               BODY
-            </FlexboxGridItem>
+            </FlexboxGridItem> */}
           </FlexboxGrid>
         </FlexboxGridItem>
-      </FlexboxGrid> */}
+      </FlexboxGrid>
     </>
   );
 };
