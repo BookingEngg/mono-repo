@@ -2,7 +2,7 @@
 import { TRoutes } from "@/typings/common";
 // Layouts
 import Body from "@/layout/Body";
-import SideNavV2 from "@/layout/SideNavV2";
+import SideNav from "@/layout/SideNav";
 import Header from "@/layout/Header";
 
 const MainLayout = (props: { routes: TRoutes[]; childrens: JSX.Element }) => {
@@ -10,7 +10,8 @@ const MainLayout = (props: { routes: TRoutes[]; childrens: JSX.Element }) => {
 
   return (
     <section style={{ paddingLeft: "60px" }}>
-      <SideNavV2 routes={routes} />
+      <SideNav routes={routes}/>
+      {/* <SideNavV2 routes={routes} /> */}
       <Header />
       <Body>{childrens}</Body>
     </section>
