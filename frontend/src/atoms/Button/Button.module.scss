@@ -1,0 +1,11 @@
+@import "../../styles/common";
+@import "../../styles/variables";
+
+@each $color in $colors {
+  .background-color-#{$color} {
+    background-color: var(--#{$color});
+    &:focus {
+      background-color: var(--#{$color});
+    }
+  }
+}

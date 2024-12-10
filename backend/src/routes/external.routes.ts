@@ -1,24 +1,27 @@
 import { Routes } from "@interfaces/common.interface";
 import { Router } from "express";
 import UserController from "@/controllers/user.controllers";
+import OtpController from "@/controllers/otp.controllers";
+import AuthMiddleware from "@/middleware/auth.middleware";
 
 class ExternalRoutes implements Routes {
   public path = "/api/v1/platform";
   public router = Router();
 
+  private authMiddleware = new AuthMiddleware();
+
   // Controllers
   private userController = new UserController();
+  private otpController = new OtpController();
 
   constructor() {
-    this.initilizePostRoutes(`${this.path}/user`);
-    this.initilizeGetRoutes(`${this.path}/users`);
+    this.initializeUsersRoutes(`${this.path}/user`);
   }
 
-  private initilizeGetRoutes(prefix: string) {    
-    this.router.get(`${prefix}/`, this.userController.getUsers);
-  }
+  private initializeUsersRoutes(prefix: string) {
+    this.router.post(`${prefix}/otp/create`, this.otpController.sendOtp);
+    this.router.post(`${prefix}/otp/verify`, this.otpController.verifyOtp);
 
-  private initilizePostRoutes(prefix: string) {
     this.router.post(`${prefix}/create`, this.userController.createUser);
   }
 }

@@ -14,5 +14,15 @@
         "port": 27017
       }
     }
+  },
+  "nodemailer": {
+    "host": "smtp.ethereal.email",
+    "port": 587,
+    "user": "your-email@gmail.com",
+    "password": "xxxx xxxx xxxx xxxx",
+    "expire_in_minutes": "5"
+  },
+  "token": {
+    "secret_key": "xxxxxxx"
   }
 }

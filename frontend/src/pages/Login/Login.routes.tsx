@@ -1,8 +1,8 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
 import { TRoutes } from "@/typings/common";
-import Profitability from "@/atoms/icons/Profitablity";
 import Payment from "@/atoms/icons/Payment";
+import LoginOrganism from "@/organism/Login";
 
 export const BASE_URL = "/login";
 
@@ -22,7 +22,7 @@ const getLoginRoutes = () => {
       children: [
         {
           path: `${BASE_URL}/otp`,
-          element: <>Login Otp</>,
+          element: <LoginOrganism />,
           label: "Login Otp",
           key: "login-otp",
           showOnSideNav: true

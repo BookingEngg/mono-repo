@@ -1,0 +1,9 @@
+@import "../../styles/borderRadiusSizing";
+@import "../../styles/variables";
+@import "../../styles/common";
+
+@each $size in $sizes {
+  .border-radius-#{$size} {
+    border-radius: borderRadiusSizing($size);
+  }
+}

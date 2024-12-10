@@ -1,3 +1,4 @@
+import { IUser } from "@/interfaces/user.interface";
 import UsersModel from "@/models/user.model";
 
 class UserDao {
@@ -6,12 +7,15 @@ class UserDao {
   public createUser = async () => {
     return await this.userModel.create({
       first_name: "Tushar",
-      contact_number: "9990870405",
+      contact: "9990870405",
+      email: "tusharepc205@gmail.com",
+      roles: ['director'],
     });
   };
 
-  public getUsers = async () => {
-    return await this.userModel.find();
+  
+  public getUserByEmail = async (email: string): Promise<IUser> => {
+    return await this.userModel.findOne({ email });
   };
 }
 

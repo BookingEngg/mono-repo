@@ -1,0 +1,12 @@
+@import "../../styles/common";
+@import "../../styles/variables";
+
+.common-font-style {
+  font-family: inherit;
+}
+
+@each $color in $colors {
+  .color-#{$color} {
+    color: var(--#{$color});
+  }
+}

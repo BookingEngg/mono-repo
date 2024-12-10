@@ -12,3 +12,15 @@ export interface IDataBase {
   password: string;
   port: number;
 }
+
+export interface INodeMailer {
+  host: string;
+  port: number;
+  user: string;
+  password: string;
+  expire_in_minutes: number;
+}
+
+export interface IToken {
+  secret_key: string;
+}

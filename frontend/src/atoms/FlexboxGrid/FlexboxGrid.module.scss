@@ -1,0 +1,22 @@
+@import "../../styles/common";
+@import "../../styles/variables";
+
+.flexbox {
+  display: flex;
+}
+
+@each $flexDirection in $flexDirections {
+  .direction-#{$flexDirection} {
+    flex-direction: $flexDirection;
+  }
+}
+
+@each $flexAlignment in $flexAlignments {
+  .align-#{$flexAlignment} {
+    align-items: $flexAlignment;
+  }
+
+  .justify-#{$flexAlignment} {
+    justify-content: $flexAlignment;
+  }
+}

@@ -2,7 +2,7 @@ import { Routes } from "@interfaces/common.interface";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import {PORT, serviceName, serviceRoute, env} from "@config";
+import { PORT, serviceName, serviceRoute, env } from "@config";
 
 class App {
   private app: express.Application;
@@ -20,7 +20,12 @@ class App {
   }
 
   public initilizeMiddlewares() {
-    this.app.use(cors());
+    this.app.use(
+      cors({
+        origin: true,
+        credentials: true,
+      })
+    );
     this.app.use(cookieParser());
     this.app.use(express.json());
     this.app.use(cookieParser());
@@ -29,7 +34,9 @@ class App {
   }
 
   private initilizeRoutes(routes: Routes[]) {
-    routes.forEach((route) => this.app.use(`/${serviceRoute || ''}`, route.router));
+    routes.forEach((route) =>
+      this.app.use(`/${serviceRoute || ""}`, route.router)
+    );
   }
 
   public listenServer() {

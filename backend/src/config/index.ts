@@ -1,5 +1,10 @@
 import nconf from "nconf";
-import { IDataBaseConfig, IServer } from "@/typings/config";
+import {
+  IDataBaseConfig,
+  INodeMailer,
+  IServer,
+  IToken,
+} from "@/typings/config";
 
 export const env = process.env.NODE_ENV || "development";
 const configFile = `src/config/config.${env}.json`;
@@ -12,3 +17,7 @@ export const PORT = (nconf.get("server") as IServer).port;
 
 export const MONGO_DB_NAMES: readonly string[] = ["praman"];
 export const mongoDbConfig = nconf.get("databases").mongodb as IDataBaseConfig;
+
+export const nodeMailConfig = nconf.get("nodemailer") as INodeMailer;
+
+export const tokenSecretKey = (nconf.get("token") as IToken).secret_key;
