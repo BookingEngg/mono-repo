@@ -9,6 +9,9 @@ class UserController {
     return res.send({ response });
   };
 
+  public getUsers = async (_req: Request, res: Response): Promise<any> => {
+    return res.send({ status: "success" });
+  };
 }
 
 export default UserController;

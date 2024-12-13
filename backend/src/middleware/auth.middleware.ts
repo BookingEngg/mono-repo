@@ -1,41 +1,58 @@
 import { Request, Response, NextFunction } from "express";
 import UserDao from "@/dao/user.dao";
 import JwtService from "@/services/jwt.service";
-import { IUser } from "@/interfaces/user.interface";
+import {
+  RolesAccessibilityWithRoles,
+  RoleType,
+} from "@/constants/common.constants";
 
 class AuthMiddleware {
   private jwtService = new JwtService();
   private userDao = new UserDao();
 
   public getAuthUser = () => {
-    let tokenData: { email: number } | null;
     return async (req: Request, _: Response, next: NextFunction) => {
-      const token = req.header["authorization"];
-      if (!token) {
-        throw new Error("Token not found");
-      }
+      try {
+        const token = this.jwtService.getJwtToken(req);
+        if (!token) {
+          throw new Error("Token not found");
+        }
+        const { email } = this.jwtService.verifyToken(token);
 
-      tokenData = this.jwtService.verifyToken(token);
-      const { email } = tokenData;
-      if (!email) {
-        throw new Error("Invalid Token");
-      }
-      // const userData = await this.userDao.getUserByEmail(email);
-      // req.user = userData;
+        if (!email) {
+          throw new Error("Invalid Token");
+        }
 
-      next();
+        const userData = await this.userDao.getUserByEmail(email);
+        req.user = userData;
+        next();
+      } catch (error) {
+        req.user = null;
+        next();
+      }
     };
   };
 
   public checkRoles = (roles: string[]) => {
-    return async (req: Request, res: Response, next: NextFunction) => {
-      const userRoles = req.user.roles || [];
+    return async (req: Request, _: Response, next: NextFunction) => {
+      const user = req.user;
 
-      if (userRoles.find((role) => roles.indexOf(role) > -1).length) {
-        return next();
+      // Roles which are assigned by the system in DB
+      const userRoles = user.roles || [];
+
+      // Check the role assign and the level of the user
+      let allRoles = [];
+      roles.forEach((role) => {
+        const allUserRoles = userRoles.filter((u_role) => {
+          return RolesAccessibilityWithRoles[u_role]?.includes(role);
+        });
+
+        allRoles = [...allRoles, ...allUserRoles];
+      });
+
+      if (allRoles.length) {
+        next(new Error("Authentication Error"));
       }
-
-      next(new Error("Authorization Error"));
     };
   };
 }

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import JwtService from "@/services/jwt.service";
 import OtpService from "@/services/otp.service";
+import { IUser } from "@/interfaces/user.interface";
 
 class OtpController {
   private jwtService = new JwtService();
@@ -15,12 +16,12 @@ class OtpController {
   public verifyOtp = async (req: Request, res: Response): Promise<any> => {
     const { email, otp } = req.body;
 
-    const user = await this.otpService.verifyOtp(email, otp);
+    const user: IUser = await this.otpService.verifyOtp(email, otp);
     if (!user) {
       return res.send({ status: "Invalid Otp" });
     }
 
-    const token = await this.jwtService.createToken(user);
+    const token = await this.jwtService.createToken({ email: user.email });
     res.cookie("jwt-token", token);
     return res.send({ status: "success" });
   };

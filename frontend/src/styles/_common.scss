@@ -1,0 +1,36 @@
+@import "./marginPaddingSizing";
+@import "./variables";
+
+@each $size in $sizes {
+  .mt-#{$size} {
+    margin-top: marginPaddingSizing($size);
+  }
+
+  .ml-#{$size} {
+    margin-left: marginPaddingSizing($size);
+  }
+
+  .mb-#{$size} {
+    margin-bottom: marginPaddingSizing($size);
+  }
+
+  .mr-#{$size} {
+    margin-right: marginPaddingSizing($size);
+  }
+
+  .pt-#{$size} {
+    padding-top: marginPaddingSizing($size);
+  }
+
+  .pl-#{$size} {
+    padding-left: marginPaddingSizing($size);
+  }
+
+  .pb-#{$size} {
+    padding-bottom: marginPaddingSizing($size);
+  }
+
+  .pr-#{$size} {
+    padding-right: marginPaddingSizing($size);
+  }
+}

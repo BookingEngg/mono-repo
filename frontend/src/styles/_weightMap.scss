@@ -1,0 +1,20 @@
+// font weight mapping function
+@function weightMap($weight) {
+  @if $weight == "thin" {
+    @return 100;
+  } @else if $weight == "light" {
+    @return 300;
+  } @else if $weight == "regular" {
+    @return 400;
+  } @else if $weight == "medium" {
+    @return 500;
+  } @else if $weight == "semibold" {
+    @return 600;
+  } @else if $weight == "bold" {
+    @return 700;
+  } @else if $weight == "extrabold" {
+    @return 800;
+  }
+
+  @return null;
+}

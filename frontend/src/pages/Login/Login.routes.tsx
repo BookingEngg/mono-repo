@@ -12,7 +12,7 @@ const getLoginRoutes = () => {
       path: BASE_URL,
       element: (
         <>
-          Login Page <Outlet />
+          <Outlet />
         </>
       ),
       icon: <Payment />,
@@ -22,10 +22,10 @@ const getLoginRoutes = () => {
       children: [
         {
           path: `${BASE_URL}/otp`,
-          element: <LoginOrganism />,
+          element: <><LoginOrganism /></>,
           label: "Login Otp",
           key: "login-otp",
-          showOnSideNav: true
+          showOnSideNav: true,
         },
       ],
     },
