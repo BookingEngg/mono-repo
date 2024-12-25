@@ -9,7 +9,9 @@ class OtpController {
 
   public sendOtp = async (req: Request, res: Response): Promise<any> => {
     const { email } = req.body;
-    await this.otpService.generateNewOtp(email);
+    if (email) {
+      await this.otpService.generateNewOtp(email);
+    }
     return res.send({ status: "success" });
   };
 
@@ -18,12 +20,12 @@ class OtpController {
 
     const user: IUser = await this.otpService.verifyOtp(email, otp);
     if (!user) {
-      return res.send({ status: "Invalid Otp" });
+      return res.send({ message: "Invalid Otp", status: false });
     }
 
     const token = await this.jwtService.createToken({ email: user.email });
     res.cookie("jwt-token", token);
-    return res.send({ status: "success" });
+    return res.send({ message: "Otp Send Sucessfully", status: true });
   };
 }
 

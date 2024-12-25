@@ -19,10 +19,21 @@
     "host": "smtp.ethereal.email",
     "port": 587,
     "user": "your-email@gmail.com",
-    "password": "xxxx xxxx xxxx xxxx",
+    "password": "",
     "expire_in_minutes": "5"
   },
   "token": {
     "secret_key": "xxxxxxx"
+  },
+  "google_auth": {
+    "web": {
+      "client_id": "",
+      "project_id": "",
+      "auth_uri": "",
+      "token_uri": "",
+      "auth_provider_x509_cert_url": "",
+      "client_secret": "",
+      "javascript_origins": [""]
+    }
   }
 }

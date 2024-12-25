@@ -1,65 +1,21 @@
-
-.body {
-  border: 1px solid red;
+.login-container {
   height: 100vh;
-  background: linear-gradient(325deg, #4764cd, #91a8eb);
-  background-image: linear-gradient(to right, #4764cd 61%, #5694f2 98%);
-  background-size: 400% 400%;
-  -webkit-animation: LoginBG 5s ease infinite;
-  -moz-animation: LoginBG 5s ease infinite;
-  -o-animation: LoginBG 5s ease infinite;
-  animation: LoginBG 5s ease infinite;
-}
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
-@-webkit-keyframes LoginBG {
-  0%{background-position:5% 0%}
-  50%{background-position:96% 100%}
-  100%{background-position:5% 0%}
-}
-@-moz-keyframes LoginBG {
-  0%{background-position:5% 0%}
-  50%{background-position:96% 100%}
-  100%{background-position:5% 0%}
-}
-@-o-keyframes LoginBG {
-  0%{background-position:5% 0%}
-  50%{background-position:96% 100%}
-  100%{background-position:5% 0%}
-}
-@keyframes LoginBG {
-  0%{background-position:5% 0%}
-  50%{background-position:96% 100%}
-  100%{background-position:5% 0%}
-}
+  .signup-form-card {
+    box-shadow: 0px 0px 10px #4764cd7e;
+    padding: 10vh 8vh;
+    width: 60vh;
+    border-radius: 6px;
+  }
 
-.form-container {
-  height: 100%;
-}
-.panel-body-wrapper {
-  background-color: var(--white);
-  border-radius: 6px;
-}
-.panel-body {
-  padding: 32px 20px;
-  border-radius: 6px;
-}
+  p {
+    margin: 10px 0px;
+  }
 
-.bottom-links-container {
-  padding-top: 20px;
-}
-
-.input-wrapper {
-  margin: 40px 0 8px;
-}
-
-.margin-top {
-  margin-top: 40px;
-}
-
-.validation-placeholder{
-height: 24px;
-}
-
-.link-btn {
-  color: var(--subtitles);
+  .action-cta {
+    width: 100%;
+  }
 }
