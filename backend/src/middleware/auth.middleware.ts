@@ -1,10 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import UserDao from "@/dao/user.dao";
 import JwtService from "@/services/jwt.service";
-import {
-  RolesAccessibilityWithRoles,
-  RoleType,
-} from "@/constants/common.constants";
+import { RolesAccessibilityWithRoles } from "@/constants/common.constants";
 
 class AuthMiddleware {
   private jwtService = new JwtService();

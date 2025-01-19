@@ -38,7 +38,7 @@ class OtpService {
     }
   };
 
-  public verifyOtp = async (email: string, otp: number) => {
+  public getVerifiedUser = async (email: string, otp: number) => {
     const otpData = await this.otpDao.getOtpDetailByEmail(email);
     let userData: IUser;
     let isVerifiedOtp = false;

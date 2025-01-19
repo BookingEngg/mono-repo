@@ -24,7 +24,7 @@ class ExternalRoutes implements Routes {
     this.router.get(
       `${prefix}/`,
       this.authMiddleware.getAuthUser(),
-      this.authMiddleware.checkRoles([Roles.DIRECTOR]),
+      // this.authMiddleware.checkRoles([Roles.DIRECTOR]),
       this.userController.getUsers
     );
     this.router.post(`${prefix}/create`, this.userController.createUser);

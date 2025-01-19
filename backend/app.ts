@@ -1,7 +1,9 @@
 import { Routes } from "@interfaces/common.interface";
 import express from "express";
 import cors from "cors";
+import cookieSession from "cookie-session";
 import cookieParser from "cookie-parser";
+import { tokenSecretKey } from "@/config";
 // const { OAuth2Client } = require("google-auth-library");
 import { PORT, serviceName, serviceRoute, env } from "@config";
 
@@ -30,6 +32,12 @@ class App {
     this.app.use(cookieParser());
     this.app.use(express.json());
     this.app.use(cookieParser());
+    this.app.use(
+      cookieSession({
+        name: "session",
+        keys: [tokenSecretKey],
+      })
+    );
 
     this.initilizeRoutes(this.routes);
   }

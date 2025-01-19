@@ -2,7 +2,9 @@ import { Button, FlexboxGrid, Input, InputGroup, Text } from "rsuite";
 import style from "./Login.module.scss";
 import classNames from "classnames/bind";
 import React from "react";
-import { sendOtp, verifyOtp } from "@/services/Login.service";
+import { sendOtp, verifyOtp, getUser } from "@/services/Login.service";
+import { login } from "@/store/auth";
+import { useAppDispatch } from "@/store/hooks";
 
 const cx = classNames.bind(style);
 
@@ -11,11 +13,8 @@ const defaultPayloadValue = {
   otp: "",
 };
 
-const Login = (props: {
-  makeUserLoggedIn: () => void;
-  makeUserLogout: () => void;
-}) => {
-  const { makeUserLoggedIn } = props;
+const Login = () => {
+  const dispatch = useAppDispatch();
 
   const [loginPayload, setLoginPayload] = React.useState(defaultPayloadValue);
   const [isVerifyOtpVisible, setIsVerifyOtpVisible] = React.useState(false);
@@ -49,12 +48,13 @@ const Login = (props: {
     }
 
     setLoading(true);
-    const response = await verifyOtp(loginPayload);
-    if (response.status) {
-      makeUserLoggedIn();
+    await verifyOtp(loginPayload);
+    const response = await getUser();
+    if (response.user) {
+      dispatch(login({ user: response.user, isAuthorized: true, value: 0 }));
     }
     setLoading(false);
-  }, [loginPayload, makeUserLoggedIn]);
+  }, [loginPayload]);
 
   return (
     <div className={cx("login-container")}>

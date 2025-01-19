@@ -18,13 +18,20 @@ class OtpController {
   public verifyOtp = async (req: Request, res: Response): Promise<any> => {
     const { email, otp } = req.body;
 
-    const user: IUser = await this.otpService.verifyOtp(email, otp);
+    const user: IUser = await this.otpService.getVerifiedUser(email, otp);
     if (!user) {
-      return res.send({ message: "Invalid Otp", status: false });
+      return res.status(500).send({ message: "Invalid Otp", status: false });
     }
 
     const token = await this.jwtService.createToken({ email: user.email });
-    res.cookie("jwt-token", token);
+    res.cookie("jwt-token", token, {
+      maxAge: 100000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
+
     return res.send({ message: "Otp Send Sucessfully", status: true });
   };
 }

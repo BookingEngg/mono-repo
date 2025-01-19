@@ -13,12 +13,10 @@ class JwtService {
     return this.jwt.verify(token, tokenSecretKey);
   };
 
-  public getJwtToken = (req: Request) => {
-    const tokenString = (req.headers?.cookie ||
-      req.headers?.["tcookie"]) as string;
-    return tokenString?.split("=")?.[1];
+  public getJwtToken = (req: Request): string => {
+    const tokenCookie = req.headers["cookie"];
+    return tokenCookie.slice("jwt-token=".length) || '';
   };
-
 }
 
 export default JwtService;

@@ -1,3 +1,5 @@
+import { IUser } from "@/store/auth/types";
+
 const prefix = "http://localhost:8080/backend/api/v1/platform";
 
 export const sendOtp = async () => {
@@ -26,20 +28,18 @@ export const verifyOtp = async (payload: {
     mode: "cors",
     credentials: "include",
   });
-
   return response.json();
 };
 
-export const getUser = async () => {
+export const getUser = async (): Promise<{ status: string; user: IUser }> => {
   const response = await fetch(`${prefix}/user`, {
     method: "GET",
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
-      TCookie: document.cookie,
     },
     mode: "cors",
+    credentials: "include",
   });
-  console.log(document.cookie);
-  console.log("USER RESPONSE >>>>>>>>>", response);
+  return response.json();
 };

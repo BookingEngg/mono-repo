@@ -9,8 +9,11 @@ class UserController {
     return res.send({ response });
   };
 
-  public getUsers = async (_req: Request, res: Response): Promise<any> => {
-    return res.send({ status: "success" });
+  public getUsers = async (req: Request, res: Response): Promise<any> => {
+    if (!req.user) {
+      return res.status(401);
+    }
+    return res.send({ status: "success", user: req.user });
   };
 }
 
