@@ -8,5 +8,4 @@ export interface IUser {
 export interface IAuth {
   user: IUser | null;
   isAuthorized: boolean;
-  value: number; 
 }

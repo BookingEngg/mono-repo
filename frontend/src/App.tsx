@@ -1,12 +1,21 @@
 // Modules
 import React from "react";
-import { Outlet, Route, Routes, useLocation } from "react-router-dom";
+import {
+  Outlet,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 // Pages
 import LoginRoutes from "@/pages/Login/Login.routes";
 import PaymentRoutes from "@/pages/Payment/Payment.routes";
 import SettingsRoutes from "./pages/Settings";
 // Layout
 import MainLayout from "@/layout/MainLayout";
+// Store
+import { useAppSelector } from "./store/hooks";
+import { isUserAuthorized } from "./store/auth";
 // Context Provider
 import CurrentRouteContext from "@/contextProvider/routeContext";
 // Typings
@@ -50,40 +59,61 @@ const flatternRoutes = (routes: TRoutes[]): TRoutes[] => {
 };
 
 function App() {
+  const navigate = useNavigate();
   const location = useLocation();
+  const isAuthorized = useAppSelector(isUserAuthorized);
 
   // Contain all pages routes
-  const allRoutes: TRoutes[] = [
-    ...LoginRoutes(),
-    ...PaymentRoutes(),
-    ...SettingsRoutes(),
-  ];
+  const loginRoutes = [...LoginRoutes()];
+  const authorizedRoutes = [...PaymentRoutes(), ...SettingsRoutes()];
 
-  const flatternRoutesTree = React.useMemo(() => {
-    return flatternRoutes(allRoutes);
-  }, [allRoutes]);
+  const flatternLoginRoutesTree = React.useMemo(() => {
+    return flatternRoutes(loginRoutes);
+  }, [loginRoutes]);
+
+  const flatternAuthorizedRoutesTree = React.useMemo(() => {
+    return flatternRoutes(authorizedRoutes);
+  }, [authorizedRoutes]);
 
   // Return the current working route on location
   const getCurrentRoute = React.useMemo(() => {
-    const currentRoute = flatternRoutesTree.find((route) => {
+    const currentRoute = [
+      ...flatternLoginRoutesTree,
+      ...flatternAuthorizedRoutesTree,
+    ].find((route) => {
       return route.path === location.pathname;
     });
 
-    return currentRoute || flatternRoutesTree[0];
-  }, [allRoutes, location]);
+    return currentRoute || flatternLoginRoutesTree[0];
+  }, [flatternLoginRoutesTree, flatternAuthorizedRoutesTree, location]);
+
+  if (!isUserAuthorized) {
+    navigate("/login");
+  }
 
   return (
     <>
       <CurrentRouteContext.Provider value={{ currentRoute: getCurrentRoute }}>
-        <MainLayout
-          routes={allRoutes}
-          childrens={
-            <>
-              <Outlet />
-              <Routes>{getAllRoutes(allRoutes)}</Routes>
-            </>
-          }
-        />
+        {isAuthorized ? (
+          <MainLayout
+            routes={authorizedRoutes}
+            childrens={
+              <>
+                <Outlet />
+                <Routes>{getAllRoutes(authorizedRoutes)}</Routes>
+              </>
+            }
+          />
+        ) : (
+          <MainLayout
+            routes={loginRoutes}
+            childrens={
+              <>
+                <Routes>{getAllRoutes(loginRoutes)}</Routes>
+              </>
+            }
+          />
+        )}
       </CurrentRouteContext.Provider>
     </>
   );

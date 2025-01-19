@@ -1,8 +1,8 @@
-import React from "react";
-import { Outlet } from "react-router-dom";
 import { TRoutes } from "@/typings/common";
 import Payment from "@/atoms/icons/Payment";
-import { LoginOrganism } from "@/organism/Login";
+// Organism
+import { Login } from "@/organism/Login";
+import { Outlet } from "react-router-dom";
 
 export const BASE_URL = "/login";
 
@@ -13,25 +13,13 @@ const getLoginRoutes = () => {
       element: (
         <>
           <Outlet />
+          <Login />
         </>
       ),
       icon: <Payment />,
       showOnSideNav: true,
       key: "login",
       label: "Login",
-      children: [
-        {
-          path: `${BASE_URL}/otp`,
-          element: (
-            <>
-              <LoginOrganism />
-            </>
-          ),
-          label: "Login Otp",
-          key: "login-otp",
-          showOnSideNav: true,
-        },
-      ],
     },
   ];
 
