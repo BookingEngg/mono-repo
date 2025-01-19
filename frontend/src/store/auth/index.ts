@@ -4,7 +4,6 @@ import { IAuth } from "./types";
 const initialState: IAuth = {
   user: null,
   isAuthorized: false,
-  value: 0,
 };
 
 const userSlice = createSlice({

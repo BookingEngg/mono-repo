@@ -13,7 +13,7 @@ class UserController {
     if (!req.user) {
       return res.status(401);
     }
-    return res.send({ status: "success", user: req.user });
+    return res.send({ status: true, user: req.user });
   };
 }
 
