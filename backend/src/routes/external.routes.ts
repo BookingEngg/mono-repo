@@ -28,6 +28,7 @@ class ExternalRoutes implements Routes {
       this.userController.getUsers
     );
     this.router.post(`${prefix}/create`, this.userController.createUser);
+    this.router.post(`${prefix}/logout`, this.userController.logoutAuthUser);
   }
 
   private initializeOtpRoutes(prefix: string) {

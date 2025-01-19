@@ -43,3 +43,16 @@ export const getUser = async (): Promise<{ status: string; user: IUser }> => {
   });
   return response.json();
 };
+
+export const logoutAuthUser = async (): Promise<{ status: boolean }> => {
+  const response = await fetch(`${prefix}/user/logout`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    mode: "cors",
+    credentials: "include",
+  });
+  return response.json();
+};

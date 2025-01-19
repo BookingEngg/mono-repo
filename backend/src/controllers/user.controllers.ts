@@ -15,6 +15,17 @@ class UserController {
     }
     return res.send({ status: true, user: req.user });
   };
+
+  public logoutAuthUser = async (req: Request, res: Response): Promise<any> => {
+    res.clearCookie("jwt-token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
+
+    return res.status(200).send({ status: true });
+  };
 }
 
 export default UserController;

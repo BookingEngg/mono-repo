@@ -11,7 +11,6 @@ class AuthMiddleware {
     return async (req: Request, _: Response, next: NextFunction) => {
       try {
         const token = this.jwtService.getJwtToken(req);
-        console.log("TOKEN>>>>", token)
         if (!token) {
           throw new Error("Token not found");
         }
