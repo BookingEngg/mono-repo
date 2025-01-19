@@ -37,7 +37,7 @@ const Login = () => {
       return;
     }
     setLoading(true);
-    await sendOtp();
+    await sendOtp(loginPayload);
     setIsVerifyOtpVisible(true);
     setLoading(false);
   }, [loginPayload]);
@@ -49,10 +49,12 @@ const Login = () => {
     }
 
     setLoading(true);
-    await verifyOtp(loginPayload);
-    const response = await getUser();
-    if (response.user) {
-      dispatch(login({ user: response.user, isAuthorized: true, value: 0 }));
+    const otpResponse = await verifyOtp(loginPayload);
+    if (otpResponse.status) {
+      const response = await getUser();
+      if (!!response.status) {
+        dispatch(login({ user: response.user, isAuthorized: true }));
+      }
     }
     setLoading(false);
   }, [loginPayload]);

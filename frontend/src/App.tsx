@@ -9,17 +9,20 @@ import {
 } from "react-router-dom";
 // Pages
 import LoginRoutes from "@/pages/Login/Login.routes";
-import PaymentRoutes from "@/pages/Payment/Payment.routes";
+import HomeRoutes from "@/pages/Home/Home.routes";
 import SettingsRoutes from "./pages/Settings";
+// Services
+import { getUser } from "@/services/Login.service";
 // Layout
 import MainLayout from "@/layout/MainLayout";
 // Store
-import { useAppSelector } from "./store/hooks";
-import { isUserAuthorized } from "./store/auth";
+import { isUserAuthorized, login } from "./store/auth";
+import { useAppDispatch } from "./store/hooks";
 // Context Provider
 import CurrentRouteContext from "@/contextProvider/routeContext";
 // Typings
 import { TRoutes } from "@/typings/common";
+import { useSelector } from "react-redux";
 
 /**
  * Get all the routes passing in the routes parameter
@@ -61,34 +64,49 @@ const flatternRoutes = (routes: TRoutes[]): TRoutes[] => {
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const isAuthorized = useAppSelector(isUserAuthorized);
+  const dispatch = useAppDispatch();
+  const isAuthorized = useSelector(isUserAuthorized);
+
+  //User Authorized check
+  React.useEffect(() => {
+    const validateAuthorizedUser = async () => {
+      const userResponse = await getUser();
+      if(userResponse.status) {
+        dispatch(login({user: userResponse.user, isAuthorized: true}));
+      }
+    }
+    validateAuthorizedUser();
+  }, [])
 
   // Contain all pages routes
   const loginRoutes = [...LoginRoutes()];
-  const authorizedRoutes = [...PaymentRoutes(), ...SettingsRoutes()];
+  const authorizedRoutes = [...HomeRoutes(), ...SettingsRoutes()];
 
   const flatternLoginRoutesTree = React.useMemo(() => {
     return flatternRoutes(loginRoutes);
   }, [loginRoutes]);
 
-  const flatternAuthorizedRoutesTree = React.useMemo(() => {
+  const flatternAuthRoutesTree = React.useMemo(() => {
     return flatternRoutes(authorizedRoutes);
   }, [authorizedRoutes]);
 
   // Return the current working route on location
   const getCurrentRoute = React.useMemo(() => {
     const currentRoute = [
-      ...flatternLoginRoutesTree,
-      ...flatternAuthorizedRoutesTree,
+      ...(isAuthorized ? flatternAuthRoutesTree : flatternLoginRoutesTree),
     ].find((route) => {
       return route.path === location.pathname;
     });
 
-    return currentRoute || flatternLoginRoutesTree[0];
-  }, [flatternLoginRoutesTree, flatternAuthorizedRoutesTree, location]);
+    return currentRoute || isAuthorized
+      ? flatternAuthRoutesTree[0]
+      : flatternLoginRoutesTree[0];
+  }, [flatternAuthRoutesTree, flatternLoginRoutesTree, location]);
 
-  if (!isUserAuthorized) {
+  if (!isAuthorized) {
     navigate("/login");
+  } else {
+    navigate("/");
   }
 
   return (
@@ -109,6 +127,7 @@ function App() {
             routes={loginRoutes}
             childrens={
               <>
+                <Outlet />
                 <Routes>{getAllRoutes(loginRoutes)}</Routes>
               </>
             }

@@ -2,13 +2,13 @@ import { IUser } from "@/store/auth/types";
 
 const prefix = "http://localhost:8080/backend/api/v1/platform";
 
-export const sendOtp = async () => {
+export const sendOtp = async (loginPayload: { email: string }) => {
   return await fetch(`${prefix}/otp/create`, {
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ email: "tusharepc205@gmail.com" }),
+    body: JSON.stringify(loginPayload),
     method: "POST",
     mode: "cors",
   });

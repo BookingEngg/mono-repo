@@ -1,6 +1,5 @@
 import { TRoutes } from "@/typings/common";
 import Payment from "@/atoms/icons/Payment";
-// Organism
 import { Login } from "@/organism/Login";
 import { Outlet } from "react-router-dom";
 
@@ -17,7 +16,7 @@ const getLoginRoutes = () => {
         </>
       ),
       icon: <Payment />,
-      showOnSideNav: true,
+      showOnSideNav: false,
       key: "login",
       label: "Login",
     },
