@@ -26,7 +26,6 @@ const MainLayout = (props: { routes: TRoutes[]; childrens: JSX.Element }) => {
       )}
       <Body>{childrens}
         <Button onClick={() => {dispatch(logout())}}>Logout</Button>
-
       </Body>
     </section>
   );

@@ -15,13 +15,14 @@ import SettingsRoutes from "./pages/Settings";
 import { getUser } from "@/services/Login.service";
 // Layout
 import MainLayout from "@/layout/MainLayout";
+// Store
+import { isUserAuthorized, login } from "./store/auth";
+import { useAppDispatch } from "./store/hooks";
 // Context Provider
 import CurrentRouteContext from "@/contextProvider/routeContext";
 // Typings
 import { TRoutes } from "@/typings/common";
 import { useSelector } from "react-redux";
-import { isUserAuthorized, login } from "./store/auth";
-import { useAppDispatch } from "./store/hooks";
 
 /**
  * Get all the routes passing in the routes parameter
