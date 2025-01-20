@@ -1,51 +1,38 @@
 import { TRoutes } from "@/typings/common";
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { Nav } from "rsuite";
-import CurrentRouteContext from "@/contextProvider/routeContext";
+import { Button, FlexboxGrid, Nav } from "rsuite";
+import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
+import { logoutAuthUser } from "@/services/Login.service";
+import { useAppDispatch } from "@/store/hooks";
+import { logout } from "@/store/auth";
 
 const Header = () => {
-  const { currentRoute: selectedRoute } = useContext(CurrentRouteContext);
-  if (!selectedRoute) {
-    return <></>;
-  }
-
   const navigate = useNavigate();
-  const validAvailableTabs = React.useMemo(() => {
-    const { handle } = selectedRoute;
-    if (handle?.identifier === "root") {
-      return selectedRoute;
+  const dispatch = useAppDispatch();
+
+  const handleAuthUserLogout = React.useCallback(async () => {
+    dispatch(logout());
+    const response = await logoutAuthUser();
+    if (response.status) {
+      navigate("/login");
     }
-    return selectedRoute.parent || selectedRoute;
-  }, [selectedRoute]);
-
-  const validRoutesForNav: TRoutes[] =
-    React.useMemo(() => {
-      return (
-        validAvailableTabs.children?.filter((route) => !!route.showOnTab) || []
-      );
-    }, [selectedRoute, validAvailableTabs]) || [];
-
-  React.useEffect(() => {
-    console.log("USE>>>>", validRoutesForNav);
-    navigate(validRoutesForNav?.[0]?.path);
-  }, []);
+  }, [logoutAuthUser, dispatch, navigate]);
 
   return (
-    <Nav appearance="subtle" defaultActiveKey={validRoutesForNav?.[0]?.key}>
-      {validRoutesForNav.map((route) => {
-        return (
-          <Nav.Item
-            eventKey={route.key}
-            onClick={() => {
-              navigate(route.path);
-            }}
+    <div>
+      <FlexboxGrid justify="end" align="middle">
+        <FlexboxGridItem>
+          <Button
+            style={{ margin: "5px 10px" }}
+            appearance="primary"
+            onClick={handleAuthUserLogout}
           >
-            {route.label}
-          </Nav.Item>
-        );
-      })}
-    </Nav>
+            Logout
+          </Button>
+        </FlexboxGridItem>
+      </FlexboxGrid>
+    </div>
   );
 };
 
