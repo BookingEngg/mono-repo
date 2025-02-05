@@ -11,14 +11,14 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     login: (state: IAuth, action: PayloadAction<IAuth>) => {
-      state = {
+      return {
         ...state,
         user: action.payload.user,
         isAuthorized: action.payload.isAuthorized,
       };
     },
     logout: (state: IAuth) => {
-      state = {
+      return {
         ...state,
         user: null,
         isAuthorized: false,
@@ -31,7 +31,7 @@ export const getAuthUser = (state: { auth: IAuth }): IAuth => {
   return state.auth;
 };
 
-export const isLoggedInUser = (state: { auth: IAuth }): boolean => {
+export const isUserAuthorized = (state: { auth: IAuth }): boolean => {
   return state.auth.isAuthorized;
 };
 

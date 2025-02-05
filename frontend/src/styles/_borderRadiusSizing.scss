@@ -1,0 +1,20 @@
+// borde radius size mapping function
+@function borderRadiusSizing($size) {
+  @if $size == xs {
+    @return 0.125rem;
+  } @else if $size == sm {
+    @return 0.25rem;
+  } @else if $size == md {
+    @return 0.5rem;
+  } @else if $size == lg {
+    @return 0.75rem;
+  } @else if $size == xl {
+    @return 1rem;
+  } @else if $size == xxl {
+    @return 1.5rem;
+  } @else if $size == full {
+    @return 100%;
+  }
+
+  @return null;
+}

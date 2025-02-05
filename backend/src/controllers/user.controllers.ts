@@ -5,15 +5,26 @@ class UserController {
   private userService = new UserService();
 
   public createUser = async (_req: Request, res: Response): Promise<any> => {
-    // TODO : need to remove any
     const response = await this.userService.createUser();
-    return res.send(response);
+    return res.send({ response });
   };
 
-  public getUsers = async (_req: Request, res: Response): Promise<any> => {
-    // TODO: need to remove any
-    const response = await this.userService.getUsers();
-    return res.send(response);
+  public getUsers = async (req: Request, res: Response): Promise<any> => {
+    if (!req.user) {
+      return res.status(401);
+    }
+    return res.send({ status: true, user: req.user });
+  };
+
+  public logoutAuthUser = async (req: Request, res: Response): Promise<any> => {
+    res.clearCookie("jwt-token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      path: "/",
+    });
+
+    return res.status(200).send({ status: true });
   };
 }
 

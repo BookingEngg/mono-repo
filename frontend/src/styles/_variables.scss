@@ -1,0 +1,50 @@
+$sizes: (xs, sm, md, lg, xl, xxl, full); // sizes list
+
+$colors: (
+  "violet",
+  "purple",
+  "purple-2",
+  "indigo",
+  "blue",
+  "blue-1",
+  "blue-2",
+  "blue-3",
+  "blue-4",
+  "blue-5",
+  "green",
+  "green-2",
+  "yellow",
+  "orange",
+  "red",
+  "pink",
+  "white",
+  "grey",
+  "grey-1",
+  "grey-2",
+  "grey-3",
+  "grey-4",
+  "grey-5",
+  "grey-6",
+  "black",
+  "black-1"
+); // colors list
+
+$weights: (
+  thin,
+  light,
+  regular,
+  medium,
+  semibold,
+  bold,
+  extrabold
+); // font weight
+
+$flexDirections: (row, row-reverse, column, column-reverse); // flex direction
+
+$flexAlignments: (
+  start,
+  end,
+  center,
+  space-around,
+  space-between
+); // flex alignment

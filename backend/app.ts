@@ -1,8 +1,11 @@
 import { Routes } from "@interfaces/common.interface";
 import express from "express";
 import cors from "cors";
+import cookieSession from "cookie-session";
 import cookieParser from "cookie-parser";
-import {PORT, serviceName, serviceRoute, env} from "@config";
+import { tokenSecretKey } from "@/config";
+// const { OAuth2Client } = require("google-auth-library");
+import { PORT, serviceName, serviceRoute, env } from "@config";
 
 class App {
   private app: express.Application;
@@ -20,16 +23,29 @@ class App {
   }
 
   public initilizeMiddlewares() {
-    this.app.use(cors());
+    this.app.use(
+      cors({
+        origin: true,
+        credentials: true,
+      })
+    );
     this.app.use(cookieParser());
     this.app.use(express.json());
     this.app.use(cookieParser());
+    this.app.use(
+      cookieSession({
+        name: "session",
+        keys: [tokenSecretKey],
+      })
+    );
 
     this.initilizeRoutes(this.routes);
   }
 
   private initilizeRoutes(routes: Routes[]) {
-    routes.forEach((route) => this.app.use(`/${serviceRoute || ''}`, route.router));
+    routes.forEach((route) =>
+      this.app.use(`/${serviceRoute || ""}`, route.router)
+    );
   }
 
   public listenServer() {

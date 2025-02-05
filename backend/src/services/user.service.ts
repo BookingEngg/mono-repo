@@ -6,10 +6,7 @@ class UserService {
   public createUser = async () => {
     return await this.userDao.createUser();
   };
-
-  public getUsers = async () => {
-    return await this.userDao.getUsers();
-  };
+  
 }
 
 export default UserService;
