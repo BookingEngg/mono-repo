@@ -11,6 +11,7 @@ import {
 import LoginRoutes from "@/pages/Login/Login.routes";
 import HomeRoutes from "@/pages/Home/Home.routes";
 import SettingsRoutes from "./pages/Settings";
+import ChatRoutes from "./pages/Chat";
 // Services
 import { getUser } from "@/services/Login.service";
 // Layout
@@ -80,7 +81,7 @@ function App() {
 
   // Contain all pages routes
   const loginRoutes = [...LoginRoutes()];
-  const authorizedRoutes = [...HomeRoutes(), ...SettingsRoutes()];
+  const authorizedRoutes = [...HomeRoutes(), ...SettingsRoutes(), ...ChatRoutes()];
 
   const flatternLoginRoutesTree = React.useMemo(() => {
     return flatternRoutes(loginRoutes);
