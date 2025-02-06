@@ -7,6 +7,8 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
+// Socket IO
+import { io } from "socket.io-client";
 // Pages
 import LoginRoutes from "@/pages/Login/Login.routes";
 import HomeRoutes from "@/pages/Home/Home.routes";
@@ -23,6 +25,8 @@ import CurrentRouteContext from "@/contextProvider/routeContext";
 // Typings
 import { TRoutes } from "@/typings/common";
 import { useSelector } from "react-redux";
+
+const socket = io("http://localhost:8080", { transports: ["websocket"] });
 
 /**
  * Get all the routes passing in the routes parameter
@@ -71,12 +75,12 @@ function App() {
   React.useEffect(() => {
     const validateAuthorizedUser = async () => {
       const userResponse = await getUser();
-      if(userResponse.status) {
-        dispatch(login({user: userResponse.user, isAuthorized: true}));
+      if (userResponse.status) {
+        dispatch(login({ user: userResponse.user, isAuthorized: true }));
       }
-    }
+    };
     validateAuthorizedUser();
-  }, [])
+  }, []);
 
   // Contain all pages routes
   const loginRoutes = [...LoginRoutes()];
@@ -112,6 +116,16 @@ function App() {
   return (
     <>
       <CurrentRouteContext.Provider value={{ currentRoute: getCurrentRoute }}>
+        <button
+          onClick={() => {
+            socket.emit(
+              "client-message",
+              `A new user authorized = ${isAuthorized}`
+            );
+          }}
+        >
+          Socket IO Client Send
+        </button>
         {isAuthorized ? (
           <MainLayout
             routes={authorizedRoutes}
