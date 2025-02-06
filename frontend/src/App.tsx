@@ -103,11 +103,13 @@ function App() {
       : flatternLoginRoutesTree[0];
   }, [flatternAuthRoutesTree, flatternLoginRoutesTree, location]);
 
-  if (!isAuthorized) {
-    navigate("/login");
-  } else {
-    navigate("/");
-  }
+  React.useEffect(() => {
+    if (!isAuthorized) {
+      navigate("/login");
+    } else {
+      navigate("/");
+    }
+  }, [])
 
   return (
     <>

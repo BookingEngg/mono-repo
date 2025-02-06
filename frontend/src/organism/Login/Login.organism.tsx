@@ -5,7 +5,7 @@ import React from "react";
 import { sendOtp, verifyOtp, getUser } from "@/services/Login.service";
 import { login } from "@/store/auth";
 import { useAppDispatch } from "@/store/hooks";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 
 const cx = classNames.bind(style);
 
@@ -16,6 +16,7 @@ const defaultPayloadValue = {
 
 const Login = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const [loginPayload, setLoginPayload] = React.useState(defaultPayloadValue);
   const [isVerifyOtpVisible, setIsVerifyOtpVisible] = React.useState(false);
@@ -54,6 +55,7 @@ const Login = () => {
       const response = await getUser();
       if (!!response.status) {
         dispatch(login({ user: response.user, isAuthorized: true }));
+        navigate('/');
       }
     }
     setLoading(false);
