@@ -1,6 +1,8 @@
 import { Routes } from "@interfaces/common.interface";
 import express from "express";
 import cors from "cors";
+import { Server } from "socket.io";
+import http from "http";
 import cookieSession from "cookie-session";
 import cookieParser from "cookie-parser";
 import { tokenSecretKey } from "@/config";
@@ -12,6 +14,8 @@ class App {
   private env: string;
   private routes: Routes[];
   private port: number;
+  private server: http.Server;
+  private io;
 
   constructor(routes: Routes[]) {
     this.routes = routes;
@@ -19,6 +23,10 @@ class App {
     this.env = env;
 
     this.app = express();
+
+    this.server = http.createServer(this.app); // http server for sockets IO
+    this.io = new Server(this.server);
+
     this.initilizeMiddlewares();
   }
 
@@ -40,6 +48,7 @@ class App {
     );
 
     this.initilizeRoutes(this.routes);
+    this.initilizeSocketEvents();
   }
 
   private initilizeRoutes(routes: Routes[]) {
@@ -48,8 +57,17 @@ class App {
     );
   }
 
+  public initilizeSocketEvents = () => {
+    this.io.on("connection", (socket) => {
+      socket.on("client-message", (msg) => {
+        console.log("MESSAGE RECEIVED>>>>>>", msg);
+        this.io.emit("message", msg);
+      });
+    });
+  };
+
   public listenServer() {
-    this.app.listen(this.port, () => {
+    this.server.listen(this.port, () => {
       console.log(
         ` 🔥🔥 ENV = ${this.env} 🔥🔥\n`,
         `SERVICE ${serviceName} Started AT PORT NO ${this.port} ✔️`
