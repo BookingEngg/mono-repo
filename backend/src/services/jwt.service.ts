@@ -15,7 +15,11 @@ class JwtService {
 
   public getJwtToken = (req: Request): string => {
     const tokenCookie = req.headers["cookie"];
-    return tokenCookie.slice("jwt-token=".length) || '';
+    if (!tokenCookie.includes("jwt-token")) {
+      return "";
+    }
+
+    return tokenCookie.slice("jwt-token=".length) || "";
   };
 }
 

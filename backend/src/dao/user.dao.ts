@@ -9,13 +9,20 @@ class UserDao {
       first_name: "Tushar",
       contact: "9990870405",
       email: "tusharepc205@gmail.com",
-      roles: ['director'],
+      roles: ["director"],
     });
   };
 
-  
   public getUserByEmail = async (email: string): Promise<IUser> => {
     return await this.userModel.findOne({ email });
+  };
+
+  public getUserByUserId = async (userId: string) => {
+    return await this.userModel.findOne({ _id: userId });
+  };
+
+  public getUsers = async (email: string) => {
+    return await this.userModel.find({ email: { $ne: email } });
   };
 }
 

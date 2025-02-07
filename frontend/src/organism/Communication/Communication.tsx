@@ -1,71 +1,70 @@
+// Modules
+import React from "react";
+// Services
+import {
+  getCommunicationUsers,
+  addNewChatMessage,
+  getUserChatsDetails,
+} from "@/services/Communication.service";
+// Rsuite
 import { Button, FlexboxGrid, Input, Stack, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
-import classNames from "classnames/bind";
-import style from "./Communication.module.scss";
 import StackItem from "rsuite/esm/Stack/StackItem";
-import React from "react";
+// Style
+import style from "./Communication.module.scss";
+import classNames from "classnames/bind";
 const cx = classNames.bind(style);
 
-const initialUserList: { name: string; updatedAt: string }[] = [
-  {
-    name: "Tushar Chand Thakur",
-    updatedAt: "05:16 PM",
-  },
-  {
-    name: "Tejasvi KumarThakur",
-    updatedAt: "05:16 PM",
-  },
-  {
-    name: "Manasvi Kumar Thakur",
-    updatedAt: "05:16 PM",
-  },
-];
-
-let currentUserChats: {
+let initialUserChat: {
   username: string;
+  user_id: string;
   chats: { message: string; time: string }[];
 } = {
-  username: "Tushar Chand Thakur",
-  chats: [
-    {
-      message: "Hi",
-      time: "05:18 PM",
-    },
-    {
-      message: "Hello",
-      time: "05:18 PM",
-    },
-    {
-      message: "It's me Tushar",
-      time: "05:18 PM",
-    },
-  ],
+  username: "",
+  user_id: "",
+  chats: [],
 };
 
+export interface ICommUser {
+  user_id: string;
+  name: string;
+  date: string;
+}
 const Communication = () => {
   const [message, setMessage] = React.useState("");
-  const [userList, setUserList] = React.useState(initialUserList);
+  const [userList, setUserList] = React.useState<ICommUser[]>([]);
   const [currentUserMessages, setCurrentUserMessages] =
-    React.useState(currentUserChats);
+    React.useState(initialUserChat);
 
-  const handleSendMessage = React.useCallback(() => {
-    const newMessage = { message, time: new Date().toString() };
+  const handleSendMessage = React.useCallback(async () => {
+    const newMessage = { message, time: "" };
     setCurrentUserMessages({
       ...currentUserMessages,
       chats: [...currentUserMessages.chats, newMessage],
     });
+    await addNewChatMessage({ user_id: currentUserMessages.user_id, message });
     setMessage("");
   }, [message]);
 
   const handleUserChange = React.useCallback(
-    (currentUserIndex: number) => {
-      setCurrentUserMessages({
-        ...currentUserChats,
-        username: userList[currentUserIndex].name,
-      });
+    async (currentUserIndex: number) => {
+      const response = await getUserChatsDetails(
+        userList[currentUserIndex].user_id
+      );
+
+      setCurrentUserMessages(response.data);
     },
-    [userList, currentUserChats]
+    [userList, currentUserMessages]
   );
+
+  React.useEffect(() => {
+    const fetchCommunicationUsers = async () => {
+      const response = await getCommunicationUsers();
+      setUserList(response.data);
+    };
+
+    fetchCommunicationUsers();
+  }, []);
 
   return (
     <FlexboxGrid justify="space-between" className={cx("chat-container")}>
@@ -82,7 +81,7 @@ const Communication = () => {
             >
               <FlexboxGrid justify="space-between">
                 <FlexboxGridItem>{user.name}</FlexboxGridItem>
-                <FlexboxGridItem>{user.updatedAt}</FlexboxGridItem>
+                <FlexboxGridItem>{user.date}</FlexboxGridItem>
               </FlexboxGrid>
             </FlexboxGridItem>
           ))}

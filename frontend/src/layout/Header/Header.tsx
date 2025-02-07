@@ -14,8 +14,9 @@ const Header = () => {
   const handleAuthUserLogout = React.useCallback(async () => {
     dispatch(logout());
     const response = await logoutAuthUser();
+    console.log("RESPO>>>>>>>>>>", response)
     if (response.status) {
-      navigate("/");
+      navigate("/login");
     }
   }, [logoutAuthUser, dispatch, navigate]);
 

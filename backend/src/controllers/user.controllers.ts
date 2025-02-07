@@ -10,7 +10,7 @@ class UserController {
   };
 
   public getUsers = async (req: Request, res: Response): Promise<any> => {
-    if (!req.user) {
+    if (!req.user?._id) {
       return res.status(401);
     }
     return res.send({ status: true, user: req.user });

@@ -66,8 +66,7 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
-  // const isAuthorized = useSelector(isUserAuthorized);
-  const isAuthorized = true;
+  const isAuthorized = useSelector(isUserAuthorized);
 
   //User Authorized check
   React.useEffect(() => {
@@ -113,7 +112,7 @@ function App() {
     }
   }, [isAuthorized])
 
-
+  console.log("LOGS>>>>>>", isAuthorized)
 
   return (
     <>
