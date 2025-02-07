@@ -7,7 +7,14 @@ import cookieSession from "cookie-session";
 import cookieParser from "cookie-parser";
 import { tokenSecretKey } from "@/config";
 // const { OAuth2Client } = require("google-auth-library");
-import { PORT, serviceName, serviceRoute, env } from "@config";
+import {
+  PORT,
+  serviceName,
+  serviceRoute,
+  env,
+  SOCKET_EVENTS_NAMES,
+} from "@config";
+import SocketEvents from "@/events/socket.events";
 
 class App {
   private app: express.Application;
@@ -16,6 +23,7 @@ class App {
   private port: number;
   private server: http.Server;
   private io;
+  private socketEventHandler = new SocketEvents();
 
   constructor(routes: Routes[]) {
     this.routes = routes;
@@ -59,9 +67,15 @@ class App {
 
   public initilizeSocketEvents = () => {
     this.io.on("connection", (socket) => {
-      socket.on("client-message", (msg) => {
-        console.log("MESSAGE RECEIVED>>>>>>", msg);
-        this.io.emit("message", msg);
+      SOCKET_EVENTS_NAMES.forEach((eventName) => {
+        socket.on(
+          eventName,
+          this.socketEventHandler.initializeSocketEvents({
+            eventName,
+            socket,
+            io: this.io,
+          })
+        );
       });
     });
   };

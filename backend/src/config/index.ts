@@ -18,6 +18,8 @@ export const PORT = (nconf.get("server") as IServer).port;
 export const MONGO_DB_NAMES: readonly string[] = ["praman"];
 export const mongoDbConfig = nconf.get("databases").mongodb as IDataBaseConfig;
 
+export const SOCKET_EVENTS_NAMES: readonly string[] = ["new-chat-message"];
+
 export const nodeMailConfig = nconf.get("nodemailer") as INodeMailer;
 
 export const tokenSecretKey = (nconf.get("token") as IToken).secret_key;
