@@ -112,8 +112,6 @@ function App() {
     }
   }, [isAuthorized])
 
-  console.log("LOGS>>>>>>", isAuthorized)
-
   return (
     <>
       <CurrentRouteContext.Provider value={{ currentRoute: getCurrentRoute }}>
