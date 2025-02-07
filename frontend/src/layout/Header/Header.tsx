@@ -15,7 +15,7 @@ const Header = () => {
     dispatch(logout());
     const response = await logoutAuthUser();
     if (response.status) {
-      navigate("/login");
+      navigate("/");
     }
   }, [logoutAuthUser, dispatch, navigate]);
 

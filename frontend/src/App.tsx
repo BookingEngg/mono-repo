@@ -66,7 +66,8 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useAppDispatch();
-  const isAuthorized = useSelector(isUserAuthorized);
+  // const isAuthorized = useSelector(isUserAuthorized);
+  const isAuthorized = true;
 
   //User Authorized check
   React.useEffect(() => {
@@ -104,13 +105,15 @@ function App() {
       : flatternLoginRoutesTree[0];
   }, [flatternAuthRoutesTree, flatternLoginRoutesTree, location]);
 
+
+  // TODO: need to fix if user is logged in before the api fetch details of loggedin user it navigate to '/login' route will avoid this.
   React.useEffect(() => {
-    if (!isAuthorized) {
+    if(!isAuthorized) {
       navigate("/login");
-    } else {
-      navigate("/");
     }
-  }, [])
+  }, [isAuthorized])
+
+
 
   return (
     <>
