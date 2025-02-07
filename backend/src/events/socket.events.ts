@@ -15,11 +15,6 @@ class SocketEvents {
     this.io = io;
 
     switch (eventName) {
-      // case "new-chat-message":
-      //   return (data: string) => {
-      //     // broadcase the event message to all the client data
-      //     io.emit("message", JSON.parse(data));
-      //   };
       case "new-chat-message":
         return this.addNewChatMessage;
       default:

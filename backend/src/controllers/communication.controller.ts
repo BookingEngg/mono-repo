@@ -31,6 +31,9 @@ class CommunicationController {
     return res.send({ data: response });
   };
 
+  /**
+   * @deprecated
+   */
   public addNewChat = async (req: Request, res: Response): Promise<any> => {
     if (!req.user?._id) {
       throw new Error("Invalid User");
