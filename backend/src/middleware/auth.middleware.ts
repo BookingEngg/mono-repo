@@ -7,27 +7,29 @@ class AuthMiddleware {
   private jwtService = new JwtService();
   private userDao = new UserDao();
 
-  public getAuthUser = () => {
-    return async (req: Request, _: Response, next: NextFunction) => {
-      try {
-        const token = this.jwtService.getJwtToken(req);
-        if (!token) {
-          throw new Error("Token not found");
-        }
-        const { email } = this.jwtService.verifyToken(token);
+  public getAuthUser = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<any> => {
+    try {
+      const token = this.jwtService.getJwtToken(req);
 
-        if (!email) {
-          throw new Error("Invalid Token");
-        }
-
-        const userData = await this.userDao.getUserByEmail(email);
-        req.user = userData;
-        next();
-      } catch (error) {
-        req.user = null;
-        next();
+      if (!token) {
+        throw new Error("Token not found");
       }
-    };
+      const { email } = this.jwtService.verifyToken(token);
+
+      if (!email) {
+        throw new Error("Invalid Token");
+      }
+
+      const userData = await this.userDao.getUserByEmail(email);
+      req.user = userData;
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: "Invalid Token for User" });
+    }
   };
 
   public checkRoles = (roles: string[]) => {
