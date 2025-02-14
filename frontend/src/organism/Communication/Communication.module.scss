@@ -23,10 +23,16 @@
 
     .right-chat-item {
       width: 100%;
-      background-color: aliceblue;
       margin: 5px 0px;
       padding: 10px;
       border-radius: 5px;
+    }
+
+    .right-chat-item-sender {
+      background-color: #6dc27088;
+    }
+    .right-chat-item-receiver {
+      background-color: aliceblue;
     }
   }
 }

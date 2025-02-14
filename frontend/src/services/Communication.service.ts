@@ -19,8 +19,8 @@ export const getCommunicationUsers = async (): Promise<{
 export const getUserChatsDetails = async (userId: string): Promise<{
   data: {
     username: string;
-    user_id: string;
-    chats: { message: string; time: string }[];
+    receiver_id: string;
+    chats: { message: string; user_id: string, user_name: string }[];
   };
 }> => {
   const response = await fetch(`${prefix}/comm/chat?user_id=${userId}`, {

@@ -8,7 +8,12 @@ class CommunicationDao {
     await this.communicationModel.create(payload);
   };
 
-  public getChatDetails = async (user_id: string, receiverId: string) => {
+  public getChatDetails = async (payload: {
+    user_id: string;
+    receiverId: string;
+    fields?: string[];
+  }) => {
+    const { user_id, receiverId, fields = [] } = payload;
     return await this.communicationModel
       .find({
         $or: [
@@ -16,6 +21,7 @@ class CommunicationDao {
           { sender_user_id: receiverId, receiver_user_id: user_id },
         ],
       })
+      .select(fields)
       .limit(100);
   };
 }

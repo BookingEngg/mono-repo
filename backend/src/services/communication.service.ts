@@ -1,10 +1,14 @@
+import R from "ramda";
 import CommunicationDao from "@/dao/communication.dao";
 import UserDao from "@/dao/user.dao";
 import { IUser } from "@/interfaces/user.interface";
+import CommunicationFormatter from "@/formatter/communication.formatter";
 
 class CommunicationService {
   private userDao = new UserDao();
   private communicationDao = new CommunicationDao();
+
+  private communicationFormatter = new CommunicationFormatter();
 
   public createChat = async (payload: {
     senderId: string;
@@ -20,18 +24,24 @@ class CommunicationService {
   };
 
   public getUsersChat = async (userDetails: IUser, receiverId: string) => {
-    const chatDetails = await this.communicationDao.getChatDetails(
-      userDetails._id.toString(),
-      receiverId
-    );
+    const senderId = userDetails._id.toString();
 
-    const formattedChatDetails = {
-      username: `${userDetails.first_name} ${userDetails.last_name}`,
-      user_id: receiverId,
-      chats: chatDetails,
-    };
+    const [chatDetails, usersDetails] = await Promise.all([
+      this.communicationDao.getChatDetails({
+        user_id: senderId,
+        receiverId,
+        fields: ["sender_user_id", "receiver_user_id", "message"],
+      }),
+      this.userDao.getUserByUserIds([senderId, receiverId], ["first_name"]),
+    ]);
+    const userDetailsMapper = R.indexBy(R.prop<string>("_id"), usersDetails);
 
-    return formattedChatDetails;
+    return this.communicationFormatter.getFormattedChatDetails({
+      userDetailsMapper,
+      user: userDetails,
+      chatDetails,
+      receiverId,
+    });
   };
 }
 

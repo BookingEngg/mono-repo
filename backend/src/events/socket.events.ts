@@ -24,12 +24,12 @@ class SocketEvents {
 
   private addNewChatMessage = async (payload: string) => {
     const parsedPayload = JSON.parse(payload);
-    const { sender_id, user_id, message } = parsedPayload;
+    const { sender_id, receiver_id, message } = parsedPayload;
 
-    if (sender_id && user_id && message) {
+    if (sender_id && receiver_id && message) {
       await this.communicationService.createChat({
         senderId: sender_id,
-        receiverId: user_id,
+        receiverId: receiver_id,
         message,
       });
 

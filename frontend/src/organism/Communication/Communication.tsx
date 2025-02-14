@@ -22,12 +22,12 @@ const cx = classNames.bind(style);
 let initialUserChat: {
   index: number;
   username: string;
-  user_id: string;
-  chats: { message: string; time: string }[];
+  receiver_id: string;
+  chats: { message: string; user_id: string; user_name: string }[];
 } = {
   index: -1,
   username: "",
-  user_id: "",
+  receiver_id: "",
   chats: [],
 };
 
@@ -46,7 +46,11 @@ const Communication = () => {
     React.useState(initialUserChat);
 
   const handleSendMessage = React.useCallback(async () => {
-    const newMessage = { message, time: "" };
+    const newMessage = {
+      message,
+      user_id: loggedInUser.user?._id || "",
+      user_name: loggedInUser.user?.first_name || "",
+    };
     setCurrentUserMessages({
       ...currentUserMessages,
       chats: [...currentUserMessages.chats, newMessage],
@@ -58,7 +62,7 @@ const Communication = () => {
       "new-chat-message",
       JSON.stringify({
         sender_id: loggedInUser.user?._id,
-        user_id: currentUserMessages.user_id,
+        receiver_id: currentUserMessages.receiver_id,
         message,
       })
     );
@@ -123,16 +127,35 @@ const Communication = () => {
         <Text size="xl">{currentUserMessages.username}</Text>
         <FlexboxGrid align="middle" justify="start">
           <FlexboxGridItem colspan={24}>
-            <Stack direction="column" className={cx("right-chat")}>
+            {/* <Stack direction="column" className={cx("right-chat")}>
               {currentUserMessages.chats.map((chat) => (
                 <StackItem className={cx("right-chat-item")}>
                   <FlexboxGrid justify="space-between">
                     <FlexboxGridItem>{chat.message}</FlexboxGridItem>
-                    <FlexboxGridItem>{chat.time}</FlexboxGridItem>
                   </FlexboxGrid>
                 </StackItem>
               ))}
-            </Stack>
+            </Stack> */}
+
+            <FlexboxGrid className={cx("right-chat")}>
+              {currentUserMessages.chats.map((chat) => {
+                const isAuthUserMsg = chat.user_id === loggedInUser.user?._id;
+
+                return (
+                  <FlexboxGridItem
+                    className={cx(
+                      "right-chat-item",
+                      `right-chat-item-${isAuthUserMsg ? "sender" : "receiver"}`
+                    )}
+                    colspan={24}
+                  >
+                    <FlexboxGrid justify={isAuthUserMsg ? "end" : "start"}>
+                      {chat.message}
+                    </FlexboxGrid>
+                  </FlexboxGridItem>
+                );
+              })}
+            </FlexboxGrid>
           </FlexboxGridItem>
 
           <FlexboxGridItem colspan={24}>
