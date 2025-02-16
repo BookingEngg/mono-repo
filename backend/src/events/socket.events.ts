@@ -9,12 +9,22 @@ export interface ISocketEvent {
 class SocketEvents {
   private io;
   private communicationService = new CommunicationService();
+  private usersSocketHash = new Map();
 
   public initializeSocketEvents(payload: ISocketEvent) {
-    const { eventName, io } = payload;
+    const { eventName, socket, io } = payload;
     this.io = io;
 
     switch (eventName) {
+      case "init":
+        return async (payload: string) => {
+          const parsedPayload = JSON.parse(payload);
+          const { user_id } = parsedPayload;
+
+          if (user_id) {
+            this.usersSocketHash.set(user_id, socket.id);
+          }
+        };
       case "new-chat-message":
         return this.addNewChatMessage;
       default:
@@ -33,7 +43,11 @@ class SocketEvents {
         message,
       });
 
-      this.io.emit("refetch-user-chat", "");
+      const receiverSocketId = this.usersSocketHash.get(receiver_id);
+      this.io.to(receiverSocketId).emit("received-user-chat", {
+        user_id: sender_id,
+        message,
+      });
     }
   };
 }

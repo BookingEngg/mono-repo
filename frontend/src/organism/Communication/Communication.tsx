@@ -1,35 +1,29 @@
 // Modules
 import React from "react";
+// Redux Store
+import { useSelector } from "react-redux";
+import { getAuthUser } from "@/store/auth";
 // Services
 import {
   getCommunicationUsers,
-  addNewChatMessage,
   getUserChatsDetails,
 } from "@/services/Communication.service";
 // Socket IO
 import { io } from "socket.io-client";
 // Rsuite
-import { Button, FlexboxGrid, Input, Stack, Text } from "rsuite";
+import { Button, FlexboxGrid, Input, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
-import StackItem from "rsuite/esm/Stack/StackItem";
 // Style
 import style from "./Communication.module.scss";
 import classNames from "classnames/bind";
-import { useSelector } from "react-redux";
-import { getAuthUser } from "@/store/auth";
 const cx = classNames.bind(style);
 
-let initialUserChat: {
+export interface IUserCommChat {
   index: number;
   username: string;
   receiver_id: string;
   chats: { message: string; user_id: string; user_name: string }[];
-} = {
-  index: -1,
-  username: "",
-  receiver_id: "",
-  chats: [],
-};
+}
 
 export interface ICommUser {
   user_id: string;
@@ -43,7 +37,12 @@ const Communication = () => {
   const [message, setMessage] = React.useState("");
   const [userList, setUserList] = React.useState<ICommUser[]>([]);
   const [currentUserMessages, setCurrentUserMessages] =
-    React.useState(initialUserChat);
+    React.useState<IUserCommChat | null>(null);
+  const currentUserMessagesRef = React.useRef(currentUserMessages);
+
+  React.useEffect(() => {
+    currentUserMessagesRef.current = currentUserMessages;
+  }, [currentUserMessages]);
 
   const handleSendMessage = React.useCallback(async () => {
     const newMessage = {
@@ -51,18 +50,20 @@ const Communication = () => {
       user_id: loggedInUser.user?._id || "",
       user_name: loggedInUser.user?.first_name || "",
     };
-    setCurrentUserMessages({
-      ...currentUserMessages,
-      chats: [...currentUserMessages.chats, newMessage],
-    });
-    // await addNewChatMessage({ user_id: currentUserMessages.user_id, message });
+
+    if (currentUserMessages) {
+      setCurrentUserMessages({
+        ...currentUserMessages,
+        chats: [...currentUserMessages.chats, newMessage],
+      });
+    }
 
     // Raise an socket event
     socket.emit(
       "new-chat-message",
       JSON.stringify({
         sender_id: loggedInUser.user?._id,
-        receiver_id: currentUserMessages.receiver_id,
+        receiver_id: currentUserMessages?.receiver_id,
         message,
       })
     );
@@ -85,21 +86,42 @@ const Communication = () => {
       const response = await getCommunicationUsers();
       setUserList(response.data);
     };
-
     fetchCommunicationUsers();
+
+    // Initial socket event for mapping
+    socket.emit(
+      "init",
+      JSON.stringify({
+        user_id: loggedInUser.user?._id,
+      })
+    );
   }, []);
 
   React.useEffect(() => {
-    socket.on("refetch-user-chat", async (_) => {
-      const response = await getUserChatsDetails(
-        userList[currentUserMessages.index].user_id
-      );
+    const handleNewMessageReceived = async (datum: {
+      user_id: string;
+      message: string;
+    }) => {
+      const { user_id, message } = datum;
 
-      setCurrentUserMessages({
-        ...response.data,
-        index: currentUserMessages.index,
-      });
-    });
+      if (user_id && message) {
+        const newMessage = {
+          message,
+          user_id: user_id,
+          user_name: "",
+        };
+
+        setCurrentUserMessages((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            chats: [...prev.chats, newMessage],
+          };
+        });
+      }
+    };
+
+    socket.on("received-user-chat", handleNewMessageReceived);
   }, [socket]);
 
   return (
@@ -124,37 +146,31 @@ const Communication = () => {
         </FlexboxGrid>
       </FlexboxGridItem>
       <FlexboxGridItem colspan={16} className={cx("chat-right-container")}>
-        <Text size="xl">{currentUserMessages.username}</Text>
+        <Text size="xl">{currentUserMessages?.username}</Text>
         <FlexboxGrid align="middle" justify="start">
           <FlexboxGridItem colspan={24}>
-            {/* <Stack direction="column" className={cx("right-chat")}>
-              {currentUserMessages.chats.map((chat) => (
-                <StackItem className={cx("right-chat-item")}>
-                  <FlexboxGrid justify="space-between">
-                    <FlexboxGridItem>{chat.message}</FlexboxGridItem>
-                  </FlexboxGrid>
-                </StackItem>
-              ))}
-            </Stack> */}
-
             <FlexboxGrid className={cx("right-chat")}>
-              {currentUserMessages.chats.map((chat) => {
-                const isAuthUserMsg = chat.user_id === loggedInUser.user?._id;
+              {currentUserMessages?.chats?.length ? (
+                currentUserMessages.chats.map((chat) => {
+                  const isAuthUserMsg = chat.user_id === loggedInUser.user?._id;
 
-                return (
-                  <FlexboxGridItem
-                    className={cx(
-                      "right-chat-item",
-                      `right-chat-item-${isAuthUserMsg ? "sender" : "receiver"}`
-                    )}
-                    colspan={24}
-                  >
-                    <FlexboxGrid justify={isAuthUserMsg ? "end" : "start"}>
-                      {chat.message}
-                    </FlexboxGrid>
-                  </FlexboxGridItem>
-                );
-              })}
+                  return (
+                    <FlexboxGridItem
+                      className={cx(
+                        "right-chat-item",
+                        `right-chat-item-${isAuthUserMsg ? "sender" : "receiver"}`
+                      )}
+                      colspan={24}
+                    >
+                      <FlexboxGrid justify={isAuthUserMsg ? "end" : "start"}>
+                        {chat.message}
+                      </FlexboxGrid>
+                    </FlexboxGridItem>
+                  );
+                })
+              ) : (
+                <></>
+              )}
             </FlexboxGrid>
           </FlexboxGridItem>
 
