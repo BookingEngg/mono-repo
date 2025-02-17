@@ -1,13 +1,15 @@
 import CommunicationService from "@/services/communication.service";
+import { Server, Socket } from "socket.io";
+import moment from "moment";
 
 export interface ISocketEvent {
   eventName: string;
-  io: any;
-  socket: any;
+  io: Server;
+  socket: Socket;
 }
 
 class SocketEvents {
-  private io;
+  private io: Server;
   private communicationService = new CommunicationService();
   private usersSocketHash = new Map();
 
@@ -47,6 +49,7 @@ class SocketEvents {
       this.io.to(receiverSocketId).emit("received-user-chat", {
         user_id: sender_id,
         message,
+        created_at: moment.utc().format("hh:mm a"),
       });
     }
   };

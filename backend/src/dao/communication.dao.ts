@@ -22,6 +22,7 @@ class CommunicationDao {
         ],
       })
       .select(fields)
+      .sort({ createdAt: 1 })
       .limit(100);
   };
 }

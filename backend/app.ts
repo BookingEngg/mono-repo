@@ -22,7 +22,7 @@ class App {
   private routes: Routes[];
   private port: number;
   private server: http.Server;
-  private io;
+  private io: Server;
   private socketEventHandler = new SocketEvents();
 
   constructor(routes: Routes[]) {

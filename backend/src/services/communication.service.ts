@@ -30,15 +30,14 @@ class CommunicationService {
       this.communicationDao.getChatDetails({
         user_id: senderId,
         receiverId,
-        fields: ["sender_user_id", "receiver_user_id", "message"],
+        fields: ["sender_user_id", "receiver_user_id", "message", "createdAt"],
       }),
-      this.userDao.getUserByUserIds([senderId, receiverId], ["first_name"]),
+      this.userDao.getUserByUserIds([senderId, receiverId], ["first_name", "last_name"]),
     ]);
     const userDetailsMapper = R.indexBy(R.prop<string>("_id"), usersDetails);
 
     return this.communicationFormatter.getFormattedChatDetails({
       userDetailsMapper,
-      user: userDetails,
       chatDetails,
       receiverId,
     });

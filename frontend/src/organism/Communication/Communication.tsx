@@ -1,5 +1,6 @@
 // Modules
 import React from "react";
+import Moment from 'moment';
 // Redux Store
 import { useSelector } from "react-redux";
 import { getAuthUser } from "@/store/auth";
@@ -22,7 +23,12 @@ export interface IUserCommChat {
   index: number;
   username: string;
   receiver_id: string;
-  chats: { message: string; user_id: string; user_name: string }[];
+  chats: {
+    message: string;
+    user_id: string;
+    user_name: string;
+    created_at: string;
+  }[];
 }
 
 export interface ICommUser {
@@ -51,6 +57,7 @@ const Communication = () => {
       message,
       user_id: loggedInUser.user?._id || "",
       user_name: loggedInUser.user?.first_name || "",
+      created_at: Moment.utc().utcOffset("+05:30").format('hh:mm a'),
     };
 
     if (currentUserMessages) {
@@ -115,8 +122,9 @@ const Communication = () => {
     const handleNewMessageReceived = async (datum: {
       user_id: string;
       message: string;
+      created_at: string;
     }) => {
-      const { user_id, message } = datum;
+      const { user_id, message, created_at } = datum;
 
       if (user_id !== currentUserMessagesRef.current?.receiver_id) {
         return;
@@ -126,6 +134,7 @@ const Communication = () => {
         const newMessage = {
           message,
           user_id: user_id,
+          created_at,
           user_name: "",
         };
 
@@ -183,7 +192,13 @@ const Communication = () => {
                       colspan={24}
                     >
                       <FlexboxGrid justify={isAuthUserMsg ? "end" : "start"}>
-                        {chat.message}
+                        <FlexboxGridItem>{chat.message}</FlexboxGridItem>
+                        <FlexboxGridItem colspan={24}></FlexboxGridItem>
+                        <FlexboxGridItem>
+                          <Text size={"sm"} weight="thin">
+                            {chat.created_at}
+                          </Text>
+                        </FlexboxGridItem>
                       </FlexboxGrid>
                     </FlexboxGridItem>
                   );
