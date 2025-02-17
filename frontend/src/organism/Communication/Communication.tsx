@@ -9,7 +9,7 @@ import {
   getUserChatsDetails,
 } from "@/services/Communication.service";
 // Socket IO
-import { io } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 // Rsuite
 import { Button, FlexboxGrid, Input, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
@@ -31,9 +31,9 @@ export interface ICommUser {
   date: string;
 }
 const Communication = () => {
-  const socket = io("http://localhost:8080", { transports: ["websocket"] });
-
   const loggedInUser = useSelector(getAuthUser);
+
+  const [socket, setSocket] = React.useState<Socket | null>(null);
   const [message, setMessage] = React.useState("");
   const [userList, setUserList] = React.useState<ICommUser[]>([]);
   const [currentUserMessages, setCurrentUserMessages] =
@@ -61,16 +61,18 @@ const Communication = () => {
     }
 
     // Raise an socket event
-    socket.emit(
-      "new-chat-message",
-      JSON.stringify({
-        sender_id: loggedInUser.user?._id,
-        receiver_id: currentUserMessages?.receiver_id,
-        message,
-      })
-    );
+    if (socket) {
+      socket.emit(
+        "new-chat-message",
+        JSON.stringify({
+          sender_id: loggedInUser.user?._id,
+          receiver_id: currentUserMessages?.receiver_id,
+          message,
+        })
+      );
+    }
     setMessage("");
-  }, [message]);
+  }, [message, socket]);
 
   const handleUserChange = React.useCallback(
     async (currentUserIndex: number) => {
@@ -90,13 +92,23 @@ const Communication = () => {
     };
     fetchCommunicationUsers();
 
+    // Socket IO connection url
+    const newSocket = io("http://localhost:8080", {
+      transports: ["websocket"],
+    });
+    setSocket(newSocket);
+
     // Initial socket event for mapping
-    socket.emit(
+    newSocket.emit(
       "init",
       JSON.stringify({
         user_id: loggedInUser.user?._id,
       })
     );
+
+    return () => {
+      newSocket.disconnect();
+    };
   }, []);
 
   React.useEffect(() => {
@@ -105,7 +117,6 @@ const Communication = () => {
       message: string;
     }) => {
       const { user_id, message } = datum;
-      console.log("SOCKET EVENT RECEIVED>>>>>>>>>", message);
 
       if (user_id !== currentUserMessagesRef.current?.receiver_id) {
         return;
@@ -128,7 +139,9 @@ const Communication = () => {
       }
     };
 
-    socket.on("received-user-chat", handleNewMessageReceived);
+    if (socket) {
+      socket.on("received-user-chat", handleNewMessageReceived);
+    }
   }, [socket]);
 
   return (
