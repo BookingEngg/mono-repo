@@ -45,6 +45,8 @@ const Communication = () => {
   }, [currentUserMessages]);
 
   const handleSendMessage = React.useCallback(async () => {
+    if (!message) return;
+
     const newMessage = {
       message,
       user_id: loggedInUser.user?._id || "",
@@ -103,6 +105,11 @@ const Communication = () => {
       message: string;
     }) => {
       const { user_id, message } = datum;
+      console.log("SOCKET EVENT RECEIVED>>>>>>>>>", message);
+
+      if (user_id !== currentUserMessagesRef.current?.receiver_id) {
+        return;
+      }
 
       if (user_id && message) {
         const newMessage = {

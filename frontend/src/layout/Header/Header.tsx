@@ -1,13 +1,25 @@
 import { TRoutes } from "@/typings/common";
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, FlexboxGrid, Nav } from "rsuite";
+import { Button, FlexboxGrid, Nav, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { logoutAuthUser } from "@/services/Login.service";
 import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/auth";
+// Redux
+import { useSelector } from "react-redux";
+import { getAuthUser } from "@/store/auth";
+// Style
+import style from "./Header.module.scss";
+import classNames from "classnames/bind";
+const cx = classNames.bind(style);
 
 const Header = () => {
+  const authUser = useSelector(getAuthUser);
+  const userNameLogo =
+    (authUser.user?.first_name.charAt(0) || "") +
+    (authUser.user?.last_name.charAt(0) || "");
+
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
@@ -30,6 +42,18 @@ const Header = () => {
           >
             Logout
           </Button>
+        </FlexboxGridItem>
+        <FlexboxGridItem>
+          <div className={cx("sidenav-logoholder")}>
+            <Text
+              size="xxl"
+              align="center"
+              weight="extrabold"
+              transform="capitalize"
+            >
+              {userNameLogo}
+            </Text>
+          </div>
         </FlexboxGridItem>
       </FlexboxGrid>
     </div>

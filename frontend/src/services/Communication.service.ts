@@ -16,11 +16,17 @@ export const getCommunicationUsers = async (): Promise<{
   return response.json();
 };
 
-export const getUserChatsDetails = async (userId: string): Promise<{
+export const getUserChatsDetails = async (
+  userId: string
+): Promise<{
   data: {
     username: string;
     receiver_id: string;
-    chats: { message: string; user_id: string, user_name: string }[];
+    chats: {
+      message: string;
+      user_id: string;
+      user_name: string;
+    }[];
   };
 }> => {
   const response = await fetch(`${prefix}/comm/chat?user_id=${userId}`, {
