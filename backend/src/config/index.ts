@@ -10,10 +10,8 @@ export const env = process.env.NODE_ENV || "development";
 let configFile = `src/config/config.${env}.json`;
 
 // TODO: configuration for render platform
-if(!configFile) {
-  configFile = `etc/secrets/config.${env}.json`
-  console.log("CONFIG FILE PATH>>>>>", configFile.toString())
-}
+configFile = `/etc/secrets/config.${env}.json`
+console.log("CONFIG FILE PATH>>>>>", configFile.toString())
 
 nconf.argv().env().file({ file: configFile });
 
