@@ -11,6 +11,7 @@ import {
 import LoginRoutes from "@/pages/Login/Login.routes";
 import HomeRoutes from "@/pages/Home/Home.routes";
 import SettingsRoutes from "./pages/Settings";
+import ChatRoutes from "./pages/Chat";
 // Services
 import { getUser } from "@/services/Login.service";
 // Layout
@@ -71,16 +72,16 @@ function App() {
   React.useEffect(() => {
     const validateAuthorizedUser = async () => {
       const userResponse = await getUser();
-      if(userResponse.status) {
-        dispatch(login({user: userResponse.user, isAuthorized: true}));
+      if (userResponse.status) {
+        dispatch(login({ user: userResponse.user, isAuthorized: true }));
       }
-    }
+    };
     validateAuthorizedUser();
-  }, [])
+  }, []);
 
   // Contain all pages routes
   const loginRoutes = [...LoginRoutes()];
-  const authorizedRoutes = [...HomeRoutes(), ...SettingsRoutes()];
+  const authorizedRoutes = [...HomeRoutes(), ...SettingsRoutes(), ...ChatRoutes()];
 
   const flatternLoginRoutesTree = React.useMemo(() => {
     return flatternRoutes(loginRoutes);
@@ -103,13 +104,13 @@ function App() {
       : flatternLoginRoutesTree[0];
   }, [flatternAuthRoutesTree, flatternLoginRoutesTree, location]);
 
+
+  // TODO: need to fix if user is logged in before the api fetch details of loggedin user it navigate to '/login' route will avoid this.
   React.useEffect(() => {
-    if (!isAuthorized) {
+    if(!isAuthorized) {
       navigate("/login");
-    } else {
-      navigate("/");
     }
-  }, [])
+  }, [isAuthorized])
 
   return (
     <>

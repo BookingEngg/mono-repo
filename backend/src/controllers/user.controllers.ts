@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import UserService from "@/services/user.service";
 
 class UserController {
@@ -10,7 +10,7 @@ class UserController {
   };
 
   public getUsers = async (req: Request, res: Response): Promise<any> => {
-    if (!req.user) {
+    if (!req.user?._id) {
       return res.status(401);
     }
     return res.send({ status: true, user: req.user });

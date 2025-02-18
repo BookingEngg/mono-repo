@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "backend": "npm run dev -w backend",
+    "backend-prod": "npm run start -w backend",
     "frontend": "npm run dev -w frontend",
     "start": "concurrently \"npm run backend\" \"npm run frontend\""
   },
@@ -20,6 +21,7 @@
   "dependencies": {
     "cookie-parser": "^1.4.7",
     "module-alias": "^2.2.3",
+    "moment": "^2.30.1",
     "mongodb": "^6.10.0",
     "nconf": "^0.12.1",
     "swc": "^1.0.11",
