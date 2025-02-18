@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "npm run build && cross-env NODE_ENV=development nodemon -r tsconfig-paths/ ./dist/server.js",
+    "start": "npm run build && cross-env NODE_ENV=prod nodemon -r tsconfig-paths/ ./dist/server.js",
     "build": "swc src -d dist --source-maps --copy-files",
     "dev": "cross-env NODE_ENV=development nodemon -r tsconfig-paths/ ./src/server.ts",
     "prod": "cross-env NODE_ENV=prod nodemon -r tsconfig-paths/ ./src/server.ts"
