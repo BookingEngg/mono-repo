@@ -8,19 +8,26 @@ import {
 
 export const env = process.env.NODE_ENV || "development";
 
+<<<<<<< HEAD
 // TODO: configuration for render platform
 const configFile = `/etc/secrets/config.${env}.json`
 
+=======
+>>>>>>> 757aedd05167868e6bfea40a8330d6f369054b34
 nconf.argv().env().file({ file: configFile });
 
 export const serviceName = nconf.get("service");
 export const serviceRoute = nconf.get("service_route");
 export const PORT = (nconf.get("server") as IServer).port;
+export const isProduction = env === "prod";
 
 export const MONGO_DB_NAMES: readonly string[] = ["praman"];
 export const mongoDbConfig = nconf.get("databases").mongodb as IDataBaseConfig;
 
-export const SOCKET_EVENTS_NAMES: readonly string[] = ["init", "new-chat-message"];
+export const SOCKET_EVENTS_NAMES: readonly string[] = [
+  "init",
+  "new-chat-message",
+];
 
 export const nodeMailConfig = nconf.get("nodemailer") as INodeMailer;
 
