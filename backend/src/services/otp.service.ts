@@ -45,13 +45,13 @@ class OtpService {
 
     if (otpData) {
       const difference = moment().diff(moment(otpData.createdAt), "minutes");
-      // if (
-      //   otpData.otp == otp &&
-      //   difference >= 0 &&
-      //   difference <= nodeMailConfig.expire_in_minutes
-      // ) {
-      //   isVerifiedOtp = true;
-      // }
+      if (
+        otpData.otp == otp &&
+        difference >= 0 &&
+        difference <= nodeMailConfig.expire_in_minutes
+      ) {
+        isVerifiedOtp = true;
+      }
     }
 
     if (isVerifiedOtp) {
