@@ -12,7 +12,6 @@ const getConnectionUrl = (config) => {
     config.url,
     `/${config.name}`,
   ].join("");
-  console.log("CONNECTION URL>>>>>>>>>>", url);
   return url;
 };
 

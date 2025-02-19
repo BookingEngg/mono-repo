@@ -7,11 +7,9 @@ import {
 } from "@/typings/config";
 
 export const env = process.env.NODE_ENV || "development";
-let configFile = `src/config/config.${env}.json`;
 
 // TODO: configuration for render platform
-configFile = `/etc/secrets/config.${env}.json`
-console.log("CONFIG FILE PATH>>>>>", configFile.toString())
+const configFile = `/etc/secrets/config.${env}.json`
 
 nconf.argv().env().file({ file: configFile });
 
