@@ -1,6 +1,6 @@
 // Modules
 import React from "react";
-import Moment from 'moment';
+import Moment from "moment";
 // Redux Store
 import { useSelector } from "react-redux";
 import { getAuthUser } from "@/store/auth";
@@ -57,7 +57,7 @@ const Communication = () => {
       message,
       user_id: loggedInUser.user?._id || "",
       user_name: loggedInUser.user?.first_name || "",
-      created_at: Moment.utc().utcOffset("+05:30").format('hh:mm a'),
+      created_at: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
     };
 
     if (currentUserMessages) {
@@ -100,7 +100,7 @@ const Communication = () => {
     fetchCommunicationUsers();
 
     // Socket IO connection url
-    const newSocket = io("http://localhost:8080", {
+    const newSocket = io("https://mono-repo-c6ep.onrender.com/", {
       transports: ["websocket"],
     });
     setSocket(newSocket);

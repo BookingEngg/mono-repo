@@ -1,4 +1,5 @@
-const prefix = "http://localhost:8080/backend/api/v1/platform";
+// const prefix = "http://localhost:8080/backend/api/v1/platform";
+const prefix = "https://mono-repo-c6ep.onrender.com/backend/api/v1/platform";
 
 export const getCommunicationUsers = async (): Promise<{
   data: { user_id: string; name: string; date: string }[];

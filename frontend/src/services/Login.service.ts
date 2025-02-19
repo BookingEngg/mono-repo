@@ -1,6 +1,7 @@
 import { IUser } from "@/store/auth/types";
 
-const prefix = "http://localhost:8080/backend/api/v1/platform";
+// const prefix = "http://localhost:8080/backend/api/v1/platform";
+const prefix = "https://mono-repo-c6ep.onrender.com/backend/api/v1/platform";
 
 export const sendOtp = async (loginPayload: { email: string }) => {
   return await fetch(`${prefix}/otp/create`, {
