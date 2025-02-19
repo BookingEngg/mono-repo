@@ -5,6 +5,7 @@ import { nodeMailConfig } from "@/config";
 import MailTemplate from "@/util/mailtemplate.util";
 import { IUser } from "@/interfaces/user.interface";
 import UserDao from "@/dao/user.dao";
+import { isProduction } from "@/config";
 
 class OtpService {
   private otpDao = new OtpDao();
@@ -29,7 +30,10 @@ class OtpService {
 
     if (isGenerateNewOtp) {
       const otp = generateOtp();
-      const mailResponse = await this.mailTemplate.sendOtpTemplate(email, otp);
+      let mailResponse = {};
+      if (isProduction) {
+        mailResponse = await this.mailTemplate.sendOtpTemplate(email, otp);
+      }
       await this.otpDao.createOtp({
         email,
         otp,
@@ -45,13 +49,14 @@ class OtpService {
 
     if (otpData) {
       const difference = moment().diff(moment(otpData.createdAt), "minutes");
-      // if (
-      //   otpData.otp == otp &&
-      //   difference >= 0 &&
-      //   difference <= nodeMailConfig.expire_in_minutes
-      // ) {
-      //   isVerifiedOtp = true;
-      // }
+      if (
+        (otpData.otp == otp &&
+          difference >= 0 &&
+          difference <= nodeMailConfig.expire_in_minutes) ||
+        (!isProduction && otpData.otp === Number("0000"))
+      ) {
+        isVerifiedOtp = true;
+      }
     }
 
     if (isVerifiedOtp) {
