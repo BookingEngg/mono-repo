@@ -126,9 +126,13 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
               <Text
                 size="lg"
                 className={
-                  selectedRoute.key === route.key
-                    ? "selected-menuitem-color"
-                    : ""
+                  selectedRoute?.children?.length
+                    ? selectedRoute.key === route.key
+                      ? "selected-menuitem-color"
+                      : ""
+                    : selectedSubTab === route.key
+                      ? "selected-menuitem-color"
+                      : ""
                 }
               >
                 {route.label}
