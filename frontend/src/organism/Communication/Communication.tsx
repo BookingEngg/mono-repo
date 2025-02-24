@@ -209,7 +209,7 @@ const Communication = () => {
             </FlexboxGrid>
           </FlexboxGridItem>
 
-          <FlexboxGridItem colspan={24}>
+          <FlexboxGridItem colspan={24} className={cx("bottom-chat-section")}>
             <FlexboxGrid justify="space-between">
               <FlexboxGridItem colspan={20}>
                 <Input
