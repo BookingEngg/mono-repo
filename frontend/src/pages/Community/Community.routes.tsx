@@ -1,7 +1,13 @@
-import { TRoutes } from "@/typings/common";
+// Atoms
 import FriendsLogo from "@/atoms/icons/FriendsLogo";
+// Pages
 import Community from "./Community";
-import { Outlet } from "react-router-dom";
+// Organism
+import NewFriendsCommunity from "@/organism/Community/NewFriendCommunity";
+import FriendsCommunity from "@/organism/Community/FriendsCommunity";
+import BlockedUserCommunity from "@/organism/Community/BlockedUserCommunity";
+// Typings
+import { TRoutes } from "@/typings/common";
 
 export const BASE_URL = "/community";
 
@@ -17,7 +23,7 @@ const getCommunityRoutes = () => {
       children: [
         {
           path: `${BASE_URL}/add`,
-          element: <>Add New Friend</>,
+          element: <NewFriendsCommunity />,
           showOnSideNav: false,
           showOnTab: true,
           key: "add-new-friend",
@@ -25,7 +31,7 @@ const getCommunityRoutes = () => {
         },
         {
           path: `${BASE_URL}/friends`,
-          element: <>All you'r friends</>,
+          element: <FriendsCommunity />,
           showOnSideNav: false,
           showOnTab: true,
           key: "all-friends",
@@ -33,7 +39,7 @@ const getCommunityRoutes = () => {
         },
         {
           path: `${BASE_URL}/blocked`,
-          element: <>Blocked User</>,
+          element: <BlockedUserCommunity />,
           showOnSideNav: false,
           showOnTab: true,
           key: "blocked-user",

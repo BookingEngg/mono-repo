@@ -1,11 +1,11 @@
 import { Button, ButtonGroup, FlexboxGrid } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 
-const Community = () => {
+const AllFriendsCommunity = () => {
   return (
     <FlexboxGrid>
       <FlexboxGridItem colspan={24}>
-        Hello World
+        All Friends
       </FlexboxGridItem>
 
       <FlexboxGridItem colspan={24}></FlexboxGridItem>
@@ -13,4 +13,4 @@ const Community = () => {
   );
 };
 
-export default Community;
+export default AllFriendsCommunity;

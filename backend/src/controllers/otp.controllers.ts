@@ -26,10 +26,6 @@ class OtpController {
     const token = await this.jwtService.createToken({ email: user.email });
     res.cookie("jwt-token", token, {
       maxAge: 1000 * 60 * 60 * 24,
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      path: "/",
     });
 
     return res.send({ message: "Otp Send Sucessfully", status: true });

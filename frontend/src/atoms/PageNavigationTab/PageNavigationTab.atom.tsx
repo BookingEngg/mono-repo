@@ -1,6 +1,6 @@
 import { TRoutes } from "@/typings/common";
 import React from "react";
-import { FlexboxGrid, Nav, Text, VStack } from "rsuite";
+import { FlexboxGrid, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 // Style
 import style from "./PageNavigation.module.scss";
@@ -27,6 +27,7 @@ const PageNavigationTabGroup = (props: IPageNavigationTabGroupType) => {
         [];
       if (validTopNavRoutes?.[0]) {
         navigate(validTopNavRoutes[0].path);
+        setSelectedTab(validTopNavRoutes[0].key)
       }
     }
   }, [currentRoute]);

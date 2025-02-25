@@ -3,8 +3,6 @@ import { Outlet } from "react-router-dom";
 import { useContext } from "react";
 // Atoms
 import PageNavigationTabGroup from "@/atoms/PageNavigationTab";
-// Organism
-import CommunityOrganism from "@/organism/Community";
 // Context Provider
 import CurrentRouteContext from "@/contextProvider/routeContext";
 // Rsuite
