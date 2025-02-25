@@ -1,12 +1,13 @@
+// Modules
+import React from "react";
 // Rsuite
 import { Button, FlexboxGrid, Input, InputGroup, Panel } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
-import { Column, Cell, HeaderCell } from "rsuite-table";
+// Atoms
 import Table from "@/atoms/Table";
 // Style
 import style from "./NewFriendCommunity.module.scss";
 import classNames from "classnames/bind";
-import React from "react";
 const cx = classNames.bind(style);
 
 const dummyData = [
