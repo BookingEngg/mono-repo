@@ -47,13 +47,17 @@ class OtpService {
     let userData: IUser | null = null;
     let isVerifiedOtp = false;
 
+    // For Development Purpose only :: This is not executed for prod
+    if(!isProduction && otp.toString() === "0000") {
+      isVerifiedOtp = true;
+    }
+
     if (otpData) {
       const difference = moment().diff(moment(otpData.createdAt), "minutes");
       if (
         (otpData.otp == otp &&
           difference >= 0 &&
-          difference <= nodeMailConfig.expire_in_minutes) ||
-        (!isProduction && otpData.otp === Number("0000"))
+          difference <= nodeMailConfig.expire_in_minutes)
       ) {
         isVerifiedOtp = true;
       }
