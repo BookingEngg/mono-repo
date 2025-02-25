@@ -45,7 +45,7 @@ class OtpService {
   public getVerifiedUser = async (email: string, otp: number) => {
     const otpData = await this.otpDao.getOtpDetailByEmail(email);
     let userData: IUser | null = null;
-    let isVerifiedOtp = true;
+    let isVerifiedOtp = false;
 
     if (otpData) {
       const difference = moment().diff(moment(otpData.createdAt), "minutes");

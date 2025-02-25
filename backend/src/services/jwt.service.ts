@@ -15,7 +15,7 @@ class JwtService {
 
   public getJwtToken = (req: Request): string => {
     const tokenCookie = req.headers["cookie"];
-    if (!tokenCookie.includes("jwt-token")) {
+    if (!tokenCookie?.includes("jwt-token")) {
       return "";
     }
 
