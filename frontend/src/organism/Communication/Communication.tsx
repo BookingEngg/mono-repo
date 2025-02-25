@@ -165,6 +165,7 @@ const Communication = () => {
               onClick={() => {
                 handleUserChange(index);
               }}
+              id={`chat-item-${index+1}`}
             >
               <FlexboxGrid justify="space-between">
                 <FlexboxGridItem>{user.name}</FlexboxGridItem>

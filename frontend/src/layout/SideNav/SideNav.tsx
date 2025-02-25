@@ -40,7 +40,7 @@ const SideNav = (props: SideNavProps) => {
           }}
         >
           <div className="sidenav-item-container">
-            {validRoutesForNav.map((route) => {
+            {validRoutesForNav.map((route, index) => {
               // ${selectedRoute.key === route.key ? 'selected-menuitem' : ''
               // this code is work only for routes who does not have any child
               return (
