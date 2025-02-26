@@ -8,7 +8,7 @@ interface ITableColumnDetails {
   width: number;
   columnDataKey?: string;
   actionCell?: boolean;
-  actionDatum?: (rowData: unknown) => JSX.Element;
+  actionDatum?: (rowData: any) => JSX.Element;
 }
 
 interface IModifiedTablePagination {

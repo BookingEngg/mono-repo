@@ -3,9 +3,7 @@ import UserDao from "@/dao/user.dao";
 class UserService {
   private userDao = new UserDao();
 
-  public createUser = async () => {
-    return await this.userDao.createUser();
-  };
+  public createUser = async () => {};
 
   public getChatUsers = async (email: string) => {
     const chatUsers = await this.userDao.getUsers(email);

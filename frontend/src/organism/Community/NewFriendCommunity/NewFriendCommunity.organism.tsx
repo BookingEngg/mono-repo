@@ -1,69 +1,89 @@
 // Modules
 import React from "react";
+// Atoms
+import Table from "@/atoms/Table";
+// Services
+import {
+  getAllNewUsers,
+  makeNewFriendRequest,
+} from "@/services/Community.service";
 // Rsuite
 import { Button, FlexboxGrid, Input, InputGroup, Panel } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
-// Atoms
-import Table from "@/atoms/Table";
 // Style
 import style from "./NewFriendCommunity.module.scss";
 import classNames from "classnames/bind";
 const cx = classNames.bind(style);
 
-const dummyData = [
-  {
-    short_id: "kjkl3423",
-    name: "Tushar Chand Thakur",
-    username: "tusharthakurepc205",
-  },
-  {
-    short_id: "kj7745f3",
-    name: "Tejasvi Kumar Thakur",
-    username: "tejasvikumar108",
-  },
-  {
-    short_id: "jlk2389ds",
-    name: "Manasvi Kumar Thakur",
-    username: "manasvikumar108",
-  },
-];
-
-const columnsDetails = [
-  {
-    title: "Short Id",
-    columnDataKey: "short_id",
-    width: 150,
-  },
-  {
-    title: "Name",
-    columnDataKey: "name",
-    width: 250,
-  },
-  {
-    title: "Username",
-    columnDataKey: "username",
-    width: 150,
-  },
-  {
-    title: "Actions",
-    width: 115,
-    actionCell: true,
-    actionDatum: (rowData: unknown) => (
-      <Button appearance="link" onClick={() => {
-        console.log(rowData)
-      }}>
-        Add Friend
-      </Button>
-    ),
-  },
-];
+export interface INewFriendCommunity {
+  user_id: string;
+  name: string;
+  username: string;
+}
 
 const NewFriendsCommunity = () => {
+  const [newCommunityUsers, setNewCommunityUsers] = React.useState<
+    INewFriendCommunity[]
+  >([]);
   const [pagination, setPagination] = React.useState<{
     page_no: number;
     limit: number;
     total: number;
   }>({ total: 0, page_no: 1, limit: 20 });
+
+  const fetchNewCommunityUsers = React.useCallback(async () => {
+    const response = await getAllNewUsers(pagination);
+    setNewCommunityUsers(response.data);
+    setPagination({ ...pagination, total: response.meta.count });
+  }, [newCommunityUsers, pagination]);
+
+  const handleNewFriendRequest = React.useCallback(
+    async (rowData: INewFriendCommunity) => {
+      const response = await makeNewFriendRequest({
+        friend_id: rowData.user_id,
+      });
+
+      console.log(response);
+    },
+    []
+  );
+
+  React.useEffect(() => {
+    fetchNewCommunityUsers();
+  }, []);
+
+  const columnsDetails = [
+    {
+      title: "User Id",
+      columnDataKey: "user_id",
+      width: 200,
+    },
+    {
+      title: "Name",
+      columnDataKey: "name",
+      width: 250,
+    },
+    {
+      title: "Username",
+      columnDataKey: "username",
+      width: 250,
+    },
+    {
+      title: "Actions",
+      width: 250,
+      actionCell: true,
+      actionDatum: (rowData: INewFriendCommunity) => (
+        <Button
+          appearance="link"
+          onClick={() => {
+            handleNewFriendRequest(rowData);
+          }}
+        >
+          Add Friend
+        </Button>
+      ),
+    },
+  ];
 
   return (
     <Panel className={cx("new-friend-container")}>
@@ -90,7 +110,7 @@ const NewFriendsCommunity = () => {
         {/* New Friends List */}
         <FlexboxGridItem colspan={24}>
           <Table
-            datum={dummyData}
+            datum={newCommunityUsers}
             columnsDetails={columnsDetails}
             pagination={pagination}
             refetchDatum={setPagination}

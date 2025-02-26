@@ -7,6 +7,9 @@ export interface IUser {
   roles: string[];
   level: number;
   origin: IOrigin;
+  friends_ids: string[];
+  blocked_ids: string[];
+  requested_friends_ids: string[];
 }
 
 export interface IOrigin {
