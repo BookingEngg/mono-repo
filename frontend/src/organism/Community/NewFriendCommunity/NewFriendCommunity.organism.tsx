@@ -105,7 +105,7 @@ const NewFriendsCommunity = () => {
         {/* New Friends List */}
         <FlexboxGridItem colspan={24}>
           <Table
-            datum={newCommunityUsers.data}
+            datum={newCommunityUsers?.data || []}
             columnsDetails={columnsDetails}
             pagination={pagination}
             refetchDatum={setPagination}

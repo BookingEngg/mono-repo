@@ -6,6 +6,7 @@ import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import style from "./FriendsCommunity.module.scss";
 import classNames from "classnames/bind";
 import { getCommunityFriends } from "@/services/Community.service";
+import { useQuery } from "@tanstack/react-query";
 const cx = classNames.bind(style);
 
 const columnsDetails = [
@@ -42,24 +43,18 @@ const columnsDetails = [
 ];
 
 const AllFriendsCommunity = () => {
-  const [friendsCommunityUsers, setFriendsCommunityUsers] = React.useState<
-    {}[]
-  >([]);
   const [pagination, setPagination] = React.useState<{
     page_no: number;
     limit: number;
     total: number;
   }>({ total: 0, page_no: 1, limit: 20 });
 
-  const fetchNewCommunityUsers = React.useCallback(async () => {
-    const response = await getCommunityFriends(pagination);
-    setFriendsCommunityUsers(response.data);
-    setPagination({ ...pagination, total: response.meta.count });
-  }, [friendsCommunityUsers, pagination]);
+  const friendsCommunityQuery = useQuery({
+    queryKey: ["community-query", pagination],
+    queryFn: () => getCommunityFriends(pagination),
+  });
 
-  React.useEffect(() => {
-    fetchNewCommunityUsers();
-  }, []);
+  const { data: friendsCommunityUsers } = friendsCommunityQuery;
 
   return (
     <Panel className={cx("friend-container")}>
@@ -86,7 +81,7 @@ const AllFriendsCommunity = () => {
         {/* New Friends List */}
         <FlexboxGridItem colspan={24}>
           <Table
-            datum={friendsCommunityUsers}
+            datum={friendsCommunityUsers.data}
             columnsDetails={columnsDetails}
             pagination={pagination}
             refetchDatum={setPagination}
