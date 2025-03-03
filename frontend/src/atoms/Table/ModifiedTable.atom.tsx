@@ -51,7 +51,10 @@ const ModifiedTable = (props: IModifiedProps) => {
         })}
       </Table>
 
-      <Pagination
+      {/* TODO: need to fix the implementation of pagination */}
+
+
+      {/* <Pagination
         layout={["total", "-", "limit", "|", "pager"]}
         size={"xs"}
         prev={true}
@@ -71,7 +74,7 @@ const ModifiedTable = (props: IModifiedProps) => {
         onChangeLimit={(newLimit) => {
           handleValueChange({ ...pagination, limit: newLimit });
         }}
-      />
+      /> */}
     </div>
   );
 };

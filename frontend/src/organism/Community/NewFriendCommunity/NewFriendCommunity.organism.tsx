@@ -1,5 +1,6 @@
 // Modules
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
 // Atoms
 import Table from "@/atoms/Table";
 // Services
@@ -22,20 +23,11 @@ export interface INewFriendCommunity {
 }
 
 const NewFriendsCommunity = () => {
-  const [newCommunityUsers, setNewCommunityUsers] = React.useState<
-    INewFriendCommunity[]
-  >([]);
   const [pagination, setPagination] = React.useState<{
     page_no: number;
     limit: number;
     total: number;
   }>({ total: 0, page_no: 1, limit: 20 });
-
-  const fetchNewCommunityUsers = React.useCallback(async () => {
-    const response = await getAllNewUsers(pagination);
-    setNewCommunityUsers(response.data);
-    setPagination({ ...pagination, total: response.meta.count });
-  }, [newCommunityUsers, pagination]);
 
   const handleNewFriendRequest = React.useCallback(
     async (rowData: INewFriendCommunity) => {
@@ -48,9 +40,12 @@ const NewFriendsCommunity = () => {
     []
   );
 
-  React.useEffect(() => {
-    fetchNewCommunityUsers();
-  }, []);
+  const newCommunityQuery = useQuery({
+    queryKey: ["community-query", pagination],
+    queryFn: () => getAllNewUsers(pagination),
+  });
+
+  const { data: newCommunityUsers } = newCommunityQuery;
 
   const columnsDetails = [
     {
@@ -110,7 +105,7 @@ const NewFriendsCommunity = () => {
         {/* New Friends List */}
         <FlexboxGridItem colspan={24}>
           <Table
-            datum={newCommunityUsers}
+            datum={newCommunityUsers?.data || []}
             columnsDetails={columnsDetails}
             pagination={pagination}
             refetchDatum={setPagination}

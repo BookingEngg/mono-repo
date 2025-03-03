@@ -1,11 +1,15 @@
-import Table from "@/atoms/Table";
 import React from "react";
+import { useQuery } from "@tanstack/react-query";
+// Atoms
+import Table from "@/atoms/Table";
+// Rsuite
 import { Button, FlexboxGrid, Input, InputGroup, Panel } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
+// Services
+import { getCommunityBlockedUsers } from "@/services/Community.service";
 // Style
 import style from "./BlockedCommunityUser.module.scss";
 import classNames from "classnames/bind";
-import { getCommunityBlockedUsers } from "@/services/Community.service";
 const cx = classNames.bind(style);
 
 const columnsDetails = [
@@ -42,24 +46,18 @@ const columnsDetails = [
 ];
 
 const BlockedUserCommunity = () => {
-  const [blockedCommunityUsers, setBlockedCommunityUsers] = React.useState<
-    {}[]
-  >([]);
   const [pagination, setPagination] = React.useState<{
     page_no: number;
     limit: number;
     total: number;
   }>({ total: 0, page_no: 1, limit: 20 });
 
-  const fetchNewCommunityUsers = React.useCallback(async () => {
-    const response = await getCommunityBlockedUsers(pagination);
-    setBlockedCommunityUsers(response.data);
-    setPagination({ ...pagination, total: response.meta.count });
-  }, [blockedCommunityUsers, pagination]);
+  const blockedCommunityQuery = useQuery({
+    queryKey: ["community-query", pagination],
+    queryFn: () => getCommunityBlockedUsers(pagination),
+  });
 
-  React.useEffect(() => {
-    fetchNewCommunityUsers();
-  }, []);
+  const { data: blockedCommunityUsers } = blockedCommunityQuery;
 
   return (
     <>
@@ -87,7 +85,7 @@ const BlockedUserCommunity = () => {
           {/* New Friends List */}
           <FlexboxGridItem colspan={24}>
             <Table
-              datum={blockedCommunityUsers}
+              datum={blockedCommunityUsers?.data || []}
               columnsDetails={columnsDetails}
               pagination={pagination}
               refetchDatum={setPagination}
