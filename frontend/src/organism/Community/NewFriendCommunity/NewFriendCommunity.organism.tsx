@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import Table from "@/atoms/Table";
 // Services
 import {
-  getAllNewUsers,
+  getCommunityUsers,
   makeNewFriendRequest,
 } from "@/services/Community.service";
 // Rsuite
@@ -31,7 +31,7 @@ const NewFriendsCommunity = () => {
 
   const newCommunityQuery = useQuery({
     queryKey: ["community-query", pagination],
-    queryFn: () => getAllNewUsers(pagination),
+    queryFn: () => getCommunityUsers(pagination, "new-users"),
   });
 
   const { data: newCommunityUsers, refetch } = newCommunityQuery;

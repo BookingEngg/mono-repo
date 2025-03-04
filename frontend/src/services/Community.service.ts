@@ -2,35 +2,14 @@
 import axiosClient from "@/services/http";
 
 /**
- * Get all the global users (excluding friends and blocked users)
+ * Get all the community user accourding to the tab
  */
-export const getAllNewUsers = async (pagination: object) => {
+export const getCommunityUsers = async (
+  pagination: object,
+  tabName: "new-users" | "friends" | "blocked-users"
+) => {
   const response = await axiosClient.get({
-    url: "/community/users",
-    params: pagination,
-  });
-
-  return response.data;
-};
-
-/**
- * Get all the valid user for communication
- */
-export const getCommunityFriends = async (pagination: object) => {
-  const response = await axiosClient.get({
-    url: "/community/friends",
-    params: pagination,
-  });
-
-  return response.data;
-};
-
-/**
- * Get all the valid user for communication
- */
-export const getCommunityBlockedUsers = async (pagination: object) => {
-  const response = await axiosClient.get({
-    url: "/community/blocked-user",
+    url: `/community/${tabName}`,
     params: pagination,
   });
 
@@ -46,20 +25,20 @@ export const makeNewFriendRequest = async (payload: object) => {
   return response.data;
 };
 
-export const updateFriendRequestStatus = async(payload: object) => {
+export const updateFriendRequestStatus = async (payload: object) => {
   const response = await axiosClient.put({
     url: "/community/friend/request-status",
     body: payload,
   });
 
   return response.data;
-}
+};
 
-export const unblockUserStatus = async(payload: object) => {
+export const unblockUserStatus = async (payload: object) => {
   const response = await axiosClient.put({
     url: "/community/friend/unblock",
     body: payload,
   });
 
   return response.data;
-}
+};

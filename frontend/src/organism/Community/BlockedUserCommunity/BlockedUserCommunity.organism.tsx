@@ -6,7 +6,10 @@ import Table from "@/atoms/Table";
 import { Button, FlexboxGrid, Input, InputGroup, Panel } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 // Services
-import { getCommunityBlockedUsers, unblockUserStatus } from "@/services/Community.service";
+import {
+  getCommunityUsers,
+  unblockUserStatus,
+} from "@/services/Community.service";
 // Style
 import style from "./BlockedCommunityUser.module.scss";
 import classNames from "classnames/bind";
@@ -32,23 +35,20 @@ const BlockedUserCommunity = () => {
 
   const blockedCommunityQuery = useQuery({
     queryKey: ["community-query", pagination],
-    queryFn: () => getCommunityBlockedUsers(pagination),
+    queryFn: () => getCommunityUsers(pagination, "blocked-users"),
   });
 
   const { data: blockedCommunityUsers, refetch } = blockedCommunityQuery;
 
-  const handleUnblockUser = React.useCallback(
-      async (rowData: IBlockedUser) => {
-        const response = await unblockUserStatus({
-          friend_id: rowData.user_id,
-        });
-  
-        if (response?.status === "success") {
-          refetch();
-        }
-      },
-      []
-    );
+  const handleUnblockUser = React.useCallback(async (rowData: IBlockedUser) => {
+    const response = await unblockUserStatus({
+      friend_id: rowData.user_id,
+    });
+
+    if (response?.status === "success") {
+      refetch();
+    }
+  }, []);
 
   const columnsDetails = [
     {
@@ -73,9 +73,12 @@ const BlockedUserCommunity = () => {
       actionDatum: (rowData: IBlockedUser) => {
         return rowData.blocked_details ? (
           <>
-            <Button appearance="link" onClick={() => {
-              handleUnblockUser(rowData);
-            }}>
+            <Button
+              appearance="link"
+              onClick={() => {
+                handleUnblockUser(rowData);
+              }}
+            >
               Unblock
             </Button>
           </>

@@ -76,21 +76,9 @@ class ExternalRoutes implements Routes {
 
   private initializeCommunityRoutes(prefix: string) {
     this.router.get(
-      `${prefix}/users`,
+      `${prefix}/:tab_name`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communityController.getAllCommunityNewUsers)
-    );
-
-    this.router.get(
-      `${prefix}/friends`,
-      this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communityController.getAllFriendsUsers)
-    );
-
-    this.router.get(
-      `${prefix}/blocked-user`,
-      this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communityController.getCommunityBlockedUsers)
+      asyncWrapper(this.communityController.getCommunityUsers)
     );
 
     this.router.put(

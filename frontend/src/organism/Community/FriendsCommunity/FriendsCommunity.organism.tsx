@@ -1,15 +1,18 @@
-import Table from "@/atoms/Table";
+import { useQuery } from "@tanstack/react-query";
 import React from "react";
+// Atoms
+import Table from "@/atoms/Table";
+// Rsuite
 import { Button, FlexboxGrid, Input, InputGroup, Panel } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
+// Services
+import {
+  getCommunityUsers,
+  updateFriendRequestStatus,
+} from "@/services/Community.service";
 // Style
 import style from "./FriendsCommunity.module.scss";
 import classNames from "classnames/bind";
-import {
-  getCommunityFriends,
-  updateFriendRequestStatus,
-} from "@/services/Community.service";
-import { useQuery } from "@tanstack/react-query";
 const cx = classNames.bind(style);
 
 export interface IFriendCommunity {
@@ -31,7 +34,7 @@ const AllFriendsCommunity = () => {
 
   const friendsCommunityQuery = useQuery({
     queryKey: ["community-query", pagination],
-    queryFn: () => getCommunityFriends(pagination),
+    queryFn: () => getCommunityUsers(pagination, "friends"),
   });
 
   const { data: friendsCommunityUsers, refetch } = friendsCommunityQuery;
