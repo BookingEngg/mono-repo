@@ -76,7 +76,8 @@ function App() {
       if (userResponse.status) {
         dispatch(login({ user: userResponse.user, isAuthorized: true }));
         if (!!userResponse?.user?._id) {
-          navigate("/");
+          // If website refresh and user is authorized then navigate to same page
+          navigate(location.pathname);
         }
       }
     };
