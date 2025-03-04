@@ -1,0 +1,16 @@
+.top-nav-container {
+  margin-bottom: 3vh;
+
+  .top-nav-container-item {
+    margin: 0px 1vh;
+    padding: 0px 1vh;
+  }
+
+  .selected-top-nav-container-item {
+    border-bottom: solid 4px #4764cd;
+  }
+
+  .unselected-top-nav-container-item {
+    border-bottom: solid 4px #ffffff00;
+  }
+}

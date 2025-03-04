@@ -40,7 +40,7 @@ const SideNav = (props: SideNavProps) => {
           }}
         >
           <div className="sidenav-item-container">
-            {validRoutesForNav.map((route) => {
+            {validRoutesForNav.map((route, index) => {
               // ${selectedRoute.key === route.key ? 'selected-menuitem' : ''
               // this code is work only for routes who does not have any child
               return (
@@ -126,9 +126,13 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
               <Text
                 size="lg"
                 className={
-                  selectedRoute.key === route.key
-                    ? "selected-menuitem-color"
-                    : ""
+                  selectedRoute?.children?.length
+                    ? selectedRoute.key === route.key
+                      ? "selected-menuitem-color"
+                      : ""
+                    : selectedSubTab === route.key
+                      ? "selected-menuitem-color"
+                      : ""
                 }
               >
                 {route.label}
