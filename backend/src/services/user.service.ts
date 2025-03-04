@@ -1,12 +1,13 @@
 import UserDao from "@/dao/user.dao";
+import { IUser } from "@/interfaces/user.interface";
 
 class UserService {
   private userDao = new UserDao();
 
   public createUser = async () => {};
 
-  public getChatUsers = async (email: string) => {
-    const chatUsers = await this.userDao.getUsers(email);
+  public getChatUsers = async (user: IUser) => {
+    const chatUsers = await this.userDao.getUserByUserIds(user.friends_ids);
 
     const formattedChatUsers = chatUsers.map((user) => {
       return {

@@ -27,7 +27,7 @@ class CommunicationControllers {
       throw new Error("Invalid User");
     }
 
-    const response = await this.userService.getChatUsers(req.user.email);
+    const response = await this.userService.getChatUsers(req.user);
     return res.send({ data: response });
   };
 
