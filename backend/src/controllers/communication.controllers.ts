@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import UserService from "@/services/user.service";
 import CommunicationService from "@/services/communication.service";
 
-class CommunicationController {
+class CommunicationControllers {
   private userService = new UserService();
   private communicationService = new CommunicationService();
 
@@ -27,7 +27,7 @@ class CommunicationController {
       throw new Error("Invalid User");
     }
 
-    const response = await this.userService.getChatUsers(req.user?.email);
+    const response = await this.userService.getChatUsers(req.user);
     return res.send({ data: response });
   };
 
@@ -50,4 +50,4 @@ class CommunicationController {
   };
 }
 
-export default CommunicationController;
+export default CommunicationControllers;

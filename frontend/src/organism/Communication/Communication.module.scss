@@ -43,6 +43,10 @@
       background-color: aliceblue;
     }
   }
+  
+  .bottom-chat-section {
+    margin-top: 10px;
+  }
 
   /* Mobile & Tablet responsiveness */
   @media (max-width: 768px) {
@@ -54,9 +58,11 @@
     }
     
     .chat-right-container {
-      max-height: 60vh;
       width: 100%;
-      overflow-y: scroll;
+
+      .right-chat {
+        max-height: 40vh !important;
+      }
     }
 
     .chat-left-container .left-chat-item {
@@ -78,6 +84,10 @@
     .chat-right-container {
       width: 100%;
       padding: 5px;
+
+      .right-chat {
+        max-height: 55vh !important;
+      }
     }
 
     .left-chat-item {
@@ -106,7 +116,7 @@
     /* Adjust the button size */
     .chat-right-container button {
       padding: 5px 10px;
-      font-size: 14px;
+      font-size: 10px;
     }
   }
 }

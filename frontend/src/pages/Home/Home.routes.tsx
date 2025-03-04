@@ -10,7 +10,7 @@ const getHomeRoutes = () => {
       path: BASE_URL,
       element: (
         <>
-          Home Page <Outlet />
+          Welcome to EAPC
         </>
       ),
       icon: <Payment />,

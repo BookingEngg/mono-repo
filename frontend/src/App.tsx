@@ -10,8 +10,9 @@ import {
 // Pages
 import LoginRoutes from "@/pages/Login/Login.routes";
 import HomeRoutes from "@/pages/Home/Home.routes";
-import SettingsRoutes from "./pages/Settings";
-import ChatRoutes from "./pages/Chat";
+import Community from "@/pages/Community";
+import ChatRoutes from "@/pages/Chat";
+import SettingsRoutes from "@/pages/Settings";
 // Services
 import { getUser } from "@/services/Login.service";
 // Layout
@@ -74,6 +75,10 @@ function App() {
       const userResponse = await getUser();
       if (userResponse.status) {
         dispatch(login({ user: userResponse.user, isAuthorized: true }));
+        if (!!userResponse?.user?._id) {
+          // If website refresh and user is authorized then navigate to same page
+          navigate(location.pathname);
+        }
       }
     };
     validateAuthorizedUser();
@@ -81,7 +86,12 @@ function App() {
 
   // Contain all pages routes
   const loginRoutes = [...LoginRoutes()];
-  const authorizedRoutes = [...HomeRoutes(), ...SettingsRoutes(), ...ChatRoutes()];
+  const authorizedRoutes = [
+    ...HomeRoutes(),
+    ...Community(),
+    ...ChatRoutes(),
+    ...SettingsRoutes(),
+  ];
 
   const flatternLoginRoutesTree = React.useMemo(() => {
     return flatternRoutes(loginRoutes);
@@ -99,18 +109,20 @@ function App() {
       return route.path === location.pathname;
     });
 
-    return currentRoute || isAuthorized
-      ? flatternAuthRoutesTree[0]
-      : flatternLoginRoutesTree[0];
+    if (!currentRoute) {
+      return isAuthorized
+        ? flatternAuthRoutesTree[0]
+        : flatternLoginRoutesTree[0];
+    }
+
+    return currentRoute;
   }, [flatternAuthRoutesTree, flatternLoginRoutesTree, location]);
 
-
-  // TODO: need to fix if user is logged in before the api fetch details of loggedin user it navigate to '/login' route will avoid this.
   React.useEffect(() => {
-    if(!isAuthorized) {
+    if (!isAuthorized) {
       navigate("/login");
     }
-  }, [isAuthorized])
+  }, [isAuthorized]);
 
   return (
     <>
