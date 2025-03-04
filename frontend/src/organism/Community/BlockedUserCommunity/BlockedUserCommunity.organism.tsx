@@ -21,7 +21,7 @@ export interface IBlockedUser {
   username: string;
   blocked_details?: {
     user_id: string;
-    request_status: string;
+    blocked_status: string;
     block_origin: string;
   };
 }
@@ -52,11 +52,6 @@ const BlockedUserCommunity = () => {
 
   const columnsDetails = [
     {
-      title: "User Id",
-      columnDataKey: "user_id",
-      width: 200,
-    },
-    {
       title: "Name",
       columnDataKey: "name",
       width: 250,
@@ -67,11 +62,16 @@ const BlockedUserCommunity = () => {
       width: 250,
     },
     {
+      title: "User Id",
+      columnDataKey: "user_id",
+      width: 200,
+    },
+    {
       title: "Actions",
       width: 115,
       actionCell: true,
       actionDatum: (rowData: IBlockedUser) => {
-        return rowData.blocked_details ? (
+        return rowData.blocked_details?.blocked_status === 'self-blocked' ? (
           <>
             <Button
               appearance="link"
@@ -83,7 +83,7 @@ const BlockedUserCommunity = () => {
             </Button>
           </>
         ) : (
-          <></>
+          <>Wait for Unblock</>
         );
       },
     },

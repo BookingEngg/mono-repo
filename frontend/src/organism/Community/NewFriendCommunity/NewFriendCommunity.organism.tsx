@@ -51,11 +51,6 @@ const NewFriendsCommunity = () => {
 
   const columnsDetails = [
     {
-      title: "User Id",
-      columnDataKey: "user_id",
-      width: 200,
-    },
-    {
       title: "Name",
       columnDataKey: "name",
       width: 250,
@@ -64,6 +59,11 @@ const NewFriendsCommunity = () => {
       title: "Username",
       columnDataKey: "username",
       width: 250,
+    },
+    {
+      title: "User Id",
+      columnDataKey: "user_id",
+      width: 200,
     },
     {
       title: "Actions",
