@@ -17,6 +17,7 @@ export const IFriendsRequest = new Schema({
 export const IBlockedRequest = new Schema({
   user_id: String, // Other person user id
   blocked_status: String,  // Blocked by whom
+  block_origin: String,   // from decline-friend-request or blocked
 });
 
 export const ROLES = ["director", "admin", "users"];
@@ -45,12 +46,11 @@ const UserSchema = new Schema(
  * User 1 ==> Current User
  * User 2 ==> Your Friend (Buddy)
  *
- * User 1 make request to User 2 :: User 1 id was in the friends_ids and User 2 id was in the requested_friends_ids
- *
- * User 2 approved request if User 1 requested
- * User 1 approved request if User 2 requested :: move ids from requested_friends_ids in the friends_ids
- *
- * User 1 or User 2 block each other if both of them are friends in such case :: both user id move from friends_ids to blocked_ids
+ * Case 1 :: User 1 make a req to User 2  => User 1 and User 2 both move into requested_friend with their respective status
+ * Case 2 :: User 2 accept the req of User 2 => User 1 and User 2 both move to friend_ids and removed from requested_friends
+ * Case 3 :: User 2 reject the req of User 2 => User 1 and User 2 both move to blocked user with their respective status and removed from requested_friend
+ * Case 4 :: User 1 blocked the User 2 => User 1 and User 2 both move to blocked user with their respective status and removed from friend_ids
+ * Case 5 :: User 1 unblock the User 2 => User 1 and User 2 bothe removed from the blocked user
  */
 
 const UsersModel = dbConnection.model("users", UserSchema);

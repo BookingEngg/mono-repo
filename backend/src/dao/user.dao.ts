@@ -1,6 +1,10 @@
 import { IUser } from "@/interfaces/user.interface";
 import UsersModel from "@/models/user.model";
-import { BlockedStatus, RequestStatusType } from '@/constants/common.constants';
+import {
+  BlockedStatus,
+  BlockedType,
+  RequestStatusType,
+} from "@/constants/common.constants";
 // import { MAX_PAGE_SIZE, DEFAULT_PAGE_NUMBER } from "@/constants/enum";
 
 class UserDao {
@@ -88,11 +92,14 @@ class UserDao {
   };
 
   // Add the friend id into the blocked list
-  public addUserBlockedList = async (
-    userId: string,
-    friendId: string,
-    blockedStatus: BlockedStatus
-  ) => {
+  public addUserBlockedList = async (payload: {
+    userId: string;
+    friendId: string;
+    blockedStatus: BlockedStatus;
+    blockOrigin: BlockedType;
+  }) => {
+    const { userId, friendId, blockedStatus, blockOrigin } = payload;
+
     return await this.userModel.updateOne(
       {
         _id: userId,
@@ -102,11 +109,30 @@ class UserDao {
           blocked_user: {
             user_id: friendId,
             blocked_status: blockedStatus,
+            block_origin: blockOrigin,
           },
         },
         $pull: {
           requested_friends: { user_id: friendId },
           friends_ids: friendId,
+        },
+      }
+    );
+  };
+
+  // Remove the friend id from the blocked_user
+  public removeUserBlockedList = async (payload: {
+    userId: string;
+    friendId: string;
+  }) => {
+    const { userId, friendId } = payload;
+    return await this.userModel.updateOne(
+      { _id: userId },
+      {
+        $pull: {
+          blocked_user: {
+            user_id: friendId,
+          },
         },
       }
     );

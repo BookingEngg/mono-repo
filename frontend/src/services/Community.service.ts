@@ -54,3 +54,12 @@ export const updateFriendRequestStatus = async(payload: object) => {
 
   return response.data;
 }
+
+export const unblockUserStatus = async(payload: object) => {
+  const response = await axiosClient.put({
+    url: "/community/friend/unblock",
+    body: payload,
+  });
+
+  return response.data;
+}

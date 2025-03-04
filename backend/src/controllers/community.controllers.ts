@@ -93,6 +93,20 @@ class CommunityControllers {
 
     return res.send({ status: "success" });
   };
+
+  public unblockUserStatus = async (req: Request, res: Response) => {
+    if (!req.user?._id) {
+      throw new Error("Invalid User");
+    }
+
+    const { friend_id } = req.body;
+    await this.communicationService.unblockUserStatus({
+      user: req.user,
+      friendId: friend_id,
+    });
+
+    return res.send({ status: "success" });
+  };
 }
 
 export default CommunityControllers;

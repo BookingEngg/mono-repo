@@ -6,44 +6,22 @@ import Table from "@/atoms/Table";
 import { Button, FlexboxGrid, Input, InputGroup, Panel } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 // Services
-import { getCommunityBlockedUsers } from "@/services/Community.service";
+import { getCommunityBlockedUsers, unblockUserStatus } from "@/services/Community.service";
 // Style
 import style from "./BlockedCommunityUser.module.scss";
 import classNames from "classnames/bind";
 const cx = classNames.bind(style);
 
-const columnsDetails = [
-  {
-    title: "User Id",
-    columnDataKey: "user_id",
-    width: 200,
-  },
-  {
-    title: "Name",
-    columnDataKey: "name",
-    width: 250,
-  },
-  {
-    title: "Username",
-    columnDataKey: "username",
-    width: 250,
-  },
-  {
-    title: "Actions",
-    width: 115,
-    actionCell: true,
-    actionDatum: (rowData: unknown) => (
-      <Button
-        appearance="link"
-        onClick={() => {
-          console.log(rowData);
-        }}
-      >
-        Add Friend
-      </Button>
-    ),
-  },
-];
+export interface IBlockedUser {
+  user_id: string;
+  name: string;
+  username: string;
+  blocked_details?: {
+    user_id: string;
+    request_status: string;
+    block_origin: string;
+  };
+}
 
 const BlockedUserCommunity = () => {
   const [pagination, setPagination] = React.useState<{
@@ -57,7 +35,56 @@ const BlockedUserCommunity = () => {
     queryFn: () => getCommunityBlockedUsers(pagination),
   });
 
-  const { data: blockedCommunityUsers } = blockedCommunityQuery;
+  const { data: blockedCommunityUsers, refetch } = blockedCommunityQuery;
+
+  const handleUnblockUser = React.useCallback(
+      async (rowData: IBlockedUser) => {
+        const response = await unblockUserStatus({
+          friend_id: rowData.user_id,
+        });
+  
+        if (response?.status === "success") {
+          refetch();
+        }
+      },
+      []
+    );
+
+  const columnsDetails = [
+    {
+      title: "User Id",
+      columnDataKey: "user_id",
+      width: 200,
+    },
+    {
+      title: "Name",
+      columnDataKey: "name",
+      width: 250,
+    },
+    {
+      title: "Username",
+      columnDataKey: "username",
+      width: 250,
+    },
+    {
+      title: "Actions",
+      width: 115,
+      actionCell: true,
+      actionDatum: (rowData: IBlockedUser) => {
+        return rowData.blocked_details ? (
+          <>
+            <Button appearance="link" onClick={() => {
+              handleUnblockUser(rowData);
+            }}>
+              Unblock
+            </Button>
+          </>
+        ) : (
+          <></>
+        );
+      },
+    },
+  ];
 
   return (
     <>

@@ -29,4 +29,8 @@ export enum BlockedStatus {
   BLOCKED_BY_PEER = "peer-blocked", // Status if you were blocked by some user
 }
 
+export enum BlockedType {
+  DECLINE_FRIEND_REQ = "decline-friend-request",
+  BLOCKED = "blocked"
+}
 

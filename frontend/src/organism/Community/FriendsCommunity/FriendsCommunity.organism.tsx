@@ -91,7 +91,14 @@ const AllFriendsCommunity = () => {
             </Button>
           </div>
         ) : (
-          <></>
+          <Button
+            appearance="link"
+            onClick={() => {
+              handleUpdateFriendRequest(rowData, "blocked");
+            }}
+          >
+            Block
+          </Button>
         );
       },
     },

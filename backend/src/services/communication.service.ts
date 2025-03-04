@@ -3,7 +3,11 @@ import CommunicationDao from "@/dao/communication.dao";
 import UserDao from "@/dao/user.dao";
 import { IUser } from "@/interfaces/user.interface";
 import CommunicationFormatter from "@/formatter/communication.formatter";
-import { BlockedStatus, RequestStatusType } from "@/constants/common.constants";
+import {
+  BlockedStatus,
+  BlockedType,
+  RequestStatusType,
+} from "@/constants/common.constants";
 
 class CommunicationService {
   private userDao = new UserDao();
@@ -164,21 +168,46 @@ class CommunicationService {
         this.userDao.addUserFriendList(friendId, user._id),
       ]);
     } else if (["reject", "blocked"].includes(requestStatus)) {
+      const blockOrigin =
+        requestStatus === "blocked"
+          ? BlockedType.BLOCKED
+          : BlockedType.DECLINE_FRIEND_REQ;
+
       await Promise.all([
-        this.userDao.addUserBlockedList(
-          user._id,
+        this.userDao.addUserBlockedList({
+          userId: user._id,
           friendId,
-          BlockedStatus.SELF_BLOCKED
-        ),
-        this.userDao.addUserBlockedList(
-          friendId,
-          user._id,
-          BlockedStatus.BLOCKED_BY_PEER
-        ),
+          blockedStatus: BlockedStatus.SELF_BLOCKED,
+          blockOrigin,
+        }),
+        this.userDao.addUserBlockedList({
+          userId: friendId,
+          friendId: user._id,
+          blockedStatus: BlockedStatus.BLOCKED_BY_PEER,
+          blockOrigin,
+        }),
       ]);
     } else {
       throw new Error("Invalid Request Status");
     }
+  };
+
+  public unblockUserStatus = async (payload: {
+    user: IUser;
+    friendId: string;
+  }) => {
+    const { user, friendId } = payload;
+
+    await Promise.all([
+      this.userDao.removeUserBlockedList({
+        userId: user._id.toString(),
+        friendId,
+      }),
+      this.userDao.removeUserBlockedList({
+        userId: friendId,
+        friendId: user._id.toString(),
+      }),
+    ]);
   };
 }
 

@@ -104,6 +104,12 @@ class ExternalRoutes implements Routes {
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communityController.updateFriendRequestStatus)
     )
+
+    this.router.put(
+      `${prefix}/friend/unblock`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.communityController.unblockUserStatus)
+    )
   }
 }
 

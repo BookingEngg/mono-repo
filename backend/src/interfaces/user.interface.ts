@@ -1,8 +1,13 @@
-import { BlockedStatus, RequestStatusType } from "@/constants/common.constants";
+import {
+  BlockedStatus,
+  RequestStatusType,
+  BlockedType,
+} from "@/constants/common.constants";
 
 export interface IBlockedUser {
   user_id: string;
   blocked_status: BlockedStatus;
+  block_origin: BlockedType;
 }
 
 export interface IRequestedUser {
