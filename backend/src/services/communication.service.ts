@@ -3,6 +3,7 @@ import CommunicationDao from "@/dao/communication.dao";
 import UserDao from "@/dao/user.dao";
 import { IUser } from "@/interfaces/user.interface";
 import CommunicationFormatter from "@/formatter/communication.formatter";
+import { BlockedStatus, RequestStatusType } from "@/constants/common.constants";
 
 class CommunicationService {
   private userDao = new UserDao();
@@ -58,18 +59,29 @@ class CommunicationService {
 
     const filterObject = {
       _id: {
-        $ne: user._id,  // Current user was not there in the list
+        $ne: user._id, // Current user was not there in the list
         ...(tab === "new-users"
           ? {
-              $nin: [...user.friends_ids, ...user.blocked_ids, ...user.requested_friends_ids],
+              $nin: [
+                ...user.friends_ids,
+                ...user.blocked_user.map((user) => user.user_id),
+                ...user.requested_friends.map((req_user) => req_user.user_id),
+              ],
             }
           : {}),
         ...(tab === "friends"
           ? {
-              $in: [...user.friends_ids, ...user.requested_friends_ids],
+              $in: [
+                ...user.requested_friends.map((req_user) => req_user.user_id),
+                ...user.friends_ids,
+              ],
             }
           : {}),
-        ...(tab === "blocked-users" ? { $in: [...user.blocked_ids] } : {}),
+        ...(tab === "blocked-users"
+          ? {
+              $in: user.blocked_user.map((block_user) => block_user.user_id),
+            }
+          : {}),
       },
     };
 
@@ -80,11 +92,32 @@ class CommunicationService {
       });
 
     return {
-      data: verifiedUsers.map((user) => {
+      data: verifiedUsers.map((verifiedUser) => {
+        const friendDetails =
+          tab === "friends"
+            ? user.requested_friends.find(
+                (req_user) => req_user.user_id === verifiedUser._id.toString()
+              )
+            : null;
+
+        const blockedDetails =
+          tab === "blocked-users"
+            ? user.blocked_user.find(
+                (req_user) => req_user.user_id === verifiedUser._id.toString()
+              )
+            : null;
+
         return {
-          user_id: user._id,
-          name: `${user.first_name} ${user.last_name}`,
-          username: user.email,
+          user_id: verifiedUser._id,
+          name: `${verifiedUser.first_name} ${verifiedUser.last_name}`,
+          username: verifiedUser.email,
+
+          ...(friendDetails && {
+            friends_details: friendDetails,
+          }),
+          ...(blockedDetails && {
+            blocked_details: blockedDetails,
+          }),
         };
       }),
       meta: {
@@ -100,15 +133,23 @@ class CommunicationService {
     }
 
     await Promise.all([
-      this.userDao.addUserFriendRequest(user._id, friendsId),
-      this.userDao.addUserFriendRequest(friendsId, user._id), // Add user id to the friend's request list
+      this.userDao.addUserFriendRequest(
+        user._id,
+        friendsId,
+        RequestStatusType.SEND_REQUEST
+      ),
+      this.userDao.addUserFriendRequest(
+        friendsId,
+        user._id,
+        RequestStatusType.RECEIVE_REQUEST
+      ),
     ]);
   };
 
   public updateFriendRequestStatus = async (payload: {
     user: IUser;
     friendId: string;
-    requestStatus: "approve" | "reject";
+    requestStatus: "approve" | "reject" | "blocked";
   }) => {
     const { user, friendId, requestStatus } = payload;
 
@@ -122,10 +163,18 @@ class CommunicationService {
         this.userDao.addUserFriendList(user._id, friendId),
         this.userDao.addUserFriendList(friendId, user._id),
       ]);
-    } else if (requestStatus === "reject") {
+    } else if (["reject", "blocked"].includes(requestStatus)) {
       await Promise.all([
-        this.userDao.addUserBlockedList(user._id, friendId),
-        this.userDao.addUserBlockedList(friendId, user._id),
+        this.userDao.addUserBlockedList(
+          user._id,
+          friendId,
+          BlockedStatus.SELF_BLOCKED
+        ),
+        this.userDao.addUserBlockedList(
+          friendId,
+          user._id,
+          BlockedStatus.BLOCKED_BY_PEER
+        ),
       ]);
     } else {
       throw new Error("Invalid Request Status");

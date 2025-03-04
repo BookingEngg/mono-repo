@@ -29,23 +29,25 @@ const NewFriendsCommunity = () => {
     total: number;
   }>({ total: 0, page_no: 1, limit: 20 });
 
+  const newCommunityQuery = useQuery({
+    queryKey: ["community-query", pagination],
+    queryFn: () => getAllNewUsers(pagination),
+  });
+
+  const { data: newCommunityUsers, refetch } = newCommunityQuery;
+
   const handleNewFriendRequest = React.useCallback(
     async (rowData: INewFriendCommunity) => {
       const response = await makeNewFriendRequest({
         friend_id: rowData.user_id,
       });
 
-      console.log(response);
+      if (response?.status === "success") {
+        refetch();
+      }
     },
     []
   );
-
-  const newCommunityQuery = useQuery({
-    queryKey: ["community-query", pagination],
-    queryFn: () => getAllNewUsers(pagination),
-  });
-
-  const { data: newCommunityUsers } = newCommunityQuery;
 
   const columnsDetails = [
     {

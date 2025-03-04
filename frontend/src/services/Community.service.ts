@@ -13,15 +13,6 @@ export const getAllNewUsers = async (pagination: object) => {
   return response.data;
 };
 
-export const makeNewFriendRequest = async (payload: object) => {
-  const response = await axiosClient.put({
-    url: "/community/friend/request",
-    body: payload,
-  });
-
-  return response.data;
-};
-
 /**
  * Get all the valid user for communication
  */
@@ -45,3 +36,21 @@ export const getCommunityBlockedUsers = async (pagination: object) => {
 
   return response.data;
 };
+
+export const makeNewFriendRequest = async (payload: object) => {
+  const response = await axiosClient.put({
+    url: "/community/friend/request",
+    body: payload,
+  });
+
+  return response.data;
+};
+
+export const updateFriendRequestStatus = async(payload: object) => {
+  const response = await axiosClient.put({
+    url: "/community/friend/request-status",
+    body: payload,
+  });
+
+  return response.data;
+}

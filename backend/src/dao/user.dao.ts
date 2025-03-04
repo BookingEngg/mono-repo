@@ -1,6 +1,7 @@
 import { IUser } from "@/interfaces/user.interface";
 import UsersModel from "@/models/user.model";
-import { MAX_PAGE_SIZE, DEFAULT_PAGE_NUMBER } from "@/constants/enum";
+import { BlockedStatus, RequestStatusType } from '@/constants/common.constants';
+// import { MAX_PAGE_SIZE, DEFAULT_PAGE_NUMBER } from "@/constants/enum";
 
 class UserDao {
   private userModel = UsersModel;
@@ -47,18 +48,21 @@ class UserDao {
   };
 
   // Add friend id into the requested friend list
-  public addUserFriendRequest = async (userId: string, friendId: string) => {
+  public addUserFriendRequest = async (
+    userId: string,
+    friendId: string,
+    requestStatus: RequestStatusType
+  ) => {
     return await this.userModel.updateOne(
       {
         _id: userId,
       },
       {
         $addToSet: {
-          requested_friends_ids: friendId,
-        },
-        $pull: {
-          friends_ids: friendId,
-          blocked_ids: friendId,
+          requested_friends: {
+            user_id: friendId,
+            request_status: requestStatus,
+          },
         },
       }
     );
@@ -75,25 +79,33 @@ class UserDao {
           friends_ids: friendId,
         },
         $pull: {
-          blocked_ids: friendId,
-          requested_friends_ids: friendId,
+          requested_friends: {
+            user_id: friendId,
+          },
         },
       }
     );
   };
 
   // Add the friend id into the blocked list
-  public addUserBlockedList = async (userId: string, friendId: string) => {
+  public addUserBlockedList = async (
+    userId: string,
+    friendId: string,
+    blockedStatus: BlockedStatus
+  ) => {
     return await this.userModel.updateOne(
       {
         _id: userId,
       },
       {
         $addToSet: {
-          blocked_ids: friendId,
+          blocked_user: {
+            user_id: friendId,
+            blocked_status: blockedStatus,
+          },
         },
         $pull: {
-          requested_friends_ids: friendId,
+          requested_friends: { user_id: friendId },
           friends_ids: friendId,
         },
       }

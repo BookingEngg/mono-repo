@@ -9,6 +9,16 @@ export const IOrigin = new Schema({
   zipcode: Number,
 });
 
+export const IFriendsRequest = new Schema({
+  user_id: String, // Sender or receiver user id
+  request_status: String, // Status of request
+});
+
+export const IBlockedRequest = new Schema({
+  user_id: String, // Other person user id
+  blocked_status: String,  // Blocked by whom
+});
+
 export const ROLES = ["director", "admin", "users"];
 
 const UserSchema = new Schema(
@@ -21,9 +31,11 @@ const UserSchema = new Schema(
     level: { type: Number, default: 1 }, // Level of the user
     origin: { type: IOrigin, default: undefined },
     email_verified: { type: Boolean, default: false },
+
+    // Community Field :: TODO ::
     friends_ids: { type: Array(String), default: [] }, // Contain all the friends user id
-    requested_friends_ids: { type: Array(String), default: [] }, // Contain all the unapproved user who request to make friend
-    blocked_ids: { type: Array(String), default: [] }, // Contain all the blocked user id for the perticular user
+    requested_friends: { type: Array(IFriendsRequest), default: [] }, // Contain all the users who request to make friend
+    blocked_user: { type: Array(IBlockedRequest), default: [] }, // Contain all the blocked users for the perticular user
   },
   { timestamps: true }
 );

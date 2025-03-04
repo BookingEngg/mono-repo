@@ -1,3 +1,15 @@
+import { BlockedStatus, RequestStatusType } from "@/constants/common.constants";
+
+export interface IBlockedUser {
+  user_id: string;
+  blocked_status: BlockedStatus;
+}
+
+export interface IRequestedUser {
+  user_id: string;
+  request_status: RequestStatusType;
+}
+
 export interface IUser {
   _id: string;
   first_name: string;
@@ -7,9 +19,10 @@ export interface IUser {
   roles: string[];
   level: number;
   origin: IOrigin;
+
   friends_ids: string[];
-  blocked_ids: string[];
-  requested_friends_ids: string[];
+  blocked_user: IBlockedUser[];
+  requested_friends: IRequestedUser[];
 }
 
 export interface IOrigin {

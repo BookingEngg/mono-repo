@@ -19,3 +19,14 @@ export const RolesAccessibilityWithRoles: Record<RoleType, RoleType[]> = {
 }
 
 
+export enum RequestStatusType {
+  SEND_REQUEST = "send",
+  RECEIVE_REQUEST = "receive",
+}
+
+export enum BlockedStatus {
+  SELF_BLOCKED = "self-blocked",    // Status if you blocked some user
+  BLOCKED_BY_PEER = "peer-blocked", // Status if you were blocked by some user
+}
+
+
