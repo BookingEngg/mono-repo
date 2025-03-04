@@ -55,11 +55,6 @@ const AllFriendsCommunity = () => {
 
   const columnsDetails = [
     {
-      title: "User Id",
-      columnDataKey: "user_id",
-      width: 200,
-    },
-    {
       title: "Name",
       columnDataKey: "name",
       width: 250,
@@ -70,11 +65,20 @@ const AllFriendsCommunity = () => {
       width: 250,
     },
     {
+      title: "User Id",
+      columnDataKey: "user_id",
+      width: 200,
+    },
+    {
       title: "Actions",
       width: 115,
       actionCell: true,
       actionDatum: (rowData: IFriendCommunity) => {
-        return rowData.friends_details ? (
+        if (rowData.friends_details?.request_status === "send") {
+          return <>Request Pending</>;
+        }
+
+        return rowData.friends_details?.request_status === "receive" ? (
           <div>
             <Button
               appearance="link"
