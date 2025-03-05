@@ -16,18 +16,19 @@ const queryClient = new QueryClient({
   },
 });
 
-
-
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <CustomProvider theme="light">
-      <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </QueryClientProvider>
-      </Provider>
-    </CustomProvider>
-  </StrictMode>
-);
+// Application Root File
+(() => {
+  return createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <CustomProvider theme="light">
+        <Provider store={store}>
+          <QueryClientProvider client={queryClient}>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </QueryClientProvider>
+        </Provider>
+      </CustomProvider>
+    </StrictMode>
+  );
+})();
