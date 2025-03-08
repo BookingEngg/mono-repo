@@ -19,7 +19,8 @@ COPY fetch-config.sh /fetch-config.sh
 RUN chmod +x /fetch-config.sh
 
 # Fetch the config file
-RUN /fetch-config.sh
+ARG GITHUB_PAT
+RUN GITHUB_PAT=${GITHUB_PAT} /fetch-config.sh
 
 # Build the application
 RUN npm run build

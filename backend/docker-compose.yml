@@ -4,6 +4,8 @@ services:
   backend:
     build:
       context: ./
+      args:
+        GITHUB_PAT: "${GITHUB_PAT}"
     container_name: backend
     restart: always
     networks:
