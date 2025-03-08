@@ -1,0 +1,14 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./
+    container_name: backend
+    restart: always
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge
