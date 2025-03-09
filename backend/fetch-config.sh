@@ -15,8 +15,8 @@ git clone "$SECRETS_GITHUB_REPO" /tmp/repo --depth=1
 # Copy the prod config
 cp /tmp/repo/mono-repo/config.prod.json /app/src/config/config.prod.json
 # Copy the nginx config to shared folder
-mkdir /app/shared
-cp /tmp/repo/mono-repo/nginx.conf /app/shared/nginx.conf
+# mkdir -p /app/shared
+# cp /tmp/repo/mono-repo/nginx.conf /app/shared/nginx.conf
 
 # Remove the secret cloned repo
 rm -rf /tmp/repo

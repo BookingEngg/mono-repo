@@ -17,6 +17,10 @@ RUN apt-get update && apt-get install -y git bash dos2unix && rm -rf /var/lib/ap
 # Copy the fetch-config script to the container and give it execute permissions
 COPY fetch-config.sh /fetch-config.sh
 
+# Copy nginx conf to shared directory
+RUN mkdir shared
+COPY nginx.conf shared/nginx.conf
+
 # Convert Windows line endings to Unix line endings
 RUN dos2unix /fetch-config.sh
 
