@@ -1,20 +1,19 @@
-import { Routes } from "@interfaces/common.interface";
+import http from "http";
 import express from "express";
 import cors from "cors";
-import { Server } from "socket.io";
-import http from "http";
 import cookieSession from "cookie-session";
 import cookieParser from "cookie-parser";
-import { tokenSecretKey } from "@/config";
-// const { OAuth2Client } = require("google-auth-library");
+import { Server } from "socket.io";
+import SocketEvents from "@/events/socket.events";
 import {
   PORT,
   serviceName,
   serviceRoute,
   env,
   SOCKET_EVENTS_NAMES,
+  tokenDetails,
 } from "@config";
-import SocketEvents from "@/events/socket.events";
+import { Routes } from "@interfaces/common.interface";
 
 class App {
   private app: express.Application;
@@ -51,7 +50,7 @@ class App {
     this.app.use(
       cookieSession({
         name: "session",
-        keys: [tokenSecretKey],
+        keys: [tokenDetails.secret_key],
       })
     );
 

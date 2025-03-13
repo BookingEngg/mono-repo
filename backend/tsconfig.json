@@ -8,7 +8,7 @@
     "target": "ES6",
     "module": "commonjs",
     "outDir": "./dist",
-    "baseUrl": "src",
+    "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"],
       "@config": ["config"],

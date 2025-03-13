@@ -10,6 +10,10 @@ import {
 class UserDao {
   private userModel = UsersModel;
 
+  public createUser = async (payload: object) => {
+    return await this.userModel.create(payload);
+  }
+
   // Get the user by email id
   public getUserByEmail = async (email: string): Promise<IUser> => {
     return await this.userModel.findOne({ email });

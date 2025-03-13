@@ -1,10 +1,16 @@
-import { Routes } from "@interfaces/common.interface";
+// Modules
 import { Router } from "express";
+// Interface
+import { Routes } from "@interfaces/common.interface";
+// Controllers
 import UserController from "@/controllers/user.controllers";
 import OtpController from "@/controllers/otp.controllers";
 import CommunicationController from "@/controllers/communication.controllers";
 import CommunityControllers from "@/controllers/community.controllers";
+import GoogleOAuthController from "@/controllers/googleAuth.controller";
+// Middlewares
 import AuthMiddleware from "@/middleware/auth.middleware";
+// Wrappers
 import { asyncWrapper } from "@/middleware/common.middleware";
 
 class ExternalRoutes implements Routes {
@@ -18,12 +24,25 @@ class ExternalRoutes implements Routes {
   private otpController = new OtpController();
   private communicationController = new CommunicationController();
   private communityController = new CommunityControllers();
+  private googleAuthController = new GoogleOAuthController();
 
   constructor() {
     this.initializeUsersRoutes(`${this.path}/user`);
     this.initializeOtpRoutes(`${this.path}/otp`);
     this.initializeCommunicationRoutes(`${this.path}/comm`);
     this.initializeCommunityRoutes(`${this.path}/community`);
+    this.initializeGoogleAuthRoutes(`${this.path}/google`);
+  }
+
+  private initializeGoogleAuthRoutes(prefix: string) {
+    this.router.get(
+      `${prefix}/get-client`,
+      asyncWrapper(this.googleAuthController.getClientDetails)
+    );
+    this.router.post(
+      `${prefix}/user`,
+      asyncWrapper(this.googleAuthController.getGoogleOAuthUser)
+    );
   }
 
   private initializeUsersRoutes(prefix: string) {
@@ -32,10 +51,6 @@ class ExternalRoutes implements Routes {
       this.authMiddleware.getAuthUser,
       // this.authMiddleware.checkRoles([Roles.DIRECTOR]),
       asyncWrapper(this.userController.getUsers)
-    );
-    this.router.post(
-      `${prefix}/create`,
-      asyncWrapper(this.userController.createUser)
     );
     this.router.post(
       `${prefix}/logout`,
@@ -85,19 +100,19 @@ class ExternalRoutes implements Routes {
       `${prefix}/friend/request`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communityController.makeFriendRequest)
-    )
+    );
 
     this.router.put(
       `${prefix}/friend/request-status`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communityController.updateFriendRequestStatus)
-    )
+    );
 
     this.router.put(
       `${prefix}/friend/unblock`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communityController.unblockUserStatus)
-    )
+    );
   }
 }
 

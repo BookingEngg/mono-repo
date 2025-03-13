@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import JwtService from "@/services/jwt.service";
 import OtpService from "@/services/otp.service";
 import { IUser } from "@/interfaces/user.interface";
+import { tokenDetails } from "@/config/index";
 
 class OtpController {
   private jwtService = new JwtService();
@@ -25,7 +26,7 @@ class OtpController {
 
     const token = await this.jwtService.createToken({ email: user.email });
     res.cookie("jwt-token", token, {
-      maxAge: 1000 * 60 * 60 * 24,
+      maxAge: 1000 * 60 * 60 * 24 * (tokenDetails.token_ttl_max_days || 10), // Default 10 Days JWT Expire
       secure: true,
       sameSite: "none",
     });
