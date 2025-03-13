@@ -23,4 +23,13 @@ export interface INodeMailer {
 
 export interface IToken {
   secret_key: string;
+  token_ttl_max_days: number;
+}
+
+export interface IGoogleOAuth {
+  client_id: string;
+  project_id: string;
+  auth_uri: string;
+  token_uri: string;
+  client_secret: string;
 }

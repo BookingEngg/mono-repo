@@ -1,12 +1,29 @@
-import { Button, FlexboxGrid, Input, InputGroup, Text } from "rsuite";
-import style from "./Login.module.scss";
-import classNames from "classnames/bind";
+// Module
 import React from "react";
-import { sendOtp, verifyOtp, getUser } from "@/services/Login.service";
+import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import {
+  CredentialResponse,
+  GoogleLogin,
+  GoogleOAuthProvider,
+} from "@react-oauth/google";
+// Rsuite
+import { Button, FlexboxGrid, Input, InputGroup, Text } from "rsuite";
+import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
+// Services
+import {
+  sendOtp,
+  verifyOtp,
+  getUser,
+  getGoogleClientDetails,
+  getUserByGoogleOAuth,
+} from "@/services/Login.service";
+// Store
 import { login } from "@/store/auth";
 import { useAppDispatch } from "@/store/hooks";
-import { Outlet, useNavigate } from "react-router-dom";
-
+// Styles
+import style from "./Login.module.scss";
+import classNames from "classnames/bind";
 const cx = classNames.bind(style);
 
 const defaultPayloadValue = {
@@ -21,6 +38,12 @@ const Login = () => {
   const [loginPayload, setLoginPayload] = React.useState(defaultPayloadValue);
   const [isVerifyOtpVisible, setIsVerifyOtpVisible] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
+
+  const googleClientQuery = useQuery({
+    queryKey: ["google-oauth-client-details"],
+    queryFn: () => getGoogleClientDetails(),
+  });
+  const { data: googleClientDetails } = googleClientQuery;
 
   const handleFormPayloadChange = React.useCallback(
     (value: string, key: string) => {
@@ -55,11 +78,27 @@ const Login = () => {
       const response = await getUser();
       if (!!response.status) {
         dispatch(login({ user: response.user, isAuthorized: true }));
-        navigate('/');
+        navigate("/");
       }
     }
     setLoading(false);
   }, [loginPayload]);
+
+  const handleGoogleOAuthLoginSuccess = async (payload: CredentialResponse) => {
+    const response = payload.credential
+      ? await getUserByGoogleOAuth({
+          token: payload.credential,
+        })
+      : null;
+
+    if (response?.is_verified_user) {
+      const getAuthUser = await getUser();
+      if (!!getAuthUser.status) {
+        dispatch(login({ user: getAuthUser.user, isAuthorized: true }));
+        navigate("/");
+      }
+    }
+  };
 
   return (
     <div className={cx("login-container")}>
@@ -106,14 +145,40 @@ const Login = () => {
               We'll send an OTP on this email
             </Text>
             <FlexboxGrid justify="center" style={{ marginTop: 40 }}>
-              <Button
-                appearance="primary"
-                className={cx("action-cta")}
-                loading={loading}
-                onClick={handleOtpSend}
-              >
-                Generate Otp
-              </Button>
+              <FlexboxGridItem colspan={24}>
+                <Button
+                  appearance="primary"
+                  className={cx("action-cta")}
+                  loading={loading}
+                  onClick={handleOtpSend}
+                >
+                  Generate Otp
+                </Button>
+              </FlexboxGridItem>
+
+              {googleClientDetails?.client_id ? (
+                <FlexboxGridItem
+                  colspan={24}
+                  className={cx("external-signup-div")}
+                >
+                  <FlexboxGrid>
+                    <FlexboxGridItem colspan={24}>
+                      <GoogleOAuthProvider
+                        clientId={googleClientDetails.client_id}
+                      >
+                        <GoogleLogin
+                          onSuccess={handleGoogleOAuthLoginSuccess}
+                          onError={() => {
+                            console.log("LOGIN FAILURE>>>>>>>>");
+                          }}
+                        />
+                      </GoogleOAuthProvider>
+                    </FlexboxGridItem>
+                  </FlexboxGrid>
+                </FlexboxGridItem>
+              ) : (
+                <></>
+              )}
             </FlexboxGrid>
           </>
         )}

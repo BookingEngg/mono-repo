@@ -1,9 +1,13 @@
-.sidenav-logoholder {
+.sidenav-custom-logo {
   border-radius: 50%;
   background-color: #3399ff;
-  padding: 5px;
-  margin-right: 10px;
+  padding: 1vh;
+  margin-right: 2vh;
   > p {
     color: white;
   }
+}
+
+.sidenav-logo {
+  margin-right: 2vh;
 }

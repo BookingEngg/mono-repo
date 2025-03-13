@@ -39,7 +39,7 @@ const ModifiedTable = (props: IModifiedProps) => {
       <Table data={datum}>
         {columnsDetails.map((column) => {
           return (
-            <Column width={column.width} align="center">
+            <Column flexGrow={column.width} align="center">
               <HeaderCell>{column.title}</HeaderCell>
               {column.actionCell ? (
                 <Cell>{column.actionDatum}</Cell>
