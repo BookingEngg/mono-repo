@@ -1,7 +1,7 @@
 import { TRoutes } from "@/typings/common";
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, FlexboxGrid, Nav, Text } from "rsuite";
+import { Avatar, Button, FlexboxGrid, Nav, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { logoutAuthUser } from "@/services/Login.service";
 import { useAppDispatch } from "@/store/hooks";
@@ -44,16 +44,26 @@ const Header = () => {
           </Button>
         </FlexboxGridItem>
         <FlexboxGridItem>
-          <div className={cx("sidenav-logoholder")}>
-            <Text
-              size="xxl"
-              align="center"
-              weight="extrabold"
-              transform="capitalize"
-            >
-              {userNameLogo}
-            </Text>
-          </div>
+          {authUser.user?.user_profile_picture ? (
+            <Avatar
+              className={cx("sidenav-logo")}
+              src={authUser.user?.user_profile_picture}
+              alt="Profile Image"
+              circle
+              size="md"
+            />
+          ) : (
+            <div className={cx("sidenav-custom-logo")}>
+              <Text
+                size="xxl"
+                align="center"
+                weight="extrabold"
+                transform="capitalize"
+              >
+                {userNameLogo}
+              </Text>
+            </div>
+          )}
         </FlexboxGridItem>
       </FlexboxGrid>
     </div>

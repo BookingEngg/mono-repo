@@ -1,6 +1,7 @@
 import nconf from "nconf";
 import {
   IDataBaseConfig,
+  IGoogleOAuth,
   INodeMailer,
   IServer,
   IToken,
@@ -26,4 +27,5 @@ export const SOCKET_EVENTS_NAMES: readonly string[] = [
 
 export const nodeMailConfig = nconf.get("nodemailer") as INodeMailer;
 
-export const tokenSecretKey = (nconf.get("token") as IToken).secret_key;
+export const tokenDetails = nconf.get("token") as IToken;
+export const googleOAuthConfigs = nconf.get("google_auth") as IGoogleOAuth;

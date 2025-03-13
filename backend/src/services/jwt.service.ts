@@ -1,4 +1,4 @@
-import { tokenSecretKey } from "@/config";
+import { tokenDetails } from "@/config";
 import { Request } from "express";
 import JWT from "jsonwebtoken";
 
@@ -6,11 +6,11 @@ class JwtService {
   private jwt = JWT;
 
   public createToken = (data: object) => {
-    return this.jwt.sign(JSON.stringify(data), tokenSecretKey);
+    return this.jwt.sign(JSON.stringify(data), tokenDetails.secret_key);
   };
 
   public verifyToken = (token: string) => {
-    return this.jwt.verify(token, tokenSecretKey);
+    return this.jwt.verify(token, tokenDetails.secret_key);
   };
 
   public getJwtToken = (req: Request): string => {

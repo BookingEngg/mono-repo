@@ -24,6 +24,8 @@ export interface IUser {
   roles: string[];
   level: number;
   origin: IOrigin;
+  email_verified: boolean;
+  user_profile_picture?: string;
 
   friends_ids: string[];
   blocked_user: IBlockedUser[];

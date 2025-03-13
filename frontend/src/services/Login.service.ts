@@ -38,3 +38,22 @@ export const logoutAuthUser = async () => {
 
   return response.data;
 };
+
+// Get the Google OAuth Client Id
+export const getGoogleClientDetails = async () => {
+  const response = await axiosClient.get({
+    url: "/google/get-client",
+  });
+
+  return response.data;
+};
+
+// Login the User with Google OAuth Client Id
+export const getUserByGoogleOAuth = async (payload: { token: string }) => {
+  const response = await axiosClient.post({
+    url: "/google/user",
+    body: payload,
+  });
+
+  return response.data;
+};
