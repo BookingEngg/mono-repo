@@ -54,21 +54,21 @@ const BlockedUserCommunity = () => {
     {
       title: "Name",
       columnDataKey: "name",
-      width: 250,
+      width: 2,
     },
     {
       title: "Username",
       columnDataKey: "username",
-      width: 250,
+      width: 2,
     },
     {
       title: "User Id",
       columnDataKey: "user_id",
-      width: 200,
+      width: 2,
     },
     {
       title: "Actions",
-      width: 115,
+      width: 3,
       actionCell: true,
       actionDatum: (rowData: IBlockedUser) => {
         return rowData.blocked_details?.blocked_status === 'self-blocked' ? (
