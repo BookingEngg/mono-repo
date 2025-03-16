@@ -56,6 +56,12 @@ class ExternalRoutes implements Routes {
       `${prefix}/logout`,
       asyncWrapper(this.userController.logoutAuthUser)
     );
+
+    this.router.get(
+      `${prefix}/summary`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.userController.getDashboardSummary)
+    )
   }
 
   private initializeOtpRoutes(prefix: string) {
