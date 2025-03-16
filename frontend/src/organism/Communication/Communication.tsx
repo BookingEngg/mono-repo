@@ -12,11 +12,12 @@ import {
 // Socket IO
 import { io, Socket } from "socket.io-client";
 // Rsuite
-import { Button, FlexboxGrid, Input, Text } from "rsuite";
+import { Button, Col, FlexboxGrid, Input, Panel, Row, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 // Style
 import style from "./Communication.module.scss";
 import classNames from "classnames/bind";
+import { useNavigate } from "react-router-dom";
 const cx = classNames.bind(style);
 
 export interface IUserCommChat {
@@ -38,6 +39,7 @@ export interface ICommUser {
 }
 const Communication = () => {
   const loggedInUser = useSelector(getAuthUser);
+  const navigate = useNavigate();
 
   const [socket, setSocket] = React.useState<Socket | null>(null);
   const [message, setMessage] = React.useState("");
@@ -81,6 +83,7 @@ const Communication = () => {
     setMessage("");
   }, [message, socket]);
 
+  // Fetch the communication of selected index user
   const handleUserChange = React.useCallback(
     async (currentUserIndex: number) => {
       const response = await getUserChatsDetails(
@@ -91,6 +94,11 @@ const Communication = () => {
     },
     [userList, currentUserMessages]
   );
+
+  // Fetch the First user message default
+  React.useEffect(() => {
+    handleUserChange(0);
+  }, [userList]);
 
   React.useEffect(() => {
     const fetchCommunicationUsers = async () => {
@@ -153,19 +161,48 @@ const Communication = () => {
     }
   }, [socket]);
 
+  if (userList.length == 0) {
+    return (
+      <>
+        <Row>
+          <Panel className="shadow-lg p-4 rounded-xl">
+            <h2 className="text-xl md:text-2xl font-semibold">
+              You have no friends yet.
+            </h2>
+          </Panel>
+          <Panel>
+            <Button
+              appearance="primary"
+              onClick={() => {
+                navigate("/community/add");
+              }}
+            >
+              Make Friends
+            </Button>
+          </Panel>
+        </Row>
+      </>
+    );
+  }
+
   return (
-    <FlexboxGrid justify="space-between" className={cx("chat-container")}>
-      <FlexboxGridItem colspan={7} className={cx("chat-left-container")}>
+    <FlexboxGrid justify="space-between" className={cx("chat-container")} >
+      <FlexboxGridItem colspan={8} className={cx("chat-left-container")}>
         <Text size="xl">Chats</Text>
         <FlexboxGrid>
           {userList.map((user, index) => (
             <FlexboxGridItem
               colspan={24}
-              className={cx("left-chat-item")}
+              className={cx([
+                "left-chat-item",
+                index === currentUserMessages?.index
+                  ? "left-chat-item-selected"
+                  : "",
+              ])}
               onClick={() => {
                 handleUserChange(index);
               }}
-              id={`chat-item-${index+1}`}
+              id={`chat-item-${index + 1}`}
             >
               <FlexboxGrid justify="space-between">
                 <FlexboxGridItem>{user.name}</FlexboxGridItem>
