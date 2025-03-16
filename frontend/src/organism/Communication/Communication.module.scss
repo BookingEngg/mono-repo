@@ -3,6 +3,7 @@
   flex-direction: row;
   justify-content: space-between;
   flex-wrap: wrap;
+  gap: 2vh;
 
   .chat-left-container, .chat-right-container {
     background-color: white;
@@ -13,12 +14,17 @@
   .chat-left-container {
     max-height: 80vh;
     overflow-y: scroll;
+    flex: 1;
 
     .left-chat-item {
       padding: 20px 5px;
       background-color: aliceblue;
       margin: 5px 0px;
       border-radius: 5px;
+    }
+
+    .left-chat-item-selected {
+      background-color: #349aff7e;
     }
   }
 
