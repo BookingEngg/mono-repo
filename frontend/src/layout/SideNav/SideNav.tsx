@@ -46,7 +46,9 @@ const SideNav = (props: SideNavProps) => {
               return (
                 <div
                   className={`sidenav-iconholder ${
-                    selectedRoute.key === route.key && "selected-menuitem"
+                    (selectedRoute.key === route.key ||
+                      selectedRoute.parent?.key === route.key) &&
+                    "selected-menuitem"
                   }`}
                 >
                   <span>{route.icon}</span>
@@ -119,7 +121,9 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
           <div className={`sidenav-item-container`}>
             <FlexboxGrid
               className={`menuitem-holder ${
-                selectedSubTab === route.key && "selected-menuitem"
+                (selectedSubTab === route.key ||
+                  selectedRoute.parent?.key === route.key) &&
+                "selected-menuitem"
               }`}
               align="middle"
               onClick={() => {
@@ -131,10 +135,12 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
                 size="lg"
                 className={
                   selectedRoute?.children?.length
-                    ? selectedRoute.key === route.key
+                    ? selectedRoute.key === route.key ||
+                      selectedRoute.parent?.key === route.key
                       ? "selected-menuitem-color"
                       : ""
-                    : selectedSubTab === route.key
+                    : selectedSubTab === route.key ||
+                        selectedRoute.parent?.key === route.key
                       ? "selected-menuitem-color"
                       : ""
                 }
