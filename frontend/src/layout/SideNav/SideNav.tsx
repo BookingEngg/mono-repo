@@ -40,11 +40,15 @@ const SideNav = (props: SideNavProps) => {
           }}
         >
           <div className="sidenav-item-container">
-            {validRoutesForNav.map((route, index) => {
+            {validRoutesForNav.map((route) => {
               // ${selectedRoute.key === route.key ? 'selected-menuitem' : ''
               // this code is work only for routes who does not have any child
               return (
-                <div className={`sidenav-iconholder`}>
+                <div
+                  className={`sidenav-iconholder ${
+                    selectedRoute.key === route.key && "selected-menuitem"
+                  }`}
+                >
                   <span>{route.icon}</span>
                 </div>
               );
@@ -80,7 +84,7 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
     return <></>;
   }
 
-  const [selectedSubTab, setSelectedSubTab] = React.useState("");
+  const [selectedSubTab, setSelectedSubTab] = React.useState(selectedRoute.key);
 
   const selectedTabHandler = (route: TRoutes) => {
     const validSubRouteForSideNav =
