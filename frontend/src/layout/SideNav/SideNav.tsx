@@ -40,11 +40,17 @@ const SideNav = (props: SideNavProps) => {
           }}
         >
           <div className="sidenav-item-container">
-            {validRoutesForNav.map((route, index) => {
+            {validRoutesForNav.map((route) => {
               // ${selectedRoute.key === route.key ? 'selected-menuitem' : ''
               // this code is work only for routes who does not have any child
               return (
-                <div className={`sidenav-iconholder`}>
+                <div
+                  className={`sidenav-iconholder ${
+                    (selectedRoute.key === route.key ||
+                      selectedRoute.parent?.key === route.key) &&
+                    "selected-menuitem"
+                  }`}
+                >
                   <span>{route.icon}</span>
                 </div>
               );
@@ -80,7 +86,7 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
     return <></>;
   }
 
-  const [selectedSubTab, setSelectedSubTab] = React.useState("");
+  const [selectedSubTab, setSelectedSubTab] = React.useState(selectedRoute.key);
 
   const selectedTabHandler = (route: TRoutes) => {
     const validSubRouteForSideNav =
@@ -115,7 +121,9 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
           <div className={`sidenav-item-container`}>
             <FlexboxGrid
               className={`menuitem-holder ${
-                selectedSubTab === route.key && "selected-menuitem"
+                (selectedSubTab === route.key ||
+                  selectedRoute.parent?.key === route.key) &&
+                "selected-menuitem"
               }`}
               align="middle"
               onClick={() => {
@@ -127,10 +135,12 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
                 size="lg"
                 className={
                   selectedRoute?.children?.length
-                    ? selectedRoute.key === route.key
+                    ? selectedRoute.key === route.key ||
+                      selectedRoute.parent?.key === route.key
                       ? "selected-menuitem-color"
                       : ""
-                    : selectedSubTab === route.key
+                    : selectedSubTab === route.key ||
+                        selectedRoute.parent?.key === route.key
                       ? "selected-menuitem-color"
                       : ""
                 }
