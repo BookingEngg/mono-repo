@@ -3,31 +3,41 @@ import { createClient } from "redis";
 class RedisUtil {
   private redisClient = null;
   constructor() {
-    try {
-      this.redisClient = createClient({
-        url: "redis://localhost:6379",
-      });
-      this.redisClient.connect();
+    this.redisClient = createClient({
+      url: "redis://localhost:6379",
+    });
+
+    this.redisClient.on("connect", () => {
       console.log("=======Redis connected========");
+    });
+
+    this.redisClient.on("error", (_err) => {
+      console.log("=======Redis Connection Error========");
+    });
+  }
+
+  private redisWrapper = async (func: Function) => {
+    try {
+      return await func();
     } catch (_err) {
-      console.log("====Redis connection error====");
+      return null;
     }
-  }
+  };
 
-  private getClient() {
-    return this.redisClient;
-  }
+  private getClient = async () => {
+    return await this.redisWrapper(this.redisClient);
+  };
 
-  public getKey(key: string) {
-    return this.getClient().get(key);
-  }
+  public getKey = async function (key: string) {
+    return await this.redisWrapper(this.getClient().get(key));
+  };
 
-  public setKey(key: string, value: string | object) {
-    if (typeof value === "object") {
-      value = JSON.stringify(value);
+  public setKey = async (key: string, value: string | object) => {
+    const client = await this.getClient();
+    if (client) {
+      return await this.redisWrapper(client.set(key, value));
     }
-    return this.getClient().set(key, value);
-  }
+  };
 }
 
 export default RedisUtil;

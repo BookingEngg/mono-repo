@@ -5,7 +5,6 @@ import cookieSession from "cookie-session";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import SocketEvents from "@/events/socket.events";
-import RedisUtil from "@/util/redis.util";
 import {
   PORT,
   serviceName,
@@ -24,7 +23,6 @@ class App {
   private server: http.Server;
   private io: Server;
   private socketEventHandler = new SocketEvents();
-  private redisClient = null;
 
   constructor(routes: Routes[]) {
     this.routes = routes;
@@ -32,7 +30,6 @@ class App {
     this.env = env;
 
     this.app = express();
-    this.redisClient = new RedisUtil();
 
     this.server = http.createServer(this.app); // http server for sockets IO
     this.io = new Server(this.server);
