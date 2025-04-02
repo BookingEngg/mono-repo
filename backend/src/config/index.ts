@@ -3,6 +3,7 @@ import {
   IDataBaseConfig,
   IGoogleOAuth,
   INodeMailer,
+  IRedisConfig,
   IServer,
   IToken,
 } from "@/typings/config";
@@ -19,6 +20,7 @@ export const isProduction = env === "prod";
 
 export const MONGO_DB_NAMES: readonly string[] = ["praman"];
 export const mongoDbConfig = nconf.get("databases").mongodb as IDataBaseConfig;
+export const redisConfig = nconf.get("redis") as IRedisConfig;
 
 export const SOCKET_EVENTS_NAMES: readonly string[] = [
   "init",

@@ -6,6 +6,13 @@ export interface IDataBaseConfig {
   praman: IDataBase;
 }
 
+export interface IRedisConfig {
+  host: string;
+  username: string;
+  password: string;
+  port: number;
+}
+
 export interface IDataBase {
   name: string
   username: string;
