@@ -1,18 +1,29 @@
 import Redis from "ioredis";
+import { isProduction, redisConfig } from "../config";
+import { IRedisConfig } from "../typings/config";
 
 class RedisStream {
   private redisConsumer: Redis | null = null;
   private STREAM_NAME = "my_stream";
 
   constructor() {
-    this.redisConsumer = new Redis({
-      host: "localhost",
-      port: 6379,
-    });
-    this.onConsumerStart();
+    this.redisConsumer = new Redis(
+      this.getRedisConsumerConnectionUrl(redisConfig)
+    );
   }
 
-  private onConsumerStart = async () => {
+  private getRedisConsumerConnectionUrl = (config: IRedisConfig) => {
+    const { username, password, host, port } = config;
+    const connectionUrl = [
+      "redis://",
+      `${isProduction ? username + ":" : ""}`,
+      `${isProduction ? password + "@" : ""}`,
+      `${host}:${port}`,
+    ].join("");
+    return connectionUrl;
+  };
+
+  public onConsumerStart = async () => {
     if (this.redisConsumer == null) {
       return;
     }

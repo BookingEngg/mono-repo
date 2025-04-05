@@ -5,7 +5,6 @@ import cookieSession from "cookie-session";
 import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import SocketEvents from "@/events/socket.events";
-import RedisUtil from "@/util/redis.util";
 import {
   PORT,
   serviceName,
@@ -36,8 +35,6 @@ class App {
     this.io = new Server(this.server);
 
     this.initilizeMiddlewares();
-
-    const redisUtil = new RedisUtil();
   }
 
   public initilizeMiddlewares() {
@@ -86,7 +83,7 @@ class App {
     this.server.listen(this.port, () => {
       console.log(
         ` 🔥🔥 ENV = ${this.env} 🔥🔥\n`,
-        `SERVICE ${serviceName} Started AT PORT NO ${this.port} ✔️`
+        `Service ${serviceName} started AT PORT NO ${this.port} ✔️`
       );
     });
   }

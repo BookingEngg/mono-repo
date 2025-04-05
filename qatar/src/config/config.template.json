@@ -1,0 +1,13 @@
+{
+  "service": "qatar",
+  "service_route": "qatar",
+  "server": {
+    "port": "3015"
+  },
+  "redis": {
+    "host": "localhost",
+    "username": "",
+    "password": "",
+    "port": 6379
+  }
+}

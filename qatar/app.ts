@@ -1,22 +1,29 @@
 import express from "express";
-import Consumers from './src/consumers';
+import { env, PORT, serviceName } from "@/config";
+import Consumers from "@/consumers";
 
 class App {
   private app: express.Application | null = null;
-  private consumers: Consumers | null = null;
-  private PORT = 3015;
+  private port: number;
+  private env: string;
 
   constructor() {
     this.app = express();
-    this.consumers = new Consumers();
+    this.port = PORT || 3015;
+    this.env = env;
+
+    new Consumers(); // Initialize Consumers
   }
 
   public startServer = () => {
     if (this.app === null) {
       throw new Error("Server is not initialized");
     }
-    this.app.listen(this.PORT, () => {
-      console.log(`Server running on port ${this.PORT}`);
+    this.app.listen(this.port, () => {
+      console.log(
+        ` 🔥🔥 ENV = ${this.env} 🔥🔥\n`,
+        `Service ${serviceName} started AT PORT NO ${this.port} ✔️`
+      );
     });
   };
 }
