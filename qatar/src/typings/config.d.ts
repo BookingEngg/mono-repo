@@ -10,10 +10,8 @@ export interface IRedisConfig {
 }
 
 export interface IConsumers {
-  config: {
+  [key: string]: {
     stream: string;
-  },
-  communication_queue: {
     consumer_name: string;
     consumer_group: string;
   }

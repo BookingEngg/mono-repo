@@ -11,12 +11,15 @@
     "port": 6379
   },
   "consumers": {
-    "config": {
-      "stream": "my_stream"
-    },
     "communication_queue": {
-      "consumer_name": "communication_queue",
-      "consumer_group": "my_group"
+      "stream": "communication_queue",
+      "consumer_group": "group1",
+      "consumer_name": "communication_queue"
+    },
+    "pending_friend_req_queue": {
+      "stream": "pending_friend_req_queue",
+      "consumer_group": "group1",
+      "consumer_name": "pending_friend_req_queue"
     }
   }
 }

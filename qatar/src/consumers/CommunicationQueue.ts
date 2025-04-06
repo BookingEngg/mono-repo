@@ -1,19 +1,12 @@
 import RedisStream from "./RedisStream";
 import { consumers } from "@/config";
-const { config, communication_queue } = consumers;
-
-// Prepare config for the communication consumer queue
-const communicationConfig = {
-  stream: config.stream,
-  consumer_name: communication_queue.consumer_name,
-  consumer_group: communication_queue.consumer_group,
-};
+const { communication_queue } = consumers;
 
 class CommunicationQueue {
   private redisStream: RedisStream | null = null;
 
   constructor() {
-    this.redisStream = new RedisStream(communicationConfig);
+    this.redisStream = new RedisStream({...communication_queue});
     this.redisStream.addListeners({ messageHandler: this.messageHandler });
   }
 
