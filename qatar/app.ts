@@ -6,13 +6,14 @@ class App {
   private app: express.Application | null = null;
   private port: number;
   private env: string;
+  private consumers: Consumers;
 
   constructor() {
     this.app = express();
     this.port = PORT || 3015;
     this.env = env;
 
-    new Consumers(); // Initialize Consumers
+    this.consumers = new Consumers(); // Initialize Consumers
   }
 
   public startServer = () => {
@@ -25,6 +26,7 @@ class App {
         `Service ${serviceName} started AT PORT NO ${this.port} ✔️`
       );
     });
+    this.consumers.startConsumers(); // Start all the consumers
   };
 }
 

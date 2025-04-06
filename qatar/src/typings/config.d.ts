@@ -8,3 +8,13 @@ export interface IRedisConfig {
   password: string;
   port: number;
 }
+
+export interface IConsumers {
+  config: {
+    stream: string;
+  },
+  communication_queue: {
+    consumer_name: string;
+    consumer_group: string;
+  }
+}

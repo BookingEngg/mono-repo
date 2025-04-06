@@ -1,5 +1,5 @@
 const nconf = require("nconf");
-import { IRedisConfig, IServer } from "../typings/config";
+import { IConsumers, IRedisConfig, IServer } from "../typings/config";
 
 export const env = process.env.NODE_ENV || "development";
 let configFile = `src/config/config.${env}.json`;
@@ -12,3 +12,4 @@ export const PORT = (nconf.get("server") as IServer).port;
 export const isProduction = env === "prod";
 
 export const redisConfig = nconf.get("redis") as IRedisConfig;
+export const consumers = nconf.get("consumers") as IConsumers;

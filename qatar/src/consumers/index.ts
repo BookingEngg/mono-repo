@@ -1,20 +1,18 @@
-import RedisStream from "./RedisStream";
+import CommunicationQueue from "./CommunicationQueue";
 
 class Consumers {
-  private redisStream: RedisStream | null = null;
+  // Declare all consumers queue
+  private communicationQueue: CommunicationQueue;
 
   constructor() {
-    this.redisStream = new RedisStream();
-
-    this.startConsumers(); // Starts all the consumers
+    // Init all the consumers
+    this.communicationQueue = new CommunicationQueue();
   }
 
-  /**
-   * Starts all the consumers
-   */
-  private startConsumers() {
-    this.redisStream.onConsumerStart();
-  }
+  public startConsumers = () => {
+    // Run all the consumers
+    this.communicationQueue.startConsumers();
+  };
 }
 
 export default Consumers;
