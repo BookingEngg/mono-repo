@@ -1,5 +1,5 @@
 import Redis from "ioredis";
-import { redisConfig } from "../config";
+import { isProduction, redisConfig } from "../config";
 import { getRedisClientConnectionUrl } from "@/util/util";
 import { IAddListenerPayload, IRedisConsumerConfig } from "./types";
 
@@ -17,11 +17,31 @@ class RedisStream {
     this.stream = consumerConfig.stream;
     this.group = consumerConfig.consumer_group;
     this.consumer_name = consumerConfig.consumer_name;
+
+    this.validateStreamGroup();
   }
 
   public addListeners = (payload: IAddListenerPayload) => {
     this.messageHandler = payload.messageHandler;
     this.onConsumerError = payload.onConsumerError;
+  };
+
+  private validateStreamGroup = async () => {
+    try {
+      await this.redisClient.xgroup(
+        "CREATE",
+        this.stream,
+        this.group,
+        "$",
+        "MKSTREAM"
+      );
+    } catch (err) {
+      if (err.message.includes("BUSYGROUP")) {
+        console.log("Group already exists");
+      } else if (this.onConsumerError) {
+        this.onConsumerError(err);
+      }
+    }
   };
 
   /**
@@ -55,7 +75,9 @@ class RedisStream {
         }
       );
     } else {
-      console.log("No new messages");
+      if (!isProduction) {
+        console.log(`No new messages found on stream ${this.stream}`);
+      }
     }
   };
 
@@ -76,18 +98,6 @@ class RedisStream {
       }
     }
   };
-
-  // private createConsumerGroup = async () => {
-  //   //  '$' tells Redis to start reading from new messages
-  //   //  'MKSTREAM' creates the stream if it doesn't exist
-  //   return this.redisClient.xgroup(
-  //     "CREATE",
-  //     this.stream,
-  //     this.group,
-  //     "$",
-  //     "MKSTREAM"
-  //   );
-  // };
 }
 
 export default RedisStream;

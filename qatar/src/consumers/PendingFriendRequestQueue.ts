@@ -3,17 +3,17 @@ import { consumers } from "@/config";
 const { config, communication_queue } = consumers;
 
 // Prepare config for the communication consumer queue
-const communicationConfig = {
-  stream: config.stream,
+const pendingFriendReqConfig = {
+  stream: "my_stream2",
   consumer_name: communication_queue.consumer_name,
   consumer_group: communication_queue.consumer_group,
 };
 
-class CommunicationQueue {
+class PendingFreiendRequestQueue {
   private redisStream: RedisStream | null = null;
 
   constructor() {
-    this.redisStream = new RedisStream(communicationConfig);
+    this.redisStream = new RedisStream(pendingFriendReqConfig);
     this.redisStream.addListeners({ messageHandler: this.messageHandler });
   }
 
@@ -21,7 +21,7 @@ class CommunicationQueue {
    * All the message listen to the communication queue will come this place
    */
   private messageHandler = (data: string[]) => {
-    console.log("Data in communication queue msg handler>>>", data);
+    console.log("Data in pending freiend req msg handler>>>", data);
   };
 
   /**
@@ -32,4 +32,4 @@ class CommunicationQueue {
   }
 }
 
-export default CommunicationQueue;
+export default PendingFreiendRequestQueue;
