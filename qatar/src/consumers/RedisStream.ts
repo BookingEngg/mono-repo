@@ -74,10 +74,6 @@ class RedisStream {
           });
         }
       );
-    } else {
-      if (!isProduction) {
-        console.log(`No new messages found on stream ${this.stream}`);
-      }
     }
   };
 

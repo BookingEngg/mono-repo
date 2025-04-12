@@ -110,9 +110,12 @@ function App() {
     });
 
     if (!currentRoute) {
-      return isAuthorized
+      const defaultCurrentRoute = isAuthorized
         ? flatternAuthRoutesTree[0]
         : flatternLoginRoutesTree[0];
+
+      navigate(defaultCurrentRoute.path);
+      return defaultCurrentRoute;
     }
 
     return currentRoute;
