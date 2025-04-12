@@ -68,6 +68,7 @@ class RedisStream {
           entries: [_id: string, fields: string[]][],
         ]) => {
           entries.forEach(([_id, fields]) => {
+            if (!isProduction) console.log("Message received >>>>> ", fields);
             if (this.messageHandler) {
               this.messageHandler(fields);
             }

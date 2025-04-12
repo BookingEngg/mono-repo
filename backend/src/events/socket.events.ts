@@ -1,6 +1,8 @@
-import CommunicationService from "@/services/communication.service";
-import { Server, Socket } from "socket.io";
+// Modules
 import moment from "moment";
+import { Server, Socket } from "socket.io";
+// Publisher
+import CommunicationPublisher from "@/queue/communication.publisher";
 
 export interface ISocketEvent {
   eventName: string;
@@ -10,7 +12,7 @@ export interface ISocketEvent {
 
 class SocketEvents {
   private io: Server;
-  private communicationService = new CommunicationService();
+  private communicationPublisher = new CommunicationPublisher();
   private usersSocketHash = new Map();
 
   public initializeSocketEvents(payload: ISocketEvent) {
@@ -39,11 +41,11 @@ class SocketEvents {
     const { sender_id, receiver_id, message } = parsedPayload;
 
     if (sender_id && receiver_id && message) {
-      await this.communicationService.createChat({
-        senderId: sender_id,
-        receiverId: receiver_id,
-        message,
-      });
+      const eventPayload = {
+        ...parsedPayload,
+        type: "new_message",
+      };
+      this.communicationPublisher.raiseEventForSendMessage(eventPayload);
 
       const receiverSocketId = this.usersSocketHash.get(receiver_id);
       this.io.to(receiverSocketId).emit("received-user-chat", {

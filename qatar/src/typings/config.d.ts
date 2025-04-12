@@ -16,3 +16,7 @@ export interface IConsumers {
     consumer_group: string;
   }
 }
+
+export interface IServices {
+  backend: string;
+}

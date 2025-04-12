@@ -2,8 +2,7 @@ import Redis from "ioredis";
 import { getRedisUrl } from "@/util/utils.util";
 
 class RedisUtil {
-  private redisClient = null;
-  private STREAM_NAME = "my_stream";    // Need to move this to config as well
+  private redisClient: Redis;
 
   constructor() {
     this.redisClient = new Redis(getRedisUrl());
@@ -25,7 +24,7 @@ class RedisUtil {
     }
   };
 
-  private getClient = async () => {
+  protected getClient = async () => {
     return await this.redisWrapper(() => this.redisClient);
   };
 
@@ -42,15 +41,6 @@ class RedisUtil {
       return await client.set(key, value);
     }
   };
-
-  // public test = async () => {
-  //   const response = await (await this.getClient()).xadd(
-  //     this.STREAM_NAME,
-  //     "*",
-  //     "content",
-  //     "Hello world from dashboard"
-  //   );
-  // };
 }
 
 export default RedisUtil;
