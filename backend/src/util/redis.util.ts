@@ -1,11 +1,11 @@
-import { createClient } from "redis";
+import Redis from "ioredis";
+import { getRedisUrl } from "@/util/utils.util";
 
 class RedisUtil {
-  private redisClient = null;
+  private redisClient: Redis;
+
   constructor() {
-    this.redisClient = createClient({
-      url: "redis://localhost:6379",
-    });
+    this.redisClient = new Redis(getRedisUrl());
 
     this.redisClient.on("connect", () => {
       console.log("=======Redis connected========");
@@ -16,7 +16,7 @@ class RedisUtil {
     });
   }
 
-  private redisWrapper = async (func: Function) => {
+  private redisWrapper = async (func: Function): Promise<Redis | null> => {
     try {
       return await func();
     } catch (_err) {
@@ -24,8 +24,8 @@ class RedisUtil {
     }
   };
 
-  private getClient = async () => {
-    return await this.redisWrapper(this.redisClient);
+  protected getClient = async () => {
+    return await this.redisWrapper(() => this.redisClient);
   };
 
   public getKey = async function (key: string) {
@@ -35,7 +35,10 @@ class RedisUtil {
   public setKey = async (key: string, value: string | object) => {
     const client = await this.getClient();
     if (client) {
-      return await this.redisWrapper(client.set(key, value));
+      if (value instanceof Object) {
+        value = JSON.stringify(value);
+      }
+      return await client.set(key, value);
     }
   };
 }

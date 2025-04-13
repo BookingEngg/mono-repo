@@ -1,0 +1,28 @@
+{
+  "service_name": "qatar",
+  "service_route": "qatar",
+  "server": {
+    "port": "3015"
+  },
+  "redis": {
+    "host": "localhost",
+    "username": "",
+    "password": "",
+    "port": 6379
+  },
+  "consumers": {
+    "communication_queue": {
+      "stream": "communication_queue",
+      "consumer_group": "group1",
+      "consumer_name": "communication_queue"
+    },
+    "pending_friend_req_queue": {
+      "stream": "pending_friend_req_queue",
+      "consumer_group": "group1",
+      "consumer_name": "pending_friend_req_queue"
+    }
+  },
+  "services": {
+    "backend": ""
+  }
+}

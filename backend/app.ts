@@ -83,7 +83,7 @@ class App {
     this.server.listen(this.port, () => {
       console.log(
         ` 🔥🔥 ENV = ${this.env} 🔥🔥\n`,
-        `SERVICE ${serviceName} Started AT PORT NO ${this.port} ✔️`
+        `Service ${serviceName} started AT PORT NO ${this.port} ✔️`
       );
     });
   }
