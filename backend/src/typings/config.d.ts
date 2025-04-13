@@ -6,8 +6,21 @@ export interface IDataBaseConfig {
   praman: IDataBase;
 }
 
+export interface IRedisConfig {
+  host: string;
+  username: string;
+  password: string;
+  port: number;
+}
+
+export interface IPublisher {
+  [key: string]: {
+    stream: string;
+  };
+}
+
 export interface IDataBase {
-  name: string
+  name: string;
   username: string;
   password: string;
   port: number;

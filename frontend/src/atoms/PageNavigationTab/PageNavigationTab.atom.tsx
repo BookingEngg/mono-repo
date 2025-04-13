@@ -15,7 +15,7 @@ interface IPageNavigationTabGroupType {
 const PageNavigationTabGroup = (props: IPageNavigationTabGroupType) => {
   const { currentRoute } = props;
   const navigate = useNavigate();
-  const [selectedTab, setSelectedTab] = React.useState("");
+  const [selectedTab, setSelectedTab] = React.useState(currentRoute?.key);
   const [currentRouteImmediateParent, setCurrentRouteImmediateParent] =
     React.useState<TRoutes | undefined>(undefined);
 

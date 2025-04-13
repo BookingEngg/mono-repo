@@ -1,5 +1,5 @@
 {
-  "service": "backend",
+  "service_name": "backend",
   "service_route": "backend",
   "server": {
     "port": "8080"
@@ -13,6 +13,20 @@
         "password": "",
         "port": 27017
       }
+    }
+  },
+  "redis": {
+    "host": "localhost",
+    "username": "",
+    "password": "",
+    "port": 6379
+  },
+  "publishers": {
+    "communication_queue": {
+      "stream": "communication_queue"
+    },
+    "pending_friend_req_queue": {
+      "stream": "pending_friend_req_queue"
     }
   },
   "nodemailer": {
