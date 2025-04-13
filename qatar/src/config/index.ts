@@ -2,7 +2,9 @@ const nconf = require("nconf");
 import { IConsumers, IRedisConfig, IServer, IServices } from "../typings/config";
 
 export const env = process.env.NODE_ENV || "development";
-let configFile = `src/config/config.${env}.json`;
+
+// TODO: configuration for render platform
+let configFile = `/etc/secrets/config.${env}.json`
 
 nconf.argv().env().file({ file: configFile });
 
