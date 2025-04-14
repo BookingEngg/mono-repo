@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "start": "npm run build && cross-env NODE_ENV=prod nodemon -r tsconfig-paths/ ./dist/server.js",
+    "start": "npm run build && cross-env NODE_ENV=prod ts-node -r tsconfig-paths/register --transpile-only ./dist/src/server.js",
     "build": "swc src -d dist --source-maps --copy-files",
-    "dev": "cross-env NODE_ENV=development nodemon -r tsconfig-paths/ ./server.ts",
-    "prod": "cross-env NODE_ENV=prod nodemon -r tsconfig-paths/ ./server.ts"
+    "dev": "cross-env NODE_ENV=development nodemon",
+    "prod": "cross-env NODE_ENV=prod nodemon"
   },
   "keywords": [
     "node-js"
