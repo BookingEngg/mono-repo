@@ -9,6 +9,7 @@ const CommunicationSchema: Schema<ICommunication> = new Schema(
     sender_user_id: { type: String, required: true },
     receiver_user_id: { type: String, required: true },
     message: { type: String, required: true },
+    message_created_at: { type: Date, required: true },
   },
   {
     timestamps: true,

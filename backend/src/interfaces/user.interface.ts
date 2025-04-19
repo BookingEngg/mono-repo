@@ -53,4 +53,5 @@ export interface ICommunication {
   sender_user_id: string;
   receiver_user_id: string;
   message: string;
+  message_created_at: Date;
 }

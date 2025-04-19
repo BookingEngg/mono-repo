@@ -35,17 +35,13 @@ class CommunicationControllers {
    * Create a new message entry in communication db
    */
   public addNewChat = async (req: Request, res: Response): Promise<any> => {
-    const { sender_id, receiver_id, message } = req.body;
+    const { sender_id, receiver_id, message, message_created_at } = req.body;
 
-    /**
-     * TODO: Optimization Scope:
-     * 1. Need to update the message on bunch (10 message at a time on or time interval just like throttling)
-     * 2. And add the field message send time if we make message send at bunch
-     */
     await this.communicationService.createChat({
       senderId: sender_id,
       receiverId: receiver_id,
       message,
+      message_created_at,
     });
 
     return res.send({ status: "success" });

@@ -19,12 +19,14 @@ class CommunicationService {
     senderId: string;
     receiverId: string;
     message: string;
+    message_created_at: Date;
   }) => {
-    const { senderId, receiverId, message } = payload;
+    const { senderId, receiverId, message, message_created_at } = payload;
     await this.communicationDao.createMessage({
       sender_user_id: senderId,
       receiver_user_id: receiverId,
       message,
+      message_created_at,
     });
   };
 
