@@ -16,6 +16,7 @@ export interface IRedisConfig {
 export interface IPublisher {
   [key: string]: {
     stream: string;
+    queue: string;
   };
 }
 

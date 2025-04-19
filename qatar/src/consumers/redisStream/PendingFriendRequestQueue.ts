@@ -2,6 +2,7 @@ import RedisStream from "./RedisStream";
 import { consumers } from "@/config";
 const { pending_friend_req_queue } = consumers;
 
+// @deprecated use redisBull instead
 class PendingFreiendRequestQueue {
   private redisStream: RedisStream | null = null;
 

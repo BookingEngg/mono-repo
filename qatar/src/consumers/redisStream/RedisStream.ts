@@ -1,7 +1,7 @@
 import Redis from "ioredis";
-import { isProduction, redisConfig } from "../config";
+import { isProduction, redisConfig } from "@/config";
 import { getRedisClientConnectionUrl } from "@/util/util";
-import { IAddListenerPayload, IRedisConsumerConfig } from "./types";
+import { IAddListenerPayload, IRedisConsumerConfig } from "@/consumers/types";
 
 class RedisStream {
   private redisClient: Redis;

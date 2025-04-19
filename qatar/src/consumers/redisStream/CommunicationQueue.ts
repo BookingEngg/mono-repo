@@ -3,6 +3,7 @@ import RedisStream from "./RedisStream";
 import { consumers } from "@/config";
 const { communication_queue } = consumers;
 
+// @deprecated use redisBull instead
 class CommunicationQueue {
   private redisStream: RedisStream;
   private backendHttp: BackendHttp;
