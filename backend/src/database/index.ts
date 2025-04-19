@@ -17,14 +17,6 @@ const getConnectionUrl = (config) => {
 };
 
 const getDataBaseConnection = (config: IDataBase) => {
-  if (isProduction) {
-    mongoose.set("debug", (collectionName, method, query, doc) => {
-      const logMessage = `Mongoose Query - Collection: ${collectionName} | Method: ${method} | Query: ${JSON.stringify(query)} | Doc: ${JSON.stringify(
-        doc
-      )}`;
-      console.debug(logMessage);
-    });
-  }
   return mongoose.createConnection(getConnectionUrl(config));
 };
 
