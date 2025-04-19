@@ -13,10 +13,7 @@ class RedisBull {
 
   constructor(consumerConfig: IRedisBullConsumerConfig) {
     this.queue = new Queue(consumerConfig.queue, {
-      redis: {
-        host: consumerConfig.host,
-        port: consumerConfig.port,
-      },
+      redis: consumerConfig,
     });
   }
 
@@ -38,6 +35,7 @@ class RedisBull {
       }
       done();
     });
+    console.log("QUEUE START LISTENING...");
   };
 }
 

@@ -8,6 +8,8 @@ export interface IRedisBullConsumerConfig {
   queue: string;
   host: string;
   port: number;
+  username: string;
+  password: string;
 }
 
 export interface IAddListenerPayload {

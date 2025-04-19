@@ -38,6 +38,7 @@ class CommunicationQueue {
 
       switch (type) {
         case "new_message":
+          console.log("NEW MESSAGE >>>>>>", data);
           await this.backendHttp.createMessage(data);
           return;
       }

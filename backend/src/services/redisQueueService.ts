@@ -14,10 +14,7 @@ class RedisQueueService extends RedisUtil {
 
     this.queueConfig = queueConfig;
     this.queue = new Queue(this.queueConfig.queue, {
-      redis: {
-        host: this.queueConfig.host,
-        port: this.queueConfig.port,
-      },
+      redis: this.queueConfig,
     });
   }
 
