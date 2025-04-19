@@ -5,15 +5,20 @@ class CommunicationPublisher {
   private queue: RedisQueueService;
 
   constructor() {
-    if (!config.publishers.communication_queue) {
+    const { publishers, redisConfig } = config;
+
+    if (!publishers.communication_queue || !redisConfig) {
       throw new Error("Queue Config Not Found");
     }
 
-    this.queue = new RedisQueueService(config.publishers.communication_queue);
+    this.queue = new RedisQueueService({
+      ...redisConfig,
+      ...publishers.communication_queue,
+    });
   }
 
   public raiseEventForSendMessage = (payload: object) =>
-    this.queue.publishMessage(payload);
+    this.queue.publishMessageToBull(payload);
 }
 
 export default CommunicationPublisher;
