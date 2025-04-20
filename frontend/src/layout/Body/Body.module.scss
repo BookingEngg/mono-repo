@@ -1,6 +1,12 @@
-.content {
+.content-login {
+  overflow: auto;
+  background-color: #cbd7f58e;
+  height: calc(100vh); // middle height is total height - header
+}
+
+.content-auth {
   padding: 16px;
   overflow: auto;
-  height: calc(100vh - 56px); // middle height is total height - header
   background-color: #cbd7f58e;
+  height: calc(100vh - 80px);
 }
