@@ -43,7 +43,6 @@ class SocketEvents {
     if (sender_id && receiver_id && message) {
       const eventPayload = {
         ...parsedPayload,
-        type: "new_message",
         message_created_at: moment.utc().toDate(),  // Message created time
       };
       this.communicationPublisher.raiseEventForSendMessage(eventPayload);

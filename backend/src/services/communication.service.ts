@@ -15,19 +15,27 @@ class CommunicationService {
 
   private communicationFormatter = new CommunicationFormatter();
 
-  public createChat = async (payload: {
-    senderId: string;
-    receiverId: string;
-    message: string;
-    message_created_at: Date;
-  }) => {
-    const { senderId, receiverId, message, message_created_at } = payload;
-    await this.communicationDao.createMessage({
-      sender_user_id: senderId,
-      receiver_user_id: receiverId,
-      message,
-      message_created_at,
+  public createChat = async (
+    data: {
+      sender_id: string;
+      receiver_id: string;
+      message: string;
+      message_created_at: Date;
+    }[]
+  ) => {
+    const pendingPromises = [];
+
+    data.forEach((message) => {
+      const promise = this.communicationDao.createMessage({
+        sender_user_id: message.sender_id,
+        receiver_user_id: message.receiver_id,
+        message: message.message,
+        message_created_at: message.message_created_at,
+      });
+      pendingPromises.push(promise);
     });
+
+    await Promise.all(pendingPromises);
   };
 
   public getUsersChat = async (userDetails: IUser, receiverId: string) => {

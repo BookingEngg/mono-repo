@@ -4,8 +4,6 @@ import { consumers, redisConfig } from "@/config";
 import RedisBull from "./RedisBull";
 // Http
 import BackendHttp from "@/http/backend.http";
-// Types
-import { ICommunicationQueueMessage } from "./redisbulll.interface";
 
 class CommunicationQueue {
   private redisBull: RedisBull;
@@ -24,6 +22,7 @@ class CommunicationQueue {
       messageHandler: this.messageHandler,
       onConsumerError: this.onConsumerError,
     });
+    this.redisBull.enableBatchPublish(); // Enable batch publish
 
     // Initialize Backend Http
     this.backendHttp = new BackendHttp();
@@ -32,15 +31,15 @@ class CommunicationQueue {
   /**
    * All the message listen to the communication queue will come this place
    */
-  private messageHandler = async (data: ICommunicationQueueMessage) => {
+  private messageHandler = async (data: object[]) => {
     try {
-      const { type } = data;
-
-      switch (type) {
-        case "new_message":
-          console.log("NEW MESSAGE >>>>>>", data);
-          await this.backendHttp.createMessage(data);
-          return;
+      if (data?.length) {
+        const payload = {
+          data,
+          type: data.length == 1 ? "single_message" : "batch_messages",
+        };
+        await this.backendHttp.createMessage(payload);
+        return;
       }
     } catch (err) {
       this.onConsumerError(err);
