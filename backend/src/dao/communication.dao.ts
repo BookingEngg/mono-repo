@@ -25,6 +25,31 @@ class CommunicationDao {
       .sort({ createdAt: 1 })
       .limit(100);
   };
+
+  public getLastReceivedChat = async (
+    user_id: string,
+    friends_ids: string[]
+  ) => {
+    return await this.communicationModel.aggregate([
+      {
+        $match: {
+          $or: [
+            { sender_user_id: user_id },
+            { receiver_user_id: { $in: friends_ids } },
+          ],
+        },
+      },
+      {
+        $sort: { updatedAt: -1 },
+      },
+      {
+        $group: {
+          _id: "$receiver_user_id",
+          last_message: { $first: "$$ROOT" },
+        },
+      },
+    ]);
+  };
 }
 
 export default CommunicationDao;
