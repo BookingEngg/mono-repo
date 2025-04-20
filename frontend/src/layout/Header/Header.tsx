@@ -1,11 +1,13 @@
 import { TRoutes } from "@/typings/common";
 import React, { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar, Button, FlexboxGrid, Nav, Text } from "rsuite";
+import { Avatar, FlexboxGrid, Nav, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { logoutAuthUser } from "@/services/Login.service";
 import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/auth";
+// Components
+import { Button } from "@/components/ui/button";
 // Redux
 import { useSelector } from "react-redux";
 import { getAuthUser } from "@/store/auth";
@@ -35,13 +37,16 @@ const Header = () => {
     <div>
       <FlexboxGrid justify="end" align="middle">
         <FlexboxGridItem>
-          <Button
+          <Button variant={"ghost"} size={"lg"} className="bg-transparent rounded-full">
+            Logout
+          </Button>
+          {/* <Button
             style={{ margin: "5px 10px" }}
             appearance="primary"
             onClick={handleAuthUserLogout}
           >
             Logout
-          </Button>
+          </Button> */}
         </FlexboxGridItem>
         <FlexboxGridItem>
           {authUser.user?.user_profile_picture ? (

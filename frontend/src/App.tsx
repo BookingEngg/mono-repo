@@ -25,6 +25,8 @@ import CurrentRouteContext from "@/contextProvider/routeContext";
 // Typings
 import { TRoutes } from "@/typings/common";
 import { useSelector } from "react-redux";
+// Style
+import "./App.css";
 
 /**
  * Get all the routes passing in the routes parameter
