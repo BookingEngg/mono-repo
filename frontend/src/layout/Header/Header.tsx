@@ -1,7 +1,6 @@
-import { TRoutes } from "@/typings/common";
-import React, { useContext } from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar, FlexboxGrid, Nav, Text } from "rsuite";
+import { Avatar, FlexboxGrid, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { logoutAuthUser } from "@/services/Login.service";
 import { useAppDispatch } from "@/store/hooks";
@@ -37,16 +36,14 @@ const Header = () => {
     <div>
       <FlexboxGrid justify="end" align="middle">
         <FlexboxGridItem>
-          <Button variant={"ghost"} size={"lg"} className="bg-transparent rounded-full">
-            Logout
-          </Button>
-          {/* <Button
-            style={{ margin: "5px 10px" }}
-            appearance="primary"
+          <Button
+            variant={"outline"}
+            size={"sm"}
+            className="mr-4"
             onClick={handleAuthUserLogout}
           >
             Logout
-          </Button> */}
+          </Button>
         </FlexboxGridItem>
         <FlexboxGridItem>
           {authUser.user?.user_profile_picture ? (

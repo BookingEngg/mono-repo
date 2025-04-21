@@ -21,7 +21,9 @@ const MainLayout = (props: { routes: TRoutes[]; childrens: JSX.Element }) => {
           <Body>{childrens}</Body>
         </section>
       ) : (
-        <section><Body>{childrens}</Body></section>
+        <section>
+          <Body>{childrens}</Body>
+        </section>
       )}
     </>
   );

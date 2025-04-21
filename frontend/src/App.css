@@ -6,11 +6,6 @@
 
 @custom-variant dark (&:is(.dark *));
 
-#root {
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
