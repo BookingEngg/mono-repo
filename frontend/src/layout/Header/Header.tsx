@@ -32,44 +32,51 @@ const Header = () => {
     }
   }, [logoutAuthUser, dispatch, navigate]);
 
+  // return (
+  //   <div className="bg-red-500">
+  //     <FlexboxGrid justify="end" align="middle">
+  //       <FlexboxGridItem>
+  //         <Button
+  //           variant={"outline"}
+  //           size={"sm"}
+  //           className="mr-4"
+  //           onClick={handleAuthUserLogout}
+  //         >
+  //           Logout
+  //         </Button>
+  //       </FlexboxGridItem>
+  //       <FlexboxGridItem>
+  //         {authUser.user?.user_profile_picture ? (
+  //           <Avatar
+  //             className={cx("sidenav-logo")}
+  //             src={authUser.user?.user_profile_picture}
+  //             alt="Profile Image"
+  //             circle
+  //             size="md"
+  //           />
+  //         ) : (
+  //           <div className={cx("sidenav-custom-logo")}>
+  //             <Text
+  //               size="xxl"
+  //               align="center"
+  //               weight="extrabold"
+  //               transform="capitalize"
+  //             >
+  //               {userNameLogo}
+  //             </Text>
+  //           </div>
+  //         )}
+  //       </FlexboxGridItem>
+  //     </FlexboxGrid>
+  //   </div>
+  // );
+
   return (
-    <div>
-      <FlexboxGrid justify="end" align="middle">
-        <FlexboxGridItem>
-          <Button
-            variant={"outline"}
-            size={"sm"}
-            className="mr-4"
-            onClick={handleAuthUserLogout}
-          >
-            Logout
-          </Button>
-        </FlexboxGridItem>
-        <FlexboxGridItem>
-          {authUser.user?.user_profile_picture ? (
-            <Avatar
-              className={cx("sidenav-logo")}
-              src={authUser.user?.user_profile_picture}
-              alt="Profile Image"
-              circle
-              size="md"
-            />
-          ) : (
-            <div className={cx("sidenav-custom-logo")}>
-              <Text
-                size="xxl"
-                align="center"
-                weight="extrabold"
-                transform="capitalize"
-              >
-                {userNameLogo}
-              </Text>
-            </div>
-          )}
-        </FlexboxGridItem>
-      </FlexboxGrid>
+    <div className="flex flex-row p-4 mb-4 mr-4 border-b border-#00043a dark:border-white-800">
+      <span className="font-bold text-black dark:text-white">Tab Name</span>
+      <div className="ml-auto">ICON</div>
     </div>
-  );
+  )
 };
 
 export default Header;
