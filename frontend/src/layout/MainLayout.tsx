@@ -14,10 +14,12 @@ const MainLayout = (props: { routes: TRoutes[]; childrens: JSX.Element }) => {
   const { routes, childrens } = props;
   const isAuthorized = useAppSelector(isUserAuthorized);
 
+  const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
+
   React.useEffect(() => {
     const root = window.document.documentElement
     root.classList.remove("light", "dark", "soft")
-    root.classList.add("dark")
+    root.classList.add("soft")
   }, [])
 
   // return (
@@ -36,11 +38,18 @@ const MainLayout = (props: { routes: TRoutes[]; childrens: JSX.Element }) => {
   //   </>
   // );
 
+  const openSidebar = () => {
+    setIsSidebarOpen(true);
+  }
+  const closeSidebar = () => {
+    setIsSidebarOpen(false);
+  }
+
   return (
     <>
       {isAuthorized ? (
-        <SidebarProvider className="flex gap-5 bg-background">
-          <SideNav routes={routes} />
+        <SidebarProvider className="flex gap-5 bg-background" open={isSidebarOpen}>
+          <SideNav routes={routes} openSidebar={openSidebar} closeSidebar={closeSidebar} />
           <div className="w-full">
             <Header />
             <Body>{childrens}</Body>

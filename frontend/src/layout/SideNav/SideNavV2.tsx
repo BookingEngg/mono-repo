@@ -8,8 +8,8 @@ import {
 } from "@/components/ui/sidebar";
 import { TRoutes } from "@/typings/common";
 
-const SideNavV2 = (props: { routes: TRoutes[] }) => {
-  const { routes } = props;
+const SideNavV2 = (props: { routes: TRoutes[], openSidebar: () => void, closeSidebar: () => void }) => {
+  const { routes, openSidebar, closeSidebar } = props;
   console.log(routes);
 
   return (
