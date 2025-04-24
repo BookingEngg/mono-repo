@@ -50,6 +50,7 @@ export interface ICommUser {
   last_message: string;
   user_profile_picture: string;
 }
+
 const Communication = () => {
   const loggedInUser = useSelector(getAuthUser);
   const navigate = useNavigate();
@@ -219,7 +220,7 @@ const Communication = () => {
             >
               <Container className={cx("chat-item-content")}>
                 <Row>
-                  <Col xs={6} sm={6} md={6} lg={3}>
+                  <Col xs={6} sm={6} md={6} lg={4}>
                     <Avatar
                       className={cx("sidenav-logo")}
                       src={user.user_profile_picture}
@@ -229,7 +230,7 @@ const Communication = () => {
                       size="md"
                     />
                   </Col>
-                  <Col xs={18} sm={18} md={16} lg={21}>
+                  <Col xs={18} sm={18} md={16} lg={20}>
                     <FlexboxGrid>
                       <FlexboxGridItem colspan={24}>
                         <FlexboxGrid>

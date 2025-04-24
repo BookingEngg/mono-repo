@@ -40,13 +40,19 @@ class UserService {
     const lastReceivedChatMap = R.indexBy(R.prop("_id"), lastReceivedChat);
 
     const formattedChatUsers = chatUsers.map((user) => {
+      const receiverDetails = lastReceivedChatMap[user._id];
+      const lastMessage = receiverDetails?.last_message?.message || "";
+      const lastOnlineAt = moment(receiverDetails?.last_message?.createdAt)
+        .utcOffset("+05:30")
+        .format("hh:mm a");
+
       return {
         user_id: user._id,
         name: `${user.first_name} ${user.last_name}`,
         time: user.updatedAt,
         user_profile_picture: user.user_profile_picture,
-        last_message: lastReceivedChatMap[user._id].last_message.message,
-        last_online_at: moment(lastReceivedChatMap[user._id].last_message.createdAt).utcOffset("+05:30").format("hh:mm a"),
+        last_message: lastMessage,
+        last_online_at: lastOnlineAt,
       };
     });
 
