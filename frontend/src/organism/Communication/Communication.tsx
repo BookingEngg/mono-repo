@@ -12,7 +12,17 @@ import {
 // Socket IO
 import { io, Socket } from "socket.io-client";
 // Rsuite
-import { Button, Col, FlexboxGrid, Input, Panel, Row, Text } from "rsuite";
+import {
+  Avatar,
+  Button,
+  Col,
+  Container,
+  FlexboxGrid,
+  Input,
+  Panel,
+  Row,
+  Text,
+} from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 // Style
 import style from "./Communication.module.scss";
@@ -36,6 +46,9 @@ export interface ICommUser {
   user_id: string;
   name: string;
   date: string;
+  last_online_at: string;
+  last_message: string;
+  user_profile_picture: string;
 }
 const Communication = () => {
   const loggedInUser = useSelector(getAuthUser);
@@ -186,7 +199,7 @@ const Communication = () => {
   }
 
   return (
-    <FlexboxGrid justify="space-between" className={cx("chat-container")} >
+    <FlexboxGrid justify="space-between" className={cx("chat-container")}>
       <FlexboxGridItem colspan={8} className={cx("chat-left-container")}>
         <Text size="xl">Chats</Text>
         <FlexboxGrid>
@@ -204,10 +217,48 @@ const Communication = () => {
               }}
               id={`chat-item-${index + 1}`}
             >
-              <FlexboxGrid justify="space-between">
-                <FlexboxGridItem>{user.name}</FlexboxGridItem>
-                <FlexboxGridItem>{user.date}</FlexboxGridItem>
-              </FlexboxGrid>
+              <Container className={cx("chat-item-content")}>
+                <Row>
+                  <Col xs={6} sm={6} md={6} lg={3}>
+                    <Avatar
+                      className={cx("sidenav-logo")}
+                      src={user.user_profile_picture}
+                      alt="Profile Image"
+                      circle
+                      bordered
+                      size="md"
+                    />
+                  </Col>
+                  <Col xs={18} sm={18} md={16} lg={21}>
+                    <FlexboxGrid>
+                      <FlexboxGridItem colspan={24}>
+                        <FlexboxGrid>
+                          <FlexboxGridItem colspan={20}>
+                            <Text
+                              size="lg"
+                              weight="bold"
+                              className={cx("user-item-content-elipsis")}
+                            >
+                              {user.name}
+                            </Text>
+                          </FlexboxGridItem>
+                          <FlexboxGridItem colspan={4}>
+                            <Text size="sm" weight="thin">
+                              {user.last_online_at}
+                            </Text>
+                          </FlexboxGridItem>
+                        </FlexboxGrid>
+                      </FlexboxGridItem>
+                      <FlexboxGridItem
+                        colspan={24}
+                        className={cx("user-item-content-elipsis")}
+                      >
+                        {user.last_message}
+                      </FlexboxGridItem>
+                    </FlexboxGrid>
+                  </Col>
+                </Row>
+              </Container>
             </FlexboxGridItem>
           ))}
         </FlexboxGrid>

@@ -17,10 +17,18 @@
     flex: 1;
 
     .left-chat-item {
-      padding: 20px 5px;
+      padding: 10px 10px;
       background-color: aliceblue;
       margin: 5px 0px;
       border-radius: 5px;
+    }
+    
+    .user-item-content-elipsis {
+      height: 3dvh;
+      width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .left-chat-item-selected {

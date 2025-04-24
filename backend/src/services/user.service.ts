@@ -1,3 +1,4 @@
+import moment from "moment";
 import R from "ramda";
 import CommunicationDao from "@/dao/communication.dao";
 import UserDao from "@/dao/user.dao";
@@ -45,7 +46,7 @@ class UserService {
         time: user.updatedAt,
         user_profile_picture: user.user_profile_picture,
         last_message: lastReceivedChatMap[user._id].last_message.message,
-        last_online_at: lastReceivedChatMap[user._id].last_message.createdAt,
+        last_online_at: moment(lastReceivedChatMap[user._id].last_message.createdAt).utcOffset("+05:30").format("hh:mm a"),
       };
     });
 
