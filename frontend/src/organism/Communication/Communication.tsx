@@ -220,7 +220,7 @@ const Communication = () => {
             >
               <Container className={cx("chat-item-content")}>
                 <Row>
-                  <Col xs={6} sm={6} md={6} lg={4}>
+                  <Col xs={4} sm={3} md={6} lg={4}>
                     <Avatar
                       className={cx("sidenav-logo")}
                       src={user.user_profile_picture}
@@ -230,7 +230,7 @@ const Communication = () => {
                       size="md"
                     />
                   </Col>
-                  <Col xs={18} sm={18} md={16} lg={20}>
+                  <Col xs={20} sm={21} md={16} lg={20}>
                     <FlexboxGrid>
                       <FlexboxGridItem colspan={24}>
                         <FlexboxGrid>

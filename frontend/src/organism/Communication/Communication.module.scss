@@ -12,7 +12,8 @@
   }
 
   .chat-left-container {
-    max-height: 80vh;
+    min-height: 88dvh;
+    max-height: 88dvh;
     overflow-y: scroll;
     flex: 1;
 
@@ -39,7 +40,8 @@
   .chat-right-container {
     .right-chat {
       width: 100%;
-      max-height: 75vh;
+      min-height: 73dvh;
+      max-height: 73dvh;
       overflow-y: scroll;
     }
 
@@ -65,7 +67,8 @@
   /* Mobile & Tablet responsiveness */
   @media (max-width: 768px) {
     .chat-left-container {
-      max-height: 30vh;
+      min-height: auto;
+      max-height: 30dvh;
       width: 100%;
       margin-bottom: 10px;
       overflow-y: scroll;
@@ -75,7 +78,8 @@
       width: 100%;
 
       .right-chat {
-        max-height: 40vh !important;
+        min-height: auto !important;
+        max-height: 40dvh !important;
       }
     }
 
@@ -100,6 +104,7 @@
       padding: 5px;
 
       .right-chat {
+        min-height: auto !important;
         max-height: 55vh !important;
       }
     }
@@ -127,11 +132,9 @@
       text-align: left;
     }
 
-    /* Adjust the button size */
     .chat-right-container button {
       padding: 5px 10px;
       font-size: 10px;
     }
   }
 }
-
