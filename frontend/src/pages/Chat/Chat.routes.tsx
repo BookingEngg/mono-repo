@@ -20,6 +20,9 @@ const getChatRoutes = () => {
       showOnSideNav: true,
       key: "communication",
       label: "Communication",
+      handle: {
+        identifier: "root",
+      },
     },
   ];
 

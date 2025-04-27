@@ -12,7 +12,7 @@ const getHomeRoutes = () => {
       icon: <Payment />,
       showOnSideNav: true,
       key: "home",
-      label: "Home",
+      label: "Summary",
       handle: { identifier: "root" },
     },
   ];
