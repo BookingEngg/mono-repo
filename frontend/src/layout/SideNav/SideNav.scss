@@ -15,7 +15,7 @@
       flex-direction: column;
 
       .sidenav-iconholder {
-        padding: 15px;
+        padding: 13.8px 16px;
 
         &:hover {
           cursor: pointer;
@@ -58,10 +58,6 @@
 
       .selected-menuitem-color {
         color: #4764cd;
-      }
-
-      .temp {
-        border: 1px solid red;
       }
     }
   } 
