@@ -20,6 +20,9 @@ const getCommunityRoutes = () => {
       showOnSideNav: true,
       key: "community",
       label: "Community",
+      handle: {
+        identifier: "root",
+      },
       children: [
         {
           path: `${BASE_URL}/add`,

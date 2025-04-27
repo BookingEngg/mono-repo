@@ -63,7 +63,7 @@ const PageNavigationTabGroup = (props: IPageNavigationTabGroupType) => {
             handleTabChange(route);
           }}
         >
-          <Text weight="semibold">{route.label}</Text>
+          <Text weight="medium">{route.label}</Text>
         </FlexboxGridItem>
       ))}
     </FlexboxGrid>
