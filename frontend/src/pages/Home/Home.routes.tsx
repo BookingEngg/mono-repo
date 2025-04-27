@@ -1,6 +1,9 @@
-import { TRoutes } from "@/typings/common";
-import Payment from "@/atoms/icons/Payment";
+// Icons
+import { HomeIcon } from "lucide-react";
+// Organism
 import Home from "@/organism/Home";
+// Typings
+import { TRoutes } from "@/typings/common";
 
 export const BASE_URL = "/";
 
@@ -9,7 +12,7 @@ const getHomeRoutes = () => {
     {
       path: BASE_URL,
       element: <Home />,
-      icon: <Payment />,
+      icon: <HomeIcon />,
       showOnSideNav: true,
       key: "home",
       label: "Summary",

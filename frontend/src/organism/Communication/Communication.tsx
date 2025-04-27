@@ -100,11 +100,13 @@ const Communication = () => {
   // Fetch the communication of selected index user
   const handleUserChange = React.useCallback(
     async (currentUserIndex: number) => {
-      const response = await getUserChatsDetails(
-        userList[currentUserIndex].user_id
-      );
+      if (userList[currentUserIndex]?.user_id) {
+        const response = await getUserChatsDetails(
+          userList[currentUserIndex].user_id
+        );
 
-      setCurrentUserMessages({ ...response.data, index: currentUserIndex });
+        setCurrentUserMessages({ ...response.data, index: currentUserIndex });
+      }
     },
     [userList, currentUserMessages]
   );

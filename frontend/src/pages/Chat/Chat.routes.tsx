@@ -1,8 +1,8 @@
 
 import { TRoutes } from "@/typings/common";
-import CommunicationLogo from "@/atoms/icons/Communication";
 import { Outlet } from "react-router-dom";
 import Communication  from "@/organism/Communication";
+import { MessageCircle } from "lucide-react";
 
 export const BASE_URL = "/chat";
 
@@ -16,7 +16,7 @@ const getChatRoutes = () => {
           <Communication />
         </>
       ),
-      icon: <CommunicationLogo />,
+      icon: <MessageCircle />,
       showOnSideNav: true,
       key: "communication",
       label: "Communication",

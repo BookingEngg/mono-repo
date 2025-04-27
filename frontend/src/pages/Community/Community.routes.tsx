@@ -1,5 +1,5 @@
-// Atoms
-import FriendsLogo from "@/atoms/icons/FriendsLogo";
+// Icons
+import { Users } from "lucide-react";
 // Pages
 import Community from "./Community";
 // Organism
@@ -16,7 +16,7 @@ const getCommunityRoutes = () => {
     {
       path: BASE_URL,
       element: <Community />,
-      icon: <FriendsLogo />,
+      icon: <Users />,
       showOnSideNav: true,
       key: "community",
       label: "Community",
