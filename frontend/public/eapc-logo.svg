@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- House shape -->
+  <path d="M12 2L2 12h3v8h14v-8h3L12 2z" 
+        fill="none" 
+        stroke="white" 
+        stroke-width="1.5" />
+  
+  <!-- Door -->
+  <rect x="10" y="14" width="4" height="6" 
+        fill="none" 
+        stroke="white" 
+        stroke-width="1" />
+  
+  <!-- Window -->
+  <rect x="5" y="8" width="4" height="4" 
+        fill="none" 
+        stroke="white" 
+        stroke-width="1" />
+  <rect x="15" y="8" width="4" height="4" 
+        fill="none" 
+        stroke="white" 
+        stroke-width="1" />
+  
+  <!-- EAPC text -->
+  <text
+    x="50%"
+    y="50%"
+    text-anchor="middle"
+    dominant-baseline="middle"
+    font-size="4"
+    font-weight="bold"
+    fill="white"
+    font-family="Gliker, sans-serif"
+  >
+    EAPC
+  </text>
+</svg> 
