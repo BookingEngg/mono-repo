@@ -1,9 +1,11 @@
-import { TRoutes } from "@/typings/common";
-import Home from "@/organism/Home";
+// Icons
 import { HomeIcon } from "lucide-react";
+// Organism
+import Home from "@/organism/Home";
+// Typings
+import { TRoutes } from "@/typings/common";
 
 export const BASE_URL = "/";
-export const PROFILE_BASE_URL = "/profile";
 
 const getHomeRoutes = () => {
   const routes: TRoutes[] = [
@@ -14,15 +16,6 @@ const getHomeRoutes = () => {
       showOnSideNav: true,
       key: "home",
       label: "Summary",
-      handle: { identifier: "root" },
-    },
-    {
-      path: PROFILE_BASE_URL,
-      element: <Home />,
-      showOnSideNav: false,
-      showOnTab: false,
-      key: "profile",
-      label: "Profile",
       handle: { identifier: "root" },
     },
   ];

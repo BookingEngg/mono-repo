@@ -18,6 +18,8 @@ const cx = classNames.bind(style);
 const Header = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const authUser = useSelector(getAuthUser);
+
   const { currentRoute: selectedRoute } = useContext(CurrentRouteContext);
 
   const [currentTabName, setCurrentTabName] = React.useState<string>("");
@@ -34,8 +36,6 @@ const Header = () => {
     }
   }, [selectedRoute]);
 
-  const authUser = useSelector(getAuthUser);
-
   const handleAuthUserLogout = React.useCallback(async () => {
     dispatch(logout());
     const response = await logoutAuthUser();
@@ -51,7 +51,7 @@ const Header = () => {
           {currentTabName || ""}
         </Text>
 
-        <FlexboxGrid>
+        <FlexboxGrid align="middle">
           <FlexboxGridItem>
             <Dropdown
               ref={dropdownRef}
@@ -74,7 +74,9 @@ const Header = () => {
                 </strong>
               </Dropdown.Item>
               <Dropdown.Separator />
-              <Dropdown.Item>Your profile</Dropdown.Item>
+              <Dropdown.Item onClick={() => navigate("/")}>
+                Your profile
+              </Dropdown.Item>
               <Dropdown.Item>Help</Dropdown.Item>
               <Dropdown.Separator />
               <Dropdown.Item onClick={handleAuthUserLogout}>
