@@ -269,8 +269,8 @@ const Communication = () => {
       <FlexboxGridItem colspan={16} className={cx("chat-right-container")}>
         <Text size="xl">{currentUserMessages?.username}</Text>
         <FlexboxGrid align="middle" justify="start">
-          <FlexboxGridItem colspan={24}>
-            <FlexboxGrid className={cx("right-chat")}>
+          <FlexboxGridItem colspan={24} className={cx("right-chat-outer-container")}>
+            <FlexboxGrid align="middle" justify="start" className={cx("right-chat")}>
               {currentUserMessages?.chats?.length ? (
                 currentUserMessages.chats.map((chat) => {
                   const isAuthUserMsg = chat.user_id === loggedInUser.user?._id;
