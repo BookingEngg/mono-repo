@@ -1,22 +1,25 @@
-import { TRoutes } from "@/typings/common";
 import React, { useContext, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Avatar, Button, Dropdown, FlexboxGrid, Nav, Text } from "rsuite";
+import { Avatar, Dropdown, FlexboxGrid, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 import { logoutAuthUser } from "@/services/Login.service";
 import { useAppDispatch } from "@/store/hooks";
 import { logout } from "@/store/auth";
+// Context
+import CurrentRouteContext from "@/contextProvider/routeContext";
 // Redux
 import { useSelector } from "react-redux";
 import { getAuthUser } from "@/store/auth";
 // Style
 import style from "./Header.module.scss";
 import classNames from "classnames/bind";
-import CurrentRouteContext from "@/contextProvider/routeContext";
 const cx = classNames.bind(style);
 
 const Header = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { currentRoute: selectedRoute } = useContext(CurrentRouteContext);
+
   const [currentTabName, setCurrentTabName] = React.useState<string>("");
   const dropdownRef = useRef(null);
 
@@ -32,12 +35,6 @@ const Header = () => {
   }, [selectedRoute]);
 
   const authUser = useSelector(getAuthUser);
-  const userNameLogo =
-    (authUser.user?.first_name.charAt(0) || "") +
-    (authUser.user?.last_name.charAt(0) || "");
-
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
   const handleAuthUserLogout = React.useCallback(async () => {
     dispatch(logout());
