@@ -18,6 +18,9 @@ const getSettingsRoutes = () => {
       showOnSideNav: true,
       label: "Setting",
       key: "setting",
+      handle: {
+        identifier: "root",
+      },
     },
   ];
 

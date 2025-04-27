@@ -234,7 +234,7 @@ const Communication = () => {
                     <FlexboxGrid>
                       <FlexboxGridItem colspan={24}>
                         <FlexboxGrid>
-                          <FlexboxGridItem colspan={20}>
+                          <FlexboxGridItem colspan={19}>
                             <Text
                               size="lg"
                               weight="bold"
@@ -243,7 +243,7 @@ const Communication = () => {
                               {user.name}
                             </Text>
                           </FlexboxGridItem>
-                          <FlexboxGridItem colspan={4}>
+                          <FlexboxGridItem colspan={5}>
                             <Text size="sm" weight="thin">
                               {user.last_online_at}
                             </Text>
