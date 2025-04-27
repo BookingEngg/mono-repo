@@ -9,8 +9,11 @@ import { SideNavProps } from "./types";
 // Context Provider
 import CurrentRouteContext from "@/contextProvider/routeContext";
 // style
-import { FlexboxGrid, Text } from "rsuite";
+import { Divider, FlexboxGrid, Text } from "rsuite";
 import "./SideNav.scss";
+import { LayoutDashboard } from "lucide-react";
+import { getAuthUser } from "@/store/auth";
+import { useSelector } from "react-redux";
 
 const SideNav = (props: SideNavProps) => {
   const { routes } = props;
@@ -40,6 +43,11 @@ const SideNav = (props: SideNavProps) => {
           }}
         >
           <div className="sidenav-item-container">
+            <div className="sidenav-iconholder">
+              <span>
+                <LayoutDashboard color="blue" />
+              </span>
+            </div>
             {validRoutesForNav.map((route) => {
               // ${selectedRoute.key === route.key ? 'selected-menuitem' : ''
               // this code is work only for routes who does not have any child
@@ -78,6 +86,8 @@ const SideNav = (props: SideNavProps) => {
 };
 
 const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
+  const authUser = useSelector(getAuthUser);
+
   const { routes } = props;
   const navigate = useNavigate();
 
@@ -112,6 +122,17 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
 
   return (
     <div className="sidenav-item-container">
+      <div className="sidenav-item-container">
+        <FlexboxGrid className={`menuitem-holder`} align="middle">
+          <LayoutDashboard color="blue" />
+          &nbsp;&nbsp;&nbsp;&nbsp;
+          <Text size="xl" weight="bold">
+            {authUser?.user?.first_name
+              ? `Hi, ${authUser?.user?.first_name}`
+              : "Dashboard"}
+          </Text>
+        </FlexboxGrid>
+      </div>
       {validRoutesForNav.map((route) => {
         const validSubRouteForSideNav = route.children?.filter((route) =>
           Boolean(route.showOnSideNav)
@@ -130,7 +151,7 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
                 selectedTabHandler(route);
               }}
             >
-              {route.icon}
+              {route.icon}&nbsp;&nbsp;&nbsp;&nbsp;
               <Text
                 size="lg"
                 className={
@@ -147,7 +168,6 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
               >
                 {route.label}
               </Text>
-
               <div className="dropdown-container">
                 {validSubRouteForSideNav?.length ? (
                   <DropDown

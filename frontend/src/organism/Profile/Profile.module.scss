@@ -1,0 +1,25 @@
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .signup-form-card {
+    box-shadow: 0px 0px 10px #4764cd7e;
+    padding: 10vh 8vh;
+    width: 60vh;
+    border-radius: 6px;
+  }
+
+  p {
+    margin: 10px 0px;
+  }
+
+  .action-cta {
+    width: 100%;
+  }
+
+  .external-signup-div {
+    margin-top: 2vh;
+  }
+}
