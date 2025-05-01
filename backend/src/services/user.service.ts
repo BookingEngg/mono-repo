@@ -39,7 +39,31 @@ class UserService {
 
     const lastReceivedChatMap = R.indexBy(R.prop("_id"), lastReceivedChat);
 
-    const formattedChatUsers = chatUsers.map((user) => {
+    // Sort the users accourding to last message
+    const sortedChatUsers = chatUsers.slice().sort((a, b) => {
+      const userA = lastReceivedChatMap[a._id];
+      const userB = lastReceivedChatMap[b._id];
+    
+      const hasUserAChatted = !!userA?.last_message?.createdAt;
+      const hasUserBChatted = !!userB?.last_message?.createdAt;
+    
+      // If neither has chatted, maintain current order
+      if (!hasUserAChatted && !hasUserBChatted) return -1;
+    
+      // If only A hasn't chatted, push A down
+      if (!hasUserAChatted) return 1;
+    
+      // If only B hasn't chatted, push B down
+      if (!hasUserBChatted) return -1;
+    
+      // Both have chatted, sort by latest message
+      const dateA = new Date(userA.last_message.createdAt).getTime();
+      const dateB = new Date(userB.last_message.createdAt).getTime();
+    
+      return dateB - dateA;
+    });
+
+    const formattedChatUsers = sortedChatUsers.map((user) => {
       const receiverDetails = lastReceivedChatMap[user._id];
       const lastMessage = receiverDetails?.last_message?.message || "";
       const lastOnlineAt = moment(receiverDetails?.last_message?.createdAt)
