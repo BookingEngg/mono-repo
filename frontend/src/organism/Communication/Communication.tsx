@@ -76,9 +76,19 @@ const Communication = () => {
       created_at: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
     };
 
+    // Update the user list to top
+    if (currentUserMessages?.index) {
+      const filterUser = userList[currentUserMessages.index];
+
+      userList.splice(currentUserMessages.index, 1);
+      userList.unshift(filterUser);
+    }
+
+    // Update the message block of sender and the user positioning
     if (currentUserMessages) {
       setCurrentUserMessages({
         ...currentUserMessages,
+        index: 0,
         chats: [...currentUserMessages.chats, newMessage],
       });
     }
@@ -95,7 +105,7 @@ const Communication = () => {
       );
     }
     setMessage("");
-  }, [message, socket]);
+  }, [userList, message, socket]);
 
   // Fetch the communication of selected index user
   const handleUserChange = React.useCallback(
@@ -150,6 +160,7 @@ const Communication = () => {
     }) => {
       const { user_id, message, created_at } = datum;
 
+      // This message is not belong to the current user
       if (user_id !== currentUserMessagesRef.current?.receiver_id) {
         return;
       }
@@ -161,7 +172,6 @@ const Communication = () => {
           created_at,
           user_name: "",
         };
-
         setCurrentUserMessages((prev) => {
           if (!prev) return prev;
           return {
@@ -269,8 +279,15 @@ const Communication = () => {
       <FlexboxGridItem colspan={16} className={cx("chat-right-container")}>
         <Text size="xl">{currentUserMessages?.username}</Text>
         <FlexboxGrid align="middle" justify="start">
-          <FlexboxGridItem colspan={24} className={cx("right-chat-outer-container")}>
-            <FlexboxGrid align="middle" justify="start" className={cx("right-chat")}>
+          <FlexboxGridItem
+            colspan={24}
+            className={cx("right-chat-outer-container")}
+          >
+            <FlexboxGrid
+              align="middle"
+              justify="start"
+              className={cx("right-chat")}
+            >
               {currentUserMessages?.chats?.length ? (
                 currentUserMessages.chats.map((chat) => {
                   const isAuthUserMsg = chat.user_id === loggedInUser.user?._id;
