@@ -76,13 +76,25 @@ const Communication = () => {
       created_at: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
     };
 
-    // Update the user list to top
-    if (currentUserMessages?.index) {
-      const filterUser = userList[currentUserMessages.index];
+    // Update the user list to move the user to top with updated message & time
+    setUserList((prevList) => {
+      const newList = [...prevList];
 
-      userList.splice(currentUserMessages.index, 1);
-      userList.unshift(filterUser);
-    }
+      if (currentUserMessages && currentUserMessages.index !== -1) {
+        const userToUpdate = newList[currentUserMessages.index];
+        if (userToUpdate) {
+          const updatedUser = {
+            ...userToUpdate,
+            last_message: message,
+            last_online_at: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
+          };
+          newList.splice(currentUserMessages.index, 1);
+          newList.unshift(updatedUser);
+        }
+      }
+
+      return newList;
+    });
 
     // Update the message block of sender and the user positioning
     if (currentUserMessages) {
@@ -105,7 +117,7 @@ const Communication = () => {
       );
     }
     setMessage("");
-  }, [userList, message, socket]);
+  }, [userList, message, socket, currentUserMessages]);
 
   // Fetch the communication of selected index user
   const handleUserChange = React.useCallback(
@@ -159,19 +171,39 @@ const Communication = () => {
       created_at: string;
     }) => {
       const { user_id, message, created_at } = datum;
-
-      // This message is not belong to the current user
-      if (user_id !== currentUserMessagesRef.current?.receiver_id) {
+      if (!user_id || !message) {
         return;
       }
 
-      if (user_id && message) {
-        const newMessage = {
-          message,
-          user_id: user_id,
-          created_at,
-          user_name: "",
+      const newMessage = {
+        message,
+        user_id: user_id,
+        created_at,
+        user_name: "",
+      };
+
+      setUserList((prevList) => {
+        const newList = [...prevList];
+        const filterUserIdx = newList.findIndex(
+          (user) => user.user_id === newMessage.user_id
+        );
+
+        if (filterUserIdx === -1) return newList;
+
+        const filterUser = {
+          ...newList[filterUserIdx],
+          last_message: newMessage.message,
+          last_online_at: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
         };
+
+        newList.splice(filterUserIdx, 1); // Remove old position
+        newList.unshift(filterUser); // Insert at top
+
+        return newList;
+      });
+
+      // This message belong to the current user (Update messoge on chat section)
+      if (user_id === currentUserMessagesRef.current?.receiver_id) {
         setCurrentUserMessages((prev) => {
           if (!prev) return prev;
           return {
