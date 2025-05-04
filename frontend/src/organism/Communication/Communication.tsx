@@ -61,6 +61,7 @@ const Communication = () => {
   const [currentUserMessages, setCurrentUserMessages] =
     React.useState<IUserCommChat | null>(null);
   const currentUserMessagesRef = React.useRef(currentUserMessages);
+  const [isFetchUserChat, setIsFetchUserChat] = React.useState(true);
 
   React.useEffect(() => {
     currentUserMessagesRef.current = currentUserMessages;
@@ -76,12 +77,36 @@ const Communication = () => {
       created_at: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
     };
 
-    if (currentUserMessages) {
-      setCurrentUserMessages({
-        ...currentUserMessages,
-        chats: [...currentUserMessages.chats, newMessage],
-      });
-    }
+    // Update the message block of sender and the user positioning
+    setCurrentUserMessages((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        index: 0,
+        chats: [...prev.chats, newMessage],
+      };
+    });
+
+    // Update the user list to move the user to top with updated message & time
+    setUserList((prevList) => {
+      const newList = [...prevList];
+
+      if (currentUserMessages && currentUserMessages.index !== -1) {
+        const userToUpdate = newList[currentUserMessages.index];
+        if (userToUpdate) {
+          const updatedUser = {
+            ...userToUpdate,
+            last_message: message,
+            last_online_at: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
+          };
+          newList.splice(currentUserMessages.index, 1);
+          newList.unshift(updatedUser);
+        }
+      }
+
+      return newList;
+    });
 
     // Raise an socket event
     if (socket) {
@@ -95,7 +120,7 @@ const Communication = () => {
       );
     }
     setMessage("");
-  }, [message, socket]);
+  }, [userList, message, socket, currentUserMessages]);
 
   // Fetch the communication of selected index user
   const handleUserChange = React.useCallback(
@@ -106,6 +131,7 @@ const Communication = () => {
         );
 
         setCurrentUserMessages({ ...response.data, index: currentUserIndex });
+        setIsFetchUserChat(false); // Now no need to auto fetch the chat
       }
     },
     [userList, currentUserMessages]
@@ -113,7 +139,9 @@ const Communication = () => {
 
   // Fetch the First user message default
   React.useEffect(() => {
-    handleUserChange(0);
+    if (isFetchUserChat) {
+      handleUserChange(0);
+    }
   }, [userList]);
 
   React.useEffect(() => {
@@ -149,24 +177,52 @@ const Communication = () => {
       created_at: string;
     }) => {
       const { user_id, message, created_at } = datum;
-
-      if (user_id !== currentUserMessagesRef.current?.receiver_id) {
+      if (!user_id || !message) {
         return;
       }
 
-      if (user_id && message) {
-        const newMessage = {
-          message,
-          user_id: user_id,
-          created_at,
-          user_name: "",
+      const newMessage = {
+        message,
+        user_id: user_id,
+        created_at,
+        user_name: "",
+      };
+
+      setUserList((prevList) => {
+        const newList = [...prevList];
+        const filterUserIdx = newList.findIndex(
+          (user) => user.user_id === newMessage.user_id
+        );
+
+        if (filterUserIdx === -1) return newList;
+
+        const filterUser = {
+          ...newList[filterUserIdx],
+          last_message: newMessage.message,
+          last_online_at: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
         };
 
+        newList.splice(filterUserIdx, 1); // Remove old position
+        newList.unshift(filterUser); // Insert at top
+
+        return newList;
+      });
+
+      // This message belong to the current user (Update messoge on chat section)
+      if (user_id === currentUserMessagesRef.current?.receiver_id) {
         setCurrentUserMessages((prev) => {
           if (!prev) return prev;
           return {
             ...prev,
             chats: [...prev.chats, newMessage],
+          };
+        });
+      } else {
+        setCurrentUserMessages((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            index: prev.index + 1,
           };
         });
       }
@@ -269,8 +325,15 @@ const Communication = () => {
       <FlexboxGridItem colspan={16} className={cx("chat-right-container")}>
         <Text size="xl">{currentUserMessages?.username}</Text>
         <FlexboxGrid align="middle" justify="start">
-          <FlexboxGridItem colspan={24}>
-            <FlexboxGrid className={cx("right-chat")}>
+          <FlexboxGridItem
+            colspan={24}
+            className={cx("right-chat-outer-container")}
+          >
+            <FlexboxGrid
+              align="middle"
+              justify="start"
+              className={cx("right-chat")}
+            >
               {currentUserMessages?.chats?.length ? (
                 currentUserMessages.chats.map((chat) => {
                   const isAuthUserMsg = chat.user_id === loggedInUser.user?._id;
