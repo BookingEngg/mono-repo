@@ -1,7 +1,6 @@
-import React from "react";
 import { Outlet } from "react-router-dom";
 import { TRoutes } from "@/typings/common";
-import SettingsIcon from "@/atoms/icons/Settings";
+import { Settings } from "lucide-react";
 
 export const BASE_URL = "/setting";
 
@@ -14,7 +13,7 @@ const getSettingsRoutes = () => {
           Setting Page <Outlet />
         </>
       ),
-      icon: <SettingsIcon />,
+      icon: <Settings />,
       showOnSideNav: true,
       label: "Setting",
       key: "setting",

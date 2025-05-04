@@ -30,21 +30,62 @@ class UserService {
     return this.userDao.getUserByEmail(email);
   };
 
-  public getChatUsers = async (user: IUser) => {
-    const chatUsers = await this.userDao.getUserByUserIds(user.friends_ids);
+  public getChatUsers = async (authUser: IUser) => {
+    const chatUsers = await this.userDao.getUserByUserIds(authUser.friends_ids);
     const lastReceivedChat = await this.communicationDao.getLastReceivedChat(
-      user._id,
-      user.friends_ids
+      authUser._id
     );
 
     const lastReceivedChatMap = R.indexBy(R.prop("_id"), lastReceivedChat);
 
-    const formattedChatUsers = chatUsers.map((user) => {
-      const receiverDetails = lastReceivedChatMap[user._id];
+    // Sort the users accourding to last message
+    const sortedChatUsers = chatUsers.slice().sort((a, b) => {
+      const senderApproachAKey = `${authUser._id}_${a._id}`;
+      const receiverApproachAKey = `${a._id}_${authUser._id}`;
+
+      const senderApproachBKey = `${authUser._id}_${b._id}`;
+      const receiverApproachBKey = `${b._id}_${authUser._id}`;
+
+      const userA =
+        lastReceivedChatMap[senderApproachAKey] ||
+        lastReceivedChatMap[receiverApproachAKey];
+      const userB =
+        lastReceivedChatMap[senderApproachBKey] ||
+        lastReceivedChatMap[receiverApproachBKey];
+
+      const hasUserAChatted = !!userA?.last_message?.createdAt;
+      const hasUserBChatted = !!userB?.last_message?.createdAt;
+
+      // If neither has chatted, maintain current order
+      if (!hasUserAChatted && !hasUserBChatted) return -1;
+
+      // If only A hasn't chatted, push A down
+      if (!hasUserAChatted) return 1;
+
+      // If only B hasn't chatted, push B down
+      if (!hasUserBChatted) return -1;
+
+      // Both have chatted, sort by latest message
+      const dateA = new Date(userA.last_message.createdAt).getTime();
+      const dateB = new Date(userB.last_message.createdAt).getTime();
+
+      return dateB - dateA;
+    });
+
+    const formattedChatUsers = sortedChatUsers.map((user) => {
+      const senderApproachKey = `${authUser._id}_${user._id}`;
+      const receiverApproachKey = `${user._id}_${authUser._id}`;
+
+      const receiverDetails =
+        lastReceivedChatMap[senderApproachKey] ||
+        lastReceivedChatMap[receiverApproachKey];
+
       const lastMessage = receiverDetails?.last_message?.message || "";
-      const lastOnlineAt = moment(receiverDetails?.last_message?.createdAt)
-        .utcOffset("+05:30")
-        .format("hh:mm a");
+      const lastOnlineAt = receiverDetails?.last_message?.createdAt
+        ? moment(receiverDetails.last_message.createdAt)
+            .utcOffset("+05:30")
+            .format("hh:mm a")
+        : "";
 
       return {
         user_id: user._id,

@@ -38,9 +38,13 @@
   }
 
   .chat-right-container {
+
+    .right-chat-outer-container {
+      min-height: 73dvh;
+    }
+
     .right-chat {
       width: 100%;
-      min-height: 73dvh;
       max-height: 73dvh;
       overflow-y: scroll;
     }

@@ -26,17 +26,25 @@ class CommunicationDao {
       .limit(100);
   };
 
-  public getLastReceivedChat = async (
-    user_id: string,
-    friends_ids: string[]
-  ) => {
+  public getLastReceivedChat = async (user_id: string) => {
     return await this.communicationModel.aggregate([
       {
         $match: {
           $or: [
-            { sender_user_id: user_id },
-            { receiver_user_id: { $in: friends_ids } },
+            { sender_user_id: user_id.toString() },
+            { receiver_user_id: user_id.toString() },
           ],
+        },
+      },
+      {
+        $addFields: {
+          conversation_id: {
+            $cond: [
+              { $gt: ["$sender_user_id", "$receiver_user_id"] },
+              { $concat: ["$receiver_user_id", "_", "$sender_user_id"] },
+              { $concat: ["$sender_user_id", "_", "$receiver_user_id"] },
+            ],
+          },
         },
       },
       {
@@ -44,7 +52,7 @@ class CommunicationDao {
       },
       {
         $group: {
-          _id: "$receiver_user_id",
+          _id: "$conversation_id",
           last_message: { $first: "$$ROOT" },
         },
       },
