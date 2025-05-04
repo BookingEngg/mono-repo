@@ -61,6 +61,7 @@ const Communication = () => {
   const [currentUserMessages, setCurrentUserMessages] =
     React.useState<IUserCommChat | null>(null);
   const currentUserMessagesRef = React.useRef(currentUserMessages);
+  const [isFetchUserChat, setIsFetchUserChat] = React.useState(true);
 
   React.useEffect(() => {
     currentUserMessagesRef.current = currentUserMessages;
@@ -75,6 +76,17 @@ const Communication = () => {
       user_name: loggedInUser.user?.first_name || "",
       created_at: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
     };
+
+    // Update the message block of sender and the user positioning
+    setCurrentUserMessages((prev) => {
+      if (!prev) return prev;
+
+      return {
+        ...prev,
+        index: prev.index + 1,
+        chats: [...prev.chats, newMessage],
+      };
+    });
 
     // Update the user list to move the user to top with updated message & time
     setUserList((prevList) => {
@@ -95,15 +107,6 @@ const Communication = () => {
 
       return newList;
     });
-
-    // Update the message block of sender and the user positioning
-    if (currentUserMessages) {
-      setCurrentUserMessages({
-        ...currentUserMessages,
-        index: 0,
-        chats: [...currentUserMessages.chats, newMessage],
-      });
-    }
 
     // Raise an socket event
     if (socket) {
@@ -128,6 +131,7 @@ const Communication = () => {
         );
 
         setCurrentUserMessages({ ...response.data, index: currentUserIndex });
+        setIsFetchUserChat(false); // Now no need to auto fetch the chat
       }
     },
     [userList, currentUserMessages]
@@ -135,7 +139,9 @@ const Communication = () => {
 
   // Fetch the First user message default
   React.useEffect(() => {
-    handleUserChange(0);
+    if (isFetchUserChat) {
+      handleUserChange(0);
+    }
   }, [userList]);
 
   React.useEffect(() => {
@@ -209,6 +215,14 @@ const Communication = () => {
           return {
             ...prev,
             chats: [...prev.chats, newMessage],
+          };
+        });
+      } else {
+        setCurrentUserMessages((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            index: prev.index + 1,
           };
         });
       }
