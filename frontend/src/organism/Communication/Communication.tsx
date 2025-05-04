@@ -83,7 +83,7 @@ const Communication = () => {
 
       return {
         ...prev,
-        index: prev.index + 1,
+        index: 0,
         chats: [...prev.chats, newMessage],
       };
     });
