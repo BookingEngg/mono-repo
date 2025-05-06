@@ -15,7 +15,7 @@ import {
   sendOtp,
   verifyOtp,
   getUser,
-  getGoogleClientDetails,
+  getOAuthClientDetails,
   getUserByGoogleOAuth,
 } from "@/services/Login.service";
 // Store
@@ -39,11 +39,11 @@ const Login = () => {
   const [isVerifyOtpVisible, setIsVerifyOtpVisible] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const googleClientQuery = useQuery({
-    queryKey: ["google-oauth-client-details"],
-    queryFn: () => getGoogleClientDetails(),
+  const oAuthClientQuery = useQuery({
+    queryKey: ["oauth-client-details"],
+    queryFn: () => getOAuthClientDetails(),
   });
-  const { data: googleClientDetails } = googleClientQuery;
+  const { data: clientDetails } = oAuthClientQuery;
 
   const handleFormPayloadChange = React.useCallback(
     (value: string, key: string) => {
@@ -98,6 +98,10 @@ const Login = () => {
         navigate("/");
       }
     }
+  };
+
+  const handleGithubOAuthLogin = async () => {
+    console.log("LOGS>>>>>>");
   };
 
   return (
@@ -156,15 +160,15 @@ const Login = () => {
                 </Button>
               </FlexboxGridItem>
 
-              {googleClientDetails?.client_id ? (
-                <FlexboxGridItem
-                  colspan={24}
-                  className={cx("external-signup-div")}
-                >
-                  <FlexboxGrid>
-                    <FlexboxGridItem colspan={24}>
+              <FlexboxGridItem
+                colspan={24}
+                className={cx("external-signup-div")}
+              >
+                <FlexboxGrid>
+                  {clientDetails?.google_client_id ? (
+                    <FlexboxGridItem colspan={12}>
                       <GoogleOAuthProvider
-                        clientId={googleClientDetails.client_id}
+                        clientId={clientDetails.google_client_id}
                       >
                         <GoogleLogin
                           onSuccess={handleGoogleOAuthLoginSuccess}
@@ -174,11 +178,20 @@ const Login = () => {
                         />
                       </GoogleOAuthProvider>
                     </FlexboxGridItem>
-                  </FlexboxGrid>
-                </FlexboxGridItem>
-              ) : (
-                <></>
-              )}
+                  ) : (
+                    <></>
+                  )}
+                  <FlexboxGridItem colspan={12}>
+                    <Button
+                      onClick={() => {
+                        handleGithubOAuthLogin();
+                      }}
+                    >
+                      Github Signup
+                    </Button>
+                  </FlexboxGridItem>
+                </FlexboxGrid>
+              </FlexboxGridItem>
             </FlexboxGrid>
           </>
         )}

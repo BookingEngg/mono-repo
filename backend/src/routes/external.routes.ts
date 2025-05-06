@@ -7,7 +7,7 @@ import UserController from "@/controllers/user.controllers";
 import OtpController from "@/controllers/otp.controllers";
 import CommunicationController from "@/controllers/communication.controllers";
 import CommunityControllers from "@/controllers/community.controllers";
-import GoogleOAuthController from "@/controllers/googleAuth.controller";
+import OAuthController from "@/controllers/oAuth.controller";
 // Middlewares
 import AuthMiddleware from "@/middleware/auth.middleware";
 // Wrappers
@@ -24,24 +24,26 @@ class ExternalRoutes implements Routes {
   private otpController = new OtpController();
   private communicationController = new CommunicationController();
   private communityController = new CommunityControllers();
-  private googleAuthController = new GoogleOAuthController();
+  private oAuthController = new OAuthController();
 
   constructor() {
     this.initializeUsersRoutes(`${this.path}/user`);
     this.initializeOtpRoutes(`${this.path}/otp`);
     this.initializeCommunicationRoutes(`${this.path}/comm`);
     this.initializeCommunityRoutes(`${this.path}/community`);
-    this.initializeGoogleAuthRoutes(`${this.path}/google`);
+
+    this.initializeOAuthAuthRoutes(`${this.path}/oauth`);
   }
 
-  private initializeGoogleAuthRoutes(prefix: string) {
+  private initializeOAuthAuthRoutes(prefix: string) {
     this.router.get(
-      `${prefix}/get-client`,
-      asyncWrapper(this.googleAuthController.getClientDetails)
+      `${prefix}/client-details`,
+      asyncWrapper(this.oAuthController.getClientDetails)
     );
+
     this.router.post(
-      `${prefix}/user`,
-      asyncWrapper(this.googleAuthController.getGoogleOAuthUser)
+      `${prefix}/google-user`,
+      asyncWrapper(this.oAuthController.getGoogleOAuthUser)
     );
   }
 
@@ -61,7 +63,7 @@ class ExternalRoutes implements Routes {
       `${prefix}/summary`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.userController.getDashboardSummary)
-    )
+    );
   }
 
   private initializeOtpRoutes(prefix: string) {

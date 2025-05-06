@@ -3,12 +3,12 @@ import { googleOAuthConfigs } from "@/config";
 import JwtService from "@/services/jwt.service";
 import UserService from "@/services/user.service";
 
-class GoogleOAuthService {
+class OAuthService {
   private jwtService = new JwtService();
   private userService = new UserService();
 
   public getGoogleOAuthClientId = () => {
-    return { client_id: googleOAuthConfigs.client_id };
+    return { google_client_id: googleOAuthConfigs.client_id };
   };
 
   public getGoogleVerifiedUser = async (token: string) => {
@@ -45,4 +45,4 @@ class GoogleOAuthService {
   };
 }
 
-export default GoogleOAuthService;
+export default OAuthService;
