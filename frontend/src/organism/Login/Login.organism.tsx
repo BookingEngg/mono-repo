@@ -101,7 +101,7 @@ const Login = () => {
   };
 
   const handleGithubOAuthLogin = async () => {
-    console.log("LOGS>>>>>>");
+    window.open(clientDetails?.github_init_url, "_self");
   };
 
   return (
@@ -182,11 +182,7 @@ const Login = () => {
                     <></>
                   )}
                   <FlexboxGridItem colspan={12}>
-                    <Button
-                      onClick={() => {
-                        handleGithubOAuthLogin();
-                      }}
-                    >
+                    <Button onClick={handleGithubOAuthLogin}>
                       Github Signup
                     </Button>
                   </FlexboxGridItem>

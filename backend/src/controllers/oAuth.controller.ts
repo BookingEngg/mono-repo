@@ -6,8 +6,19 @@ class OAuthController {
   private oAuthService = new OAuthService();
 
   public getClientDetails = async (_req: Request, res: Response) => {
-    const response = this.oAuthService.getGoogleOAuthClientId();
+    const response = this.oAuthService.getClientIds();
     return res.send(response);
+  };
+
+  public initGithubOAuth = async (req: Request, res: Response) => {
+    const githubUrl = this.oAuthService.navigateToGithubLogin();
+    return res.redirect(githubUrl);
+  };
+
+  public getGithubOAuthUser = async (req: Request, res: Response) => {
+    console.log("TRIGGERED BY GITHUB URI");
+    await this.oAuthService.getGithubVerifiedUser();
+    return res.send({ status: 200 });
   };
 
   public getGoogleOAuthUser = async (req: Request, res: Response) => {

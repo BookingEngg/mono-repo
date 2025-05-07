@@ -41,6 +41,16 @@ class ExternalRoutes implements Routes {
       asyncWrapper(this.oAuthController.getClientDetails)
     );
 
+    this.router.get(
+      `${prefix}/github_init`,
+      asyncWrapper(this.oAuthController.initGithubOAuth)
+    );
+
+    this.router.get(
+      `${prefix}/github-user`,
+      asyncWrapper(this.oAuthController.getGithubOAuthUser)
+    );
+
     this.router.post(
       `${prefix}/google-user`,
       asyncWrapper(this.oAuthController.getGoogleOAuthUser)
