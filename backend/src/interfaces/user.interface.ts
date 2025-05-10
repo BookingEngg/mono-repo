@@ -32,6 +32,14 @@ export interface IUser {
   requested_friends: IRequestedUser[];
 }
 
+export interface ICommonAuthUser {
+  first_name: string;
+  last_name: string;
+  email: string;
+  email_verified: boolean;
+  user_profile_picture: string;
+}
+
 export interface IOrigin {
   country: string;
   state: string;

@@ -1,41 +1,45 @@
 import { Request, Response } from "express";
 import OAuthService from "@/services/oAuth.service";
-import { tokenDetails } from "@/config/index";
+import JwtService from "@/services/jwt.service";
 
 class OAuthController {
   private oAuthService = new OAuthService();
+  private jwtService = new JwtService();
 
   public getClientDetails = async (_req: Request, res: Response) => {
     const response = this.oAuthService.getClientIds();
     return res.send(response);
   };
 
-  public initGithubOAuth = async (req: Request, res: Response) => {
+  public initGithubOAuth = async (_req: Request, res: Response) => {
     const githubUrl = this.oAuthService.navigateToGithubLogin();
     return res.redirect(githubUrl);
   };
 
   public getGithubOAuthUser = async (req: Request, res: Response) => {
-    console.log("TRIGGERED BY GITHUB URI");
-    await this.oAuthService.getGithubVerifiedUser();
-    return res.send({ status: 200 });
+    const { code } = req.query;
+    const response = await this.oAuthService.getGithubVerifiedUser(
+      code as string
+    );
+
+    this.jwtService.setCookieAtClientSide({
+      res,
+      cookieDetails: response,
+    });
+
+    return res.redirect(response.redirection_url);
   };
 
   public getGoogleOAuthUser = async (req: Request, res: Response) => {
     const { token } = req.body;
     const response = await this.oAuthService.getGoogleVerifiedUser(token);
 
-    if (!response || !response?.jwtToken || !response?.verifiedUser) {
-      throw new Error("Invalid Google Login");
-    }
-    const { verifiedUser, jwtToken } = response;
-
-    res.cookie("jwt-token", jwtToken, {
-      maxAge: 1000 * 60 * 60 * 24 * (tokenDetails.token_ttl_max_days || 10), // Default 10 Days JWT Expire
-      secure: true,
-      sameSite: "none",
+    this.jwtService.setCookieAtClientSide({
+      res,
+      cookieDetails: response,
     });
-    return res.json({ is_verified_user: verifiedUser });
+
+    return res.json({ is_verified_user: response.verifiedUser });
   };
 }
 

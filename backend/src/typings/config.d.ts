@@ -3,6 +3,11 @@ export interface IServer {
   port: number;
 }
 
+export interface IUiConfig {
+  url: string;
+  port: number;
+}
+
 export interface IDataBaseConfig {
   praman: IDataBase;
 }
@@ -60,7 +65,4 @@ export interface IGithubOAuth {
   scope: string;
   state: string;
   redirect_url_endpoint: string;
-  auth_url: string;
-  access_token_url: string;
-  get_user_url: string;
 }

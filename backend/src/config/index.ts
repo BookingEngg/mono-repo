@@ -7,6 +7,7 @@ import {
   IRedisConfig,
   IServer,
   IToken,
+  IUiConfig,
 } from "@/typings/config";
 
 export const env = process.env.NODE_ENV || "development";
@@ -19,6 +20,8 @@ export const serviceRoute = nconf.get("service_route");
 export const serverRoute = (nconf.get("server") as IServer).url;
 export const PORT = (nconf.get("server") as IServer).port;
 export const isProduction = env === "prod";
+
+export const uiConfigs = nconf.get("ui") as IUiConfig;
 
 export const MONGO_DB_NAMES: readonly string[] = ["praman"];
 export const mongoDbConfig = nconf.get("databases").mongodb as IDataBaseConfig;
