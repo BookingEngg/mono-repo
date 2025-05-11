@@ -103,7 +103,7 @@ const Login = () => {
   };
 
   const handleGithubOAuthLogin = async () => {
-    window.open(clientDetails?.github_init_url, "_self");
+    window.open(clientDetails?.github_init_url, "_self", "noreferrer");
   };
 
   return (
