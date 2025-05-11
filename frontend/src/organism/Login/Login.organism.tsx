@@ -8,7 +8,7 @@ import {
   GoogleOAuthProvider,
 } from "@react-oauth/google";
 // Rsuite
-import { Button, FlexboxGrid, Input, InputGroup, Text } from "rsuite";
+import { Button, Divider, FlexboxGrid, Input, InputGroup, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 // Services
 import {
@@ -18,6 +18,8 @@ import {
   getOAuthClientDetails,
   getUserByGoogleOAuth,
 } from "@/services/Login.service";
+// Icons
+import { GithubIcon } from "lucide-react";
 // Store
 import { login } from "@/store/auth";
 import { useAppDispatch } from "@/store/hooks";
@@ -164,28 +166,39 @@ const Login = () => {
                 colspan={24}
                 className={cx("external-signup-div")}
               >
-                <FlexboxGrid>
+                <Divider className={cx("external-login-divider")}>
+                  or continue with
+                </Divider>
+                <FlexboxGrid justify="space-around">
                   {clientDetails?.google_client_id ? (
-                    <FlexboxGridItem colspan={12}>
+                    <FlexboxGridItem>
                       <GoogleOAuthProvider
                         clientId={clientDetails.google_client_id}
                       >
                         <GoogleLogin
+                          type="standard"
+                          theme="outline"
+                          text="signin"
+                          shape="rectangular"
                           onSuccess={handleGoogleOAuthLoginSuccess}
-                          onError={() => {
-                            console.log("LOGIN FAILURE>>>>>>>>");
-                          }}
                         />
                       </GoogleOAuthProvider>
                     </FlexboxGridItem>
                   ) : (
                     <></>
                   )}
-                  <FlexboxGridItem colspan={12}>
-                    <Button onClick={handleGithubOAuthLogin}>
-                      Github Signup
-                    </Button>
-                  </FlexboxGridItem>
+                  {clientDetails?.github_init_url ? (
+                    <FlexboxGridItem>
+                      <Button
+                        className={cx("external-github-cta")}
+                        onClick={handleGithubOAuthLogin}
+                      >
+                        <GithubIcon /> Sign in
+                      </Button>
+                    </FlexboxGridItem>
+                  ) : (
+                    <></>
+                  )}
                 </FlexboxGrid>
               </FlexboxGridItem>
             </FlexboxGrid>
