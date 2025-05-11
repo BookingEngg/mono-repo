@@ -1,4 +1,4 @@
-import { OAuth2Client } from "google-auth-library";
+import { auth, OAuth2Client } from "google-auth-library";
 import { googleOAuthConfigs, githubOAuthConfigs } from "@/config";
 import JwtService from "@/services/jwt.service";
 import UserService from "@/services/user.service";
@@ -15,7 +15,6 @@ class OAuthService {
   private oAuthHttp = new OAuthHttp();
   // Formatter
   private oAuthFormatter = new OAuthFormatter();
-
 
   public getClientIds = () => {
     const externServerUrl = getExternalDomain();
@@ -56,7 +55,15 @@ class OAuthService {
 
     const authorizedUser = await this.oAuthHttp.getAuthorizedUser(
       tokenResponse.access_token
-    );// TODO: need to check why email is null came from github
+    );
+
+    if (!authorizedUser["email"]) {
+      const emails = await this.oAuthHttp.getUserEmails(
+        tokenResponse.access_token
+      );
+      const verifiedEmail = emails.find((email) => email.verified);
+      authorizedUser["email"] = verifiedEmail?.email;
+    }
 
     return await this.postVerifiedOAuthUser(
       authorizedUser,
@@ -90,18 +97,17 @@ class OAuthService {
     if (!verifiedUser) {
       return null;
     }
+    const authorizedEmail = verifiedUser["email"];
     let jwtToken = null;
 
-    jwtToken = this.jwtService.createToken({ email: verifiedUser["email"] });
+    jwtToken = this.jwtService.createToken({ email: authorizedEmail });
     const existingValidUser =
-      await this.userService.getInhouseUserDetailsByEmail(
-        verifiedUser["email"]
-      );
+      await this.userService.getInhouseUserDetailsByEmail(authorizedEmail);
 
     if (!existingValidUser) {
       const formattedInhouseUserMapper = {
         [OAuthClients.GOOGLE]:
-          this.oAuthFormatter.getFormattedGithubUserDetails(verifiedUser),
+          this.oAuthFormatter.getFormattedGoogleUserDetails(verifiedUser),
         [OAuthClients.GITHUB]:
           this.oAuthFormatter.getFormattedGithubUserDetails(verifiedUser),
       };

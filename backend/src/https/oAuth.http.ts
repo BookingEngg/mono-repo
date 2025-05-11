@@ -35,6 +35,19 @@ class OAuthHttp {
       return null;
     }
   };
+
+  public getUserEmails = async (accessToken: string) => {
+    try {
+      const response = await fetch("https://api.github.com/user/emails", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const text = await response.text();
+      return JSON.parse(text);
+    } catch (_) {
+      return null;
+    }
+  };
 }
 
 export default OAuthHttp;

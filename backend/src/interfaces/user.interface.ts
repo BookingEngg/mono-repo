@@ -20,7 +20,7 @@ export interface IUser {
   first_name: string;
   last_name: string;
   email: string;
-  contact: number;
+  contact?: string;
   roles: string[];
   level: number;
   origin: IOrigin;
