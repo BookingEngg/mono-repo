@@ -1,5 +1,6 @@
 import { Schema } from "mongoose";
 import { MONGO_INSTANCES } from "@database";
+import { IUser } from "@/interfaces/user.interface";
 
 const dbConnection = MONGO_INSTANCES.praman;
 
@@ -22,7 +23,7 @@ export const IBlockedRequest = new Schema({
 
 export const ROLES = ["director", "admin", "users"];
 
-const UserSchema = new Schema(
+const UserSchema = new Schema<IUser>(
   {
     first_name: { type: String, require: true },
     last_name: { type: String, require: true },

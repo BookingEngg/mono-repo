@@ -5,7 +5,7 @@ export const asyncWrapper = (
     req: Request,
     res: Response,
     next: NextFunction
-  ) => Promise<Express.Response>
+  ) => Promise<Express.Response> | Promise<void>
 ): ((req: Request, res: Response, next: NextFunction) => Promise<void>) => {
   return async (req, res, next) => {
     try {
