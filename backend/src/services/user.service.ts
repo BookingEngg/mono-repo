@@ -2,20 +2,20 @@ import moment from "moment";
 import R from "ramda";
 import CommunicationDao from "@/dao/communication.dao";
 import UserDao from "@/dao/user.dao";
-import { IUser } from "@/interfaces/user.interface";
+import { ICommonAuthUser, IUser } from "@/interfaces/user.interface";
 import { TokenPayload } from "google-auth-library";
 
 class UserService {
   private userDao = new UserDao();
   private communicationDao = new CommunicationDao();
 
-  public createUser = async (payload: TokenPayload) => {
+  public createUser = async (payload: ICommonAuthUser) => {
     const formattedUser = {
-      first_name: payload.given_name,
-      last_name: payload.family_name,
+      first_name: payload.first_name,
+      last_name: payload.last_name,
       email: payload.email,
       email_verified: payload.email_verified,
-      user_profile_picture: payload.picture,
+      user_profile_picture: payload.user_profile_picture,
 
       roles: [],
       level: 1,

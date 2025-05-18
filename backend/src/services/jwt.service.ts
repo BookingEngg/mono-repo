@@ -1,5 +1,5 @@
 import { tokenDetails } from "@/config";
-import { Request } from "express";
+import { Request, Response } from "express";
 import JWT from "jsonwebtoken";
 
 class JwtService {
@@ -26,6 +26,25 @@ class JwtService {
     }
 
     return null;
+  };
+
+  public setCookieAtClientSide = (payload: {
+    res: Response;
+    cookieDetails: {
+      verifiedUser: boolean;
+      jwtToken: string;
+    };
+  }) => {
+    const { res, cookieDetails } = payload;
+
+    if (!cookieDetails || !cookieDetails?.jwtToken) {
+      throw new Error("Invalid Login");
+    }
+    res.cookie("jwt-token", cookieDetails.jwtToken, {
+      maxAge: 1000 * 60 * 60 * 24 * (tokenDetails.token_ttl_max_days || 10), // Default 10 Days JWT Expire
+      secure: true,
+      sameSite: "none",
+    });
   };
 }
 

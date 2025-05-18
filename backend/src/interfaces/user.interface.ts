@@ -20,7 +20,7 @@ export interface IUser {
   first_name: string;
   last_name: string;
   email: string;
-  contact: number;
+  contact?: string;
   roles: string[];
   level: number;
   origin: IOrigin;
@@ -30,6 +30,14 @@ export interface IUser {
   friends_ids: string[];
   blocked_user: IBlockedUser[];
   requested_friends: IRequestedUser[];
+}
+
+export interface ICommonAuthUser {
+  first_name: string;
+  last_name: string;
+  email: string;
+  email_verified: boolean;
+  user_profile_picture: string;
 }
 
 export interface IOrigin {

@@ -19,7 +19,25 @@
     width: 100%;
   }
 
+  .external-login-divider {
+    margin: 24px 0;
+    color: gray;
+  }
+
   .external-signup-div {
     margin-top: 2vh;
+  }
+
+  .external-oauth-button {
+    color: #3C4043;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0px;
+    padding: 10px 12px;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
   }
 }
