@@ -1,0 +1,18 @@
+.chat-main-layout {
+  height: 100%;
+  width: 100%;
+  border: 1px solid black;
+}
+
+.chat-container {
+  height: calc(86vh + 2px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.chat-left-container {
+  background-color: azure;
+}
+.chat-right-container {
+  background-color: azure;
+}

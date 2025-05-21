@@ -56,9 +56,3 @@ export interface IOtp {
   createdAt: Date;
   updatedAt: Date;
 }
-
-export interface ICommunication {
-  sender_user_id: string;
-  receiver_user_id: string;
-  message: string;
-}
