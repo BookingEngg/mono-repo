@@ -58,6 +58,13 @@ class CommunicationDao {
       },
     ]);
   };
+
+  public getAggrigatedMessageDetails = async (payload: {
+    senderId: string;
+    receiverId: string;
+  }) => {
+     
+  }
 }
 
 export default CommunicationDao;

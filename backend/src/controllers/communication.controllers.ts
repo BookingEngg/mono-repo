@@ -19,6 +19,19 @@ class CommunicationControllers {
     return res.send({ status: "success", data: response });
   };
 
+  public getMessages = async (req: Request, res: Response): Promise<any> => {
+    const receiverId: string = (req.query?.user_id || "") as string;
+    if (!req.user?._id || !receiverId) {
+      throw new Error("Invalid User");
+    }
+
+    const response = await this.communicationService.getMessages(
+      req.user,
+      receiverId
+    );
+    return res.send({ status: "success", data: null });
+  }
+
   public getCommunicationChatUsers = async (
     req: Request,
     res: Response

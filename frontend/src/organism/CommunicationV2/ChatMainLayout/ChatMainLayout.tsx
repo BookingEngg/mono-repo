@@ -33,13 +33,16 @@ const ChatMainLayout = () => {
           <>
             <FlexboxGrid>
               <FlexboxGridItem
-                colspan={7}
+                colspan={8}
                 className={cx(["chat-container", "chat-left-container"])}
               >
                 <ChatSideBar />
               </FlexboxGridItem>
+              <FlexboxGridItem colspan={1}>
+                {/* GAP */}
+              </FlexboxGridItem>
               <FlexboxGridItem
-                colspan={17}
+                colspan={15}
                 className={cx(["chat-container", "chat-right-container"])}
               >
                 <ChatWindow />

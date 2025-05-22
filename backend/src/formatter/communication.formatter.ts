@@ -1,4 +1,5 @@
-import { ICommunication, IUser } from "@/interfaces/user.interface";
+import { ICommunication } from "@/interfaces/communication.interface";
+import { IUser } from "@/interfaces/user.interface";
 import moment from "moment";
 
 class CommunicationFormatter {

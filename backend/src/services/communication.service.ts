@@ -51,6 +51,19 @@ class CommunicationService {
     });
   };
 
+  public getMessages = async (userDetails: IUser, receiverId: string) => {
+    const senderId = userDetails._id.toString();
+
+    const response = await this.communicationDao.getAggrigatedMessageDetails({
+      senderId,
+      receiverId,
+    })
+    console.log("RESPONSE START>>>>");
+    console.dir(response);
+    console.log("RESPONSE END>>>>");
+
+  };
+
   public getCommunityUsers = async (payload: {
     user: IUser;
     pagination: {
