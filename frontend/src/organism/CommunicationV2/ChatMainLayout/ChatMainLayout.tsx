@@ -1,7 +1,7 @@
 // Modules
 import React from "react";
 // Rsuite
-import { Col, Container, FlexboxGrid, Row } from "rsuite";
+import { Container, FlexboxGrid } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 // Organism
 import ChatSideBar from "@/organism/CommunicationV2/ChatSideBar";

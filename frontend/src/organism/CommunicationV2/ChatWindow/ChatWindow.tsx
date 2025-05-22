@@ -1,9 +1,11 @@
-import { Avatar, Button, Container, Input, Text } from "rsuite";
+// Modules
+import React from "react";
+// Rsuite and Icons
+import { Button, Container, Input, Text } from "rsuite";
+import { SendHorizonalIcon } from "lucide-react";
 // Style
 import style from "./ChatWindow.module.scss";
 import classNames from "classnames/bind";
-import React from "react";
-import { Send, SendHorizonalIcon } from "lucide-react";
 const cx = classNames.bind(style);
 
 const apiResponse = {
@@ -48,11 +50,33 @@ const apiResponse = {
   ],
 };
 
-const messages = apiResponse.messages;
+const initialChatDetails = {
+  name: "Anonymous user",
+  description: "",
+};
+
+export interface IChatMessages {
+  date: string;
+  items: {
+    content: string;
+    sender_id: string;
+    sender_name: string;
+    timestamp: string;
+    is_sent_by_current_user: boolean;
+  }[];
+}
+
+export interface IChatDetails {
+  name: string;
+  description: string;
+}
 
 const ChatWindow = () => {
-  const [chatTitle, setChatTitle] = React.useState("Tushar Chand Thakur");
-
+  const [chatMessages, setChatMessages] = React.useState<IChatMessages[]>(
+    apiResponse.messages
+  );
+  const [chatDetails, setChatDetails] =
+    React.useState<IChatDetails>(initialChatDetails);
   const [message, setMessage] = React.useState("");
 
   const handleMessageSend = React.useCallback(() => {
@@ -63,13 +87,13 @@ const ChatWindow = () => {
     <Container className={cx("chat-outer-container")}>
       <div className={cx("chat-section-header")}>
         <Text size="xl" weight="bold">
-          {chatTitle}
+          {chatDetails.name}
         </Text>
       </div>
 
       {/* Messages Section */}
       <div className={cx("chat-messages-container")}>
-        {messages.map((message) => {
+        {chatMessages.map((message) => {
           const messageItems = message.items;
 
           return (
