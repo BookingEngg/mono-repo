@@ -20,55 +20,6 @@ const chatUserDummy = [
     last_message: "hi, how are you?",
     last_online_at: "12:00 AM",
   },
-  {
-    user_id: "123",
-    name: `Tushar Chand Thakur`,
-    user_profile_picture: "aljksdf",
-    last_message: "hello, how are you?",
-    last_online_at: "12:00 AM",
-  },
-  {
-    user_id: "123",
-    name: `Tushar Chand Thakur`,
-    user_profile_picture: "aljksdf",
-    last_message: "hello, how are you?",
-    last_online_at: "12:00 AM",
-  },
-  {
-    user_id: "123",
-    name: `Hello User`,
-    user_profile_picture: "aljksdf",
-    last_message: "hi, how are you?",
-    last_online_at: "12:00 AM",
-  },
-  {
-    user_id: "123",
-    name: `Tushar Chand Thakur`,
-    user_profile_picture: "aljksdf",
-    last_message: "hello, how are you?",
-    last_online_at: "12:00 AM",
-  },
-  {
-    user_id: "123",
-    name: `Tushar Chand Thakur`,
-    user_profile_picture: "aljksdf",
-    last_message: "hello, how are you?",
-    last_online_at: "12:00 AM",
-  },
-  {
-    user_id: "123",
-    name: `Hello User`,
-    user_profile_picture: "aljksdf",
-    last_message: "hi, how are you?",
-    last_online_at: "12:00 AM",
-  },
-  {
-    user_id: "123",
-    name: `Tushar Chand Thakur`,
-    user_profile_picture: "aljksdf",
-    last_message: "hello, how are you?",
-    last_online_at: "12:00 AM",
-  },
 ];
 
 const ChatSideBar = () => {
