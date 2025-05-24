@@ -8,6 +8,9 @@ import {
   BlockedType,
   RequestStatusType,
 } from "@/constants/common.constants";
+import moment from "moment";
+import { CommunicationType } from "@/interfaces/enum";
+import { ICommunication } from "@/interfaces/communication.interface";
 
 class CommunicationService {
   private userDao = new UserDao();
@@ -25,6 +28,7 @@ class CommunicationService {
       sender_user_id: senderId,
       receiver_user_id: receiverId,
       message,
+      message_type: CommunicationType.Private,
     });
   };
 
@@ -51,17 +55,45 @@ class CommunicationService {
     });
   };
 
-  public getMessages = async (userDetails: IUser, receiverId: string) => {
+  /**
+   * Get direct messages between two users
+   */
+  public getDirectMessages = async (userDetails: IUser, receiverId: string) => {
     const senderId = userDetails._id.toString();
 
-    const response = await this.communicationDao.getAggrigatedMessageDetails({
-      senderId,
-      receiverId,
-    })
-    console.log("RESPONSE START>>>>");
-    console.dir(response);
-    console.log("RESPONSE END>>>>");
+    // Fetch all the messages and receiver user details
+    const [{ data: initialMessages, count }, receiverUser] = await Promise.all([
+      this.communicationDao.getDirectMessages(senderId, receiverId),
+      this.userDao.getUserByUserId(receiverId),
+    ]);
 
+    // Create mapper for users
+    const userDetailsMapper = R.indexBy(R.prop<string>("_id"), [
+      userDetails,
+      receiverUser,
+    ]);
+
+    // Create mapper for messages by date
+    const messagesDataHashByDate: Record<string, ICommunication[]> = R.groupBy(
+      (message: ICommunication) =>
+        moment(message.createdAt)
+          .add(330, "minutes")
+          .startOf("date")
+          .format("DD MMM YYYY") as unknown as string
+    )(initialMessages);
+
+    const formattedMessages = this.communicationFormatter.getFormattedMessages({
+      messagesDataHashByDate,
+      userDetailsHashById: userDetailsMapper,
+      userId: senderId,
+    });
+
+    return {
+      meta: {
+        count,
+      },
+      messages: formattedMessages,
+    };
   };
 
   public getCommunityUsers = async (payload: {

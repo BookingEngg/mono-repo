@@ -12,16 +12,16 @@ class UserDao {
 
   public createUser = async (payload: object) => {
     return await this.userModel.create(payload);
-  }
+  };
 
   // Get the user by email id
   public getUserByEmail = async (email: string): Promise<IUser> => {
-    return await this.userModel.findOne({ email });
+    return await this.userModel.findOne({ email }).lean();
   };
 
   // Get the users by userId
   public getUserByUserId = async (userId: string, fields: string[] = []) => {
-    return await this.userModel.findOne({ _id: userId });
+    return await this.userModel.findOne({ _id: userId }).lean();
   };
 
   // Get the users by userIds
@@ -29,7 +29,10 @@ class UserDao {
     userIds: string[],
     fields: string[] = []
   ) => {
-    return await this.userModel.find({ _id: { $in: userIds } }).select(fields);
+    return await this.userModel
+      .find({ _id: { $in: userIds } })
+      .select(fields)
+      .lean();
   };
 
   // Get all the user expect from the source

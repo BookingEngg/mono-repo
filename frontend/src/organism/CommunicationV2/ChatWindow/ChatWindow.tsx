@@ -6,49 +6,8 @@ import { SendHorizonalIcon } from "lucide-react";
 // Style
 import style from "./ChatWindow.module.scss";
 import classNames from "classnames/bind";
+import { getDirectMessages } from "@/services/Communication.service";
 const cx = classNames.bind(style);
-
-const apiResponse = {
-  meta: {
-    page_no: 1,
-    page_size: 20,
-  },
-  messages: [
-    {
-      date: "19-03-2025",
-      items: [
-        {
-          content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae saepe tempore quasi debitis illum voluptate odit a reprehenderit magni natus. Recusandae mollitia repellendus rem quasi dignissimos atque quam natus pariatur deserunt error. Suscipit veritatis ad perferendis sint velit pariatur animi sunt libero excepturi exercitationem quia fuga incidunt deleniti neque rem quaerat voluptate quisquam molestiae laudantium nisi eos, facilis, blanditiis mollitia? Culpa ea nostrum dolorem pariatur! Reiciendis nulla, provident laudantium adipisci voluptates atque beatae accusantium cumque aperiam excepturi vitae debitis, aspernatur sapiente molestiae quaerat! Quidem eveniet recusandae, consequatur quos deserunt praesentium autem quia hic dignissimos, pariatur quo quae blanditiis ducimus fugiat!",
-          sender_id: "id",
-          sender_name: "Tushar Chand Thakur",
-          timestamp: "12:15 am",
-          is_sent_by_current_user: true,
-        },
-        {
-          content: "msg2",
-          sender_id: "id1",
-          sender_name: "Tushar Chand Thakur",
-          timestamp: "12:15 am",
-          is_sent_by_current_user: false,
-        },
-      ],
-    },
-    {
-      date: "18-03-2025",
-      items: [
-        {
-          content:
-            "Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae saepe tempore quasi debitis illum voluptate odit a reprehenderit magni natus. Recusandae mollitia repellendus rem quasi dignissimos atque quam natus pariatur deserunt error. Suscipit veritatis ad perferendis sint velit pariatur animi sunt libero excepturi exercitationem quia fuga incidunt deleniti neque rem quaerat voluptate quisquam molestiae laudantium nisi eos, facilis, blanditiis mollitia? Culpa ea nostrum dolorem pariatur! Reiciendis nulla, provident laudantium adipisci voluptates atque beatae accusantium cumque aperiam excepturi vitae debitis, aspernatur sapiente molestiae quaerat! Quidem eveniet recusandae, consequatur quos deserunt praesentium autem quia hic dignissimos, pariatur quo quae blanditiis ducimus fugiat!",
-          sender_id: "id",
-          sender_name: "Tushar Chand Thakur",
-          timestamp: "12:15 am",
-          is_sent_by_current_user: false,
-        },
-      ],
-    },
-  ],
-};
 
 const initialChatDetails = {
   name: "Anonymous user",
@@ -71,10 +30,11 @@ export interface IChatDetails {
   description: string;
 }
 
-const ChatWindow = () => {
-  const [chatMessages, setChatMessages] = React.useState<IChatMessages[]>(
-    apiResponse.messages
-  );
+const ChatWindow = (props: { activeEntityId: string | null }) => {
+  const { activeEntityId: userId } = props;
+
+  const [chatMessages, setChatMessages] = React.useState<IChatMessages[]>([]);
+
   const [chatDetails, setChatDetails] =
     React.useState<IChatDetails>(initialChatDetails);
   const [message, setMessage] = React.useState("");
@@ -82,6 +42,19 @@ const ChatWindow = () => {
   const handleMessageSend = React.useCallback(() => {
     setMessage("");
   }, [message]);
+
+  // Fetch user messages if user changes
+  React.useEffect(() => {
+    const fetchChatMessages = async () => {
+      if (!userId) return;
+
+      const response = await getDirectMessages(userId);
+      if (response) {
+        setChatMessages(response.data.messages);
+      }
+    };
+    fetchChatMessages();
+  }, [userId]);
 
   return (
     <Container className={cx("chat-outer-container")}>

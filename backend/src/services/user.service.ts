@@ -88,6 +88,7 @@ class UserService {
         : "";
 
       return {
+        id: user._id,
         user_id: user._id,
         name: `${user.first_name} ${user.last_name}`,
         time: user.updatedAt,

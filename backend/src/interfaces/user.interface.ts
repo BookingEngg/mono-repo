@@ -30,6 +30,9 @@ export interface IUser {
   friends_ids: string[];
   blocked_user: IBlockedUser[];
   requested_friends: IRequestedUser[];
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ICommonAuthUser {

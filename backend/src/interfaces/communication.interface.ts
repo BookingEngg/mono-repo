@@ -1,12 +1,16 @@
 import { CommunicationType, GroupType } from "./enum";
 
 export interface ICommunication {
+  _id?: string;
   message_type: CommunicationType;
-  sender_user_id: string;
-  receiver_user_id: string;
+  sender_user_id?: string;
+  receiver_user_id?: string;
   message: string;
-  group_id: string;
+  group_id?: string;
   is_edited?: boolean;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ICommunicationGroup {

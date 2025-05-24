@@ -1,4 +1,5 @@
-import { ICommunication } from "@/interfaces/user.interface";
+import { ICommunication } from "@/interfaces/communication.interface";
+import { CommunicationType } from "@/interfaces/enum";
 import CommunicationModel from "@/models/communication.model";
 
 class CommunicationDao {
@@ -59,12 +60,30 @@ class CommunicationDao {
     ]);
   };
 
-  public getAggrigatedMessageDetails = async (payload: {
-    senderId: string;
-    receiverId: string;
-  }) => {
-     
-  }
+  public getDirectMessages = async (
+    senderId: string,
+    receiverId: string,
+    limit: number = 100
+  ) => {
+    const filterObject = {
+      $or: [
+        { sender_user_id: senderId, receiver_user_id: receiverId },
+        { sender_user_id: receiverId, receiver_user_id: senderId },
+      ],
+      // message_type: CommunicationType.Private,
+    };
+
+    const [data, count] = await Promise.all([
+      this.communicationModel
+        .find(filterObject)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean(),
+      this.communicationModel.countDocuments(filterObject),
+    ]);
+
+    return { data, count };
+  };
 }
 
 export default CommunicationDao;
