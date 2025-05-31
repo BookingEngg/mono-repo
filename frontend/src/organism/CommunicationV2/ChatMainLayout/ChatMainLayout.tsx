@@ -15,6 +15,8 @@ import { getCommunicationUsers } from "@/services/Communication.service";
 import { useNavigate } from "react-router-dom";
 const cx = classNames.bind(style);
 
+const initialIsMobileView = window.innerWidth < 768;
+
 const ChatMainLayout = () => {
   const navigate = useNavigate();
 
@@ -23,7 +25,9 @@ const ChatMainLayout = () => {
     null
   );
 
-  const [isMobileView, setIsMobileView] = React.useState(false);
+  const [isMobileView, setIsMobileView] = React.useState(initialIsMobileView);
+  const [activeMobileScreen, setActiveMobileScreen] =
+    React.useState("user-list");
 
   // Help to check the screen size and device type
   React.useEffect(() => {
@@ -43,12 +47,22 @@ const ChatMainLayout = () => {
 
       if (response) {
         setEntityList(response.data);
-        setActiveEntityId(response.data[0]?.id);
+        if (!isMobileView) {
+          setActiveEntityId(response.data[0]?.id);
+        }
       }
     };
 
     fetchEntityList();
   }, []);
+
+  // If mobile view then set the chat window on screen
+  React.useEffect(() => {
+    if (!activeEntityId) {
+      return;
+    }
+    setActiveMobileScreen("chat-window");
+  }, [activeEntityId]);
 
   if (!entityList.length) {
     return (
@@ -74,7 +88,37 @@ const ChatMainLayout = () => {
     <>
       <Container className={cx("chat-main-layout")}>
         {isMobileView ? (
-          <></>
+          <>
+            <FlexboxGrid justify="space-between">
+              {activeMobileScreen === "user-list" && (
+                <FlexboxGridItem
+                  colspan={24}
+                  className={cx(["chat-container", "chat-left-container"])}
+                >
+                  <ChatSideBar
+                    entityList={entityList}
+                    activeEntityId={activeEntityId}
+                    setActiveEntityId={setActiveEntityId}
+                  />
+                </FlexboxGridItem>
+              )}
+              {activeMobileScreen === "chat-window" && (
+                <FlexboxGridItem
+                  colspan={24}
+                  className={cx(["chat-container", "chat-right-container"])}
+                >
+                  <ChatWindow
+                    isMobileView={isMobileView}
+                    activeEntityId={activeEntityId}
+                    navigateToChatSideBar={() => {
+                      setActiveMobileScreen("user-list");
+                      setActiveEntityId(null);
+                    }}
+                  />
+                </FlexboxGridItem>
+              )}
+            </FlexboxGrid>
+          </>
         ) : (
           <>
             <FlexboxGrid justify="space-between">
@@ -92,7 +136,10 @@ const ChatMainLayout = () => {
                 colspan={15}
                 className={cx(["chat-container", "chat-right-container"])}
               >
-                <ChatWindow activeEntityId={activeEntityId} />
+                <ChatWindow
+                  isMobileView={isMobileView}
+                  activeEntityId={activeEntityId}
+                />
               </FlexboxGridItem>
             </FlexboxGrid>
           </>

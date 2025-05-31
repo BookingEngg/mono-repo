@@ -2,7 +2,7 @@
 import React from "react";
 // Rsuite and Icons
 import { Button, Container, Input, Text } from "rsuite";
-import { SendHorizonalIcon } from "lucide-react";
+import { ArrowLeft, SendHorizonalIcon } from "lucide-react";
 // Style
 import style from "./ChatWindow.module.scss";
 import classNames from "classnames/bind";
@@ -30,8 +30,12 @@ export interface IChatDetails {
   description: string;
 }
 
-const ChatWindow = (props: { activeEntityId: string | null }) => {
-  const { activeEntityId: userId } = props;
+const ChatWindow = (props: {
+  isMobileView: boolean;
+  activeEntityId: string | null;
+  navigateToChatSideBar?: () => void;
+}) => {
+  const { isMobileView, activeEntityId: userId, navigateToChatSideBar } = props;
 
   const [chatMessages, setChatMessages] = React.useState<IChatMessages[]>([]);
 
@@ -59,6 +63,11 @@ const ChatWindow = (props: { activeEntityId: string | null }) => {
   return (
     <Container className={cx("chat-outer-container")}>
       <div className={cx("chat-section-header")}>
+        {isMobileView && (
+          <div onClick={navigateToChatSideBar}>
+            <ArrowLeft size={15} />
+          </div>
+        )}
         <Text size="xl" weight="bold">
           {chatDetails.name}
         </Text>
