@@ -1,7 +1,7 @@
 // Modules
 import React from "react";
 // Rsuite and Icons
-import { Button, Container, Input, Text } from "rsuite";
+import { Avatar, Button, Container, Input, Text } from "rsuite";
 import { ArrowLeft, SendHorizonalIcon } from "lucide-react";
 // Style
 import style from "./ChatWindow.module.scss";
@@ -11,7 +11,7 @@ const cx = classNames.bind(style);
 
 const initialChatDetails = {
   name: "Anonymous user",
-  description: "",
+  entity_logo: "",
 };
 
 export interface IChatMessages {
@@ -27,7 +27,7 @@ export interface IChatMessages {
 
 export interface IChatDetails {
   name: string;
-  description: string;
+  entity_logo: string;
 }
 
 const ChatWindow = (props: {
@@ -55,6 +55,7 @@ const ChatWindow = (props: {
       const response = await getDirectMessages(userId);
       if (response) {
         setChatMessages(response.data.messages);
+        setChatDetails(response.data.entity_details);
       }
     };
     fetchChatMessages();
@@ -65,9 +66,10 @@ const ChatWindow = (props: {
       <div className={cx("chat-section-header")}>
         {isMobileView && (
           <div onClick={navigateToChatSideBar}>
-            <ArrowLeft size={15} />
+            <ArrowLeft size={20} />
           </div>
         )}
+        <Avatar src={chatDetails.entity_logo} alt="Entity" circle size="md" />
         <Text size="xl" weight="bold">
           {chatDetails.name}
         </Text>

@@ -88,10 +88,16 @@ class CommunicationService {
       userId: senderId,
     });
 
+    const formattedEntityDetails = {
+      name: receiverUser.first_name + " " + receiverUser.last_name,
+      entity_logo: receiverUser.user_profile_picture,
+    };
+
     return {
       meta: {
         count,
       },
+      entity_details: formattedEntityDetails,
       messages: formattedMessages,
     };
   };
