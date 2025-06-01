@@ -3,10 +3,11 @@ import React from "react";
 // Rsuite and Icons
 import { Avatar, Button, Container, Input, Text } from "rsuite";
 import { ArrowLeft, SendHorizonalIcon } from "lucide-react";
+// Services
+import { getDirectMessages } from "@/services/Communication.service";
 // Style
 import style from "./ChatWindow.module.scss";
 import classNames from "classnames/bind";
-import { getDirectMessages } from "@/services/Communication.service";
 const cx = classNames.bind(style);
 
 const initialChatDetails = {
