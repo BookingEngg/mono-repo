@@ -1,0 +1,29 @@
+Access Control Docs
+
+Roles is defined as permission given to Users
+-> roles/users
+-> roles/admin
+-> roles/super-admin
+
+Privledge is defined as what all features is accessible in the roles
+NOTE: **If you assign some role to user then the default privledges will be assigned only **
+If you are at the higher role you have inherit the descendent privledges as well (but not the Restricted one)
+
+-> roles/users
+  -> privledge/community/viewer                 // Default
+  -> privledge/community/manipulate             // Default
+
+  -> privledge/communication/viewer             // Restricted
+  -> privledge/communication/writer             // Restricted
+
+-> roles/admin (inherit roles/users)
+  -> privledge/communication/group/create       // Default
+  -> privledge/communication/group/manipulate   // Default
+
+  -> privledge/system-block                     // Restricted
+
+-> roles/super-admin (inherit roles/admin)
+  -> privledge/assign/roles-privledge           // Default
+  -> privledge/remove/roles-privledge           // Need to verify can be possible
+  -> privledge/create-roles                     // Need to verify can be possible
+

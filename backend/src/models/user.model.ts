@@ -21,7 +21,7 @@ export const IBlockedRequest = new Schema({
   block_origin: String, // from decline-friend-request or blocked
 });
 
-export const ROLES = ["director", "admin", "users"];
+export const ROLES = ["super-admin", "admin", "users"];
 
 const UserSchema = new Schema<IUser>(
   {
@@ -30,10 +30,11 @@ const UserSchema = new Schema<IUser>(
     email: { type: String, require: true },
     user_profile_picture: { type: String, default: undefined },
     email_verified: { type: Boolean, default: false },
-    roles: { type: Array(String), enum: ROLES, require: true }, // user, admin, director, etc.
-    level: { type: Number, default: 1 }, // Level of the user
     contact: { type: String }, // Still @depricated
     origin: { type: IOrigin, default: undefined },
+    
+    // Access Control
+    roles: { type: Array(String), enum: ROLES, require: true }, // user, admin, super-admin, etc.
 
     // Community Field
     friends_ids: { type: Array(String), default: [] }, // Contain all the friends user id

@@ -22,7 +22,7 @@ export interface IUser {
   email: string;
   contact?: string;
   roles: string[];
-  level: number;
+  privileges: string[];
   origin: IOrigin;
   email_verified: boolean;
   user_profile_picture?: string;
