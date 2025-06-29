@@ -3,11 +3,15 @@ import React from "react";
 // Rsuite and Icons
 import { Avatar, Button, Container, Input, Text } from "rsuite";
 import { ArrowLeft, SendHorizonalIcon } from "lucide-react";
+// Redux Store
+import { useSelector } from "react-redux";
+import { getAuthUser } from "@/store/auth";
 // Services
 import { getDirectMessages } from "@/services/Communication.service";
 // Style
 import style from "./ChatWindow.module.scss";
 import classNames from "classnames/bind";
+import { IChatPayload } from "@/typings/communication";
 const cx = classNames.bind(style);
 
 const initialChatDetails = {
@@ -34,9 +38,11 @@ export interface IChatDetails {
 const ChatWindow = (props: {
   isMobileView: boolean;
   activeEntityId: string | null;
+  sendMessage: (messagePayload: IChatPayload) => void;
   navigateToChatSideBar?: () => void;
 }) => {
-  const { isMobileView, activeEntityId: userId, navigateToChatSideBar } = props;
+  const { isMobileView, activeEntityId: userId, navigateToChatSideBar, sendMessage } = props;
+  const loggedInUser = useSelector(getAuthUser);
 
   const [chatMessages, setChatMessages] = React.useState<IChatMessages[]>([]);
 
@@ -45,6 +51,11 @@ const ChatWindow = (props: {
   const [message, setMessage] = React.useState("");
 
   const handleMessageSend = React.useCallback(() => {
+    sendMessage({
+      sender_id: loggedInUser.user?._id || "",
+      receiver_id: userId || "",
+      message,
+    });
     setMessage("");
   }, [message]);
 

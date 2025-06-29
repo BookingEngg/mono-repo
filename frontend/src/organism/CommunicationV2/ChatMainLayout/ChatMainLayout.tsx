@@ -6,8 +6,10 @@ import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 // Organism
 import ChatSideBar from "@/organism/CommunicationV2/ChatSideBar";
 import ChatWindow from "@/organism/CommunicationV2/ChatWindow";
+// Services
+import SocketClient from '@/services/SocketConnection.service';
 // Typings
-import { IEntity } from "@/typings/communication";
+import { IEntity, IChatPayload } from "@/typings/communication";
 // Style
 import style from "./ChatMainLayout.module.scss";
 import classNames from "classnames/bind";
@@ -64,6 +66,13 @@ const ChatMainLayout = () => {
     setActiveMobileScreen("chat-window");
   }, [activeEntityId]);
 
+  // Socket Client
+  const socketClient = SocketClient<object, IChatPayload>({
+    onMessageReceive: (payload: object) => {
+      console.log("PAYLOAD>>>> ", payload);
+    }
+  })
+
   if (!entityList.length) {
     return (
       <Container className={cx("chat-main-layout")}>
@@ -110,6 +119,7 @@ const ChatMainLayout = () => {
                   <ChatWindow
                     isMobileView={isMobileView}
                     activeEntityId={activeEntityId}
+                    sendMessage={socketClient.sendSocketMessage}
                     navigateToChatSideBar={() => {
                       setActiveMobileScreen("user-list");
                       setActiveEntityId(null);
@@ -139,6 +149,7 @@ const ChatMainLayout = () => {
                 <ChatWindow
                   isMobileView={isMobileView}
                   activeEntityId={activeEntityId}
+                  sendMessage={socketClient.sendSocketMessage}
                 />
               </FlexboxGridItem>
             </FlexboxGrid>
