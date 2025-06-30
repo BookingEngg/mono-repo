@@ -1,5 +1,6 @@
 // Modules
 import React from "react";
+import Moment from "moment";
 // Rsuite and Icons
 import { Avatar, Button, Container, Input, Text } from "rsuite";
 import { ArrowLeft, SendHorizonalIcon } from "lucide-react";
@@ -41,7 +42,12 @@ const ChatWindow = (props: {
   sendMessage: (messagePayload: IChatPayload) => void;
   navigateToChatSideBar?: () => void;
 }) => {
-  const { isMobileView, activeEntityId: userId, navigateToChatSideBar, sendMessage } = props;
+  const {
+    isMobileView,
+    activeEntityId: userId,
+    navigateToChatSideBar,
+    sendMessage,
+  } = props;
   const loggedInUser = useSelector(getAuthUser);
 
   const [chatMessages, setChatMessages] = React.useState<IChatMessages[]>([]);
@@ -51,11 +57,72 @@ const ChatWindow = (props: {
   const [message, setMessage] = React.useState("");
 
   const handleMessageSend = React.useCallback(() => {
+    // Update sender message UI block to avoid (refetching)
+    setChatMessages((updatedChatMessages) => {
+      if (updatedChatMessages.length === 0) {
+        // First message
+        return [
+          {
+            date: Moment.utc().utcOffset("+05:30").format("DD MMM YYYY"),
+            items: [
+              {
+                content: message,
+                sender_id: loggedInUser.user?._id || "",
+                sender_name: loggedInUser.user?.first_name || "",
+                timestamp: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
+                is_sent_by_current_user: true,
+              },
+            ],
+          },
+        ];
+      } else {
+        // Message exists already
+
+        // If last message block is today
+        const lastMessageBlockDate = updatedChatMessages[0].date;
+        if (
+          Moment(lastMessageBlockDate).isSame(
+            Moment.utc().utcOffset("+05:30"),
+            "day"
+          )
+        ) {
+          updatedChatMessages[0].items.unshift({
+            content: message,
+            sender_id: loggedInUser.user?._id || "",
+            sender_name: loggedInUser.user?.first_name || "",
+            timestamp: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
+            is_sent_by_current_user: true,
+          });
+
+          return updatedChatMessages;
+        } else {
+          return [
+            {
+              date: Moment.utc().utcOffset("+05:30").format("DD MMM YYYY"),
+              items: [
+                {
+                  content: message,
+                  sender_id: loggedInUser.user?._id || "",
+                  sender_name: loggedInUser.user?.first_name || "",
+                  timestamp: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
+                  is_sent_by_current_user: true,
+                },
+              ],
+            },
+            ...updatedChatMessages,
+          ];
+        }
+      }
+    });
+
+    // Raise socket event to receipent
     sendMessage({
       sender_id: loggedInUser.user?._id || "",
       receiver_id: userId || "",
       message,
     });
+
+    // Reset message state
     setMessage("");
   }, [message]);
 

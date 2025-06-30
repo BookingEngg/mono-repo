@@ -1,7 +1,6 @@
 // import fetch from "node-fetch";
 import { URLSearchParams } from "url";
-import { fetch } from '@/util/utils.util';
-
+import { fetch } from "@/util/utils.util";
 
 class OAuthHttp {
   public getAccessToken = async (payload: {
