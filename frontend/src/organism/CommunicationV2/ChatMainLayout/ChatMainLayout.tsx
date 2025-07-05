@@ -56,7 +56,7 @@ const ChatMainLayout = () => {
   const [activeEntityId, setActiveEntityId] = React.useState<string | null>(
     null
   );
-  const currentUserMessagesRef = React.useRef(activeEntityId);
+  const currentEntityRef = React.useRef(activeEntityId);
 
   const [chatMessages, setChatMessages] = React.useState<IChatMessages[]>([]);
   const [chatDetails, setChatDetails] =
@@ -84,7 +84,9 @@ const ChatMainLayout = () => {
 
       if (response) {
         setEntityList(response.data);
-        setActiveEntityId(response?.data?.[0]?.id || "");
+        if (!isMobileView) {
+          setActiveEntityId(response.data[0]?.id);
+        }
       }
     };
 
@@ -92,7 +94,7 @@ const ChatMainLayout = () => {
   }, []);
 
   React.useEffect(() => {
-    currentUserMessagesRef.current = activeEntityId;
+    currentEntityRef.current = activeEntityId;
   }, [activeEntityId])
 
   // If mobile view then set the chat window on screen
@@ -145,7 +147,7 @@ const ChatMainLayout = () => {
       return newList;
     });
 
-    if(currentUserMessagesRef.current !== user_id){
+    if(currentEntityRef.current !== user_id){
       return;
     }
 
@@ -240,10 +242,11 @@ const ChatMainLayout = () => {
                 >
                   <ChatWindow
                     isMobileView={isMobileView}
-                    activeEntityId={activeEntityId}
+                    activeEntityId={currentEntityRef.current}
                     chatDetails={chatDetails}
                     chatMessages={chatMessages}
                     setChatMessages={setChatMessages}
+                    entityList={entityList}
                     setEntityList={setEntityList}
                     sendMessage={socketClient.sendSocketMessage}
                     navigateToChatSideBar={() => {
@@ -274,10 +277,11 @@ const ChatMainLayout = () => {
               >
                 <ChatWindow
                   isMobileView={isMobileView}
-                  activeEntityId={activeEntityId}
+                  activeEntityId={currentEntityRef.current}
                   chatDetails={chatDetails}
                   chatMessages={chatMessages}
                   setChatMessages={setChatMessages}
+                  entityList={entityList}
                   setEntityList={setEntityList}
                   sendMessage={socketClient.sendSocketMessage}
                 />
