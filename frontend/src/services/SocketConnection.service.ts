@@ -4,7 +4,7 @@ import { io, Socket } from "socket.io-client";
 import { useSelector } from "react-redux";
 import { getAuthUser } from "@/store/auth";
 
-const BASE_SOCKET_URL = "http://localhost:8080";
+const BASE_SOCKET_URL = "https://mono-repo-c6ep.onrender.com/";
 
 const SOCKET_EVENTS = {
   INITIATE_CONNECTION: "init",
