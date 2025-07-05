@@ -141,6 +141,8 @@ const ChatWindow = (props: {
   }, [message]);
 
   const handleOnChangeMessage = (value: string) => {
+    setMessage(value);
+
     setEntityList((prevList) => {
       const newList = [...prevList];
       const filterUserIdx = newList.findIndex(
@@ -151,7 +153,6 @@ const ChatWindow = (props: {
       newList[filterUserIdx].unsend_last_message = value;
       return newList;
     });
-
   }
 
   return (
