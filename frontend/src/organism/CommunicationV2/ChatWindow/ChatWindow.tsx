@@ -20,7 +20,6 @@ const ChatWindow = (props: {
   chatDetails: IChatDetails;
   chatMessages: IChatMessages[];
   setChatMessages: React.Dispatch<React.SetStateAction<IChatMessages[]>>;
-  entityList: IEntity[];
   setEntityList: React.Dispatch<React.SetStateAction<IEntity[]>>;
   sendMessage: (messagePayload: IChatPayload) => void;
   navigateToChatSideBar?: () => void;
@@ -31,14 +30,14 @@ const ChatWindow = (props: {
     chatDetails,
     chatMessages,
     setChatMessages,
-    entityList,
     setEntityList,
     navigateToChatSideBar,
     sendMessage,
   } = props;
 
-  // Handle message received from the receiver
-  React.useEffect(() => {}, [chatMessages]);
+  React.useEffect(() => {
+    setMessage("");
+  }, [userId]);
 
   const loggedInUser = useSelector(getAuthUser);
   const [message, setMessage] = React.useState("");
@@ -149,18 +148,19 @@ const ChatWindow = (props: {
 
       {/* Messages Section */}
       <div className={cx("chat-messages-container")}>
-        {chatMessages.map((message) => {
+        {chatMessages.map((message, index) => {
           const messageItems = message.items;
 
           return (
-            <div className={cx("messages-day-container")}>
+            <div key={`chat-container-${index}`} className={cx("messages-day-container")}>
               <div className={cx("message-day-block")}>
                 <Text>{message.date}</Text>
               </div>
               <div className={cx("message-block-container")}>
-                {messageItems.map((messageItem) => {
+                {messageItems.map((messageItem, i) => {
                   return (
                     <div
+                      key={`chat-item-${i}`}
                       className={cx([
                         "message-block",
                         `${messageItem.is_sent_by_current_user ? "current-user-message" : "other-user-message"}`,
