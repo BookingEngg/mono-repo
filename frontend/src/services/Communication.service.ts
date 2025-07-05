@@ -23,6 +23,14 @@ export const getUserChatsDetails = async (userId: string) => {
   return response.data;
 };
 
+export const getDirectMessages = async (userId: string) => {
+  const response = await axiosClient.get({
+    url: `/comm/chat-v2?user_id=${userId}`,
+  });
+
+  return response.data;
+}
+
 /**
  * @deprecated
  * Add a new chat message
