@@ -20,27 +20,33 @@ const ChatWindow = (props: {
   chatDetails: IChatDetails;
   chatMessages: IChatMessages[];
   setChatMessages: React.Dispatch<React.SetStateAction<IChatMessages[]>>;
+  entityList: IEntity[];
   setEntityList: React.Dispatch<React.SetStateAction<IEntity[]>>;
   sendMessage: (messagePayload: IChatPayload) => void;
   navigateToChatSideBar?: () => void;
 }) => {
   const {
     isMobileView,
-    activeEntityId: userId,
+    activeEntityId,
     chatDetails,
     chatMessages,
     setChatMessages,
+    entityList,
     setEntityList,
     navigateToChatSideBar,
     sendMessage,
   } = props;
 
-  React.useEffect(() => {
-    setMessage("");
-  }, [userId]);
-
   const loggedInUser = useSelector(getAuthUser);
   const [message, setMessage] = React.useState("");
+
+  React.useEffect(() => {
+    const activeEntity = entityList.find((entity) => entity.id === activeEntityId);
+    if(activeEntity?.unsend_last_message) {
+      setMessage(activeEntity.unsend_last_message);
+    }
+
+  }, [activeEntityId, entityList]);
 
   // Handle send message from the sender
   const handleMessageSend = React.useCallback(() => {
@@ -104,7 +110,9 @@ const ChatWindow = (props: {
 
     setEntityList((prevList) => {
       const newList = [...prevList];
-      const filterUserIdx = newList.findIndex((user) => user.id === userId);
+      const filterUserIdx = newList.findIndex(
+        (user) => user.id === activeEntityId
+      );
 
       if (filterUserIdx === -1) return newList;
 
@@ -124,13 +132,28 @@ const ChatWindow = (props: {
     sendMessage({
       sender_id: loggedInUser.user?._id || "",
       sender_name: loggedInUser.user?.first_name || "",
-      receiver_id: userId || "",
+      receiver_id: activeEntityId || "",
       message,
     });
 
     // Reset message state
     setMessage("");
   }, [message]);
+
+  const handleOnChangeMessage = (value: string) => {
+    setMessage(value);
+
+    setEntityList((prevList) => {
+      const newList = [...prevList];
+      const filterUserIdx = newList.findIndex(
+        (user) => user.id === activeEntityId
+      );
+      if (filterUserIdx === -1) return newList;
+
+      newList[filterUserIdx].unsend_last_message = value;
+      return newList;
+    });
+  }
 
   return (
     <Container className={cx("chat-outer-container")}>
@@ -152,7 +175,10 @@ const ChatWindow = (props: {
           const messageItems = message.items;
 
           return (
-            <div key={`chat-container-${index}`} className={cx("messages-day-container")}>
+            <div
+              key={`chat-container-${index}`}
+              className={cx("messages-day-container")}
+            >
               <div className={cx("message-day-block")}>
                 <Text>{message.date}</Text>
               </div>
@@ -196,9 +222,7 @@ const ChatWindow = (props: {
           size="md"
           placeholder="Message"
           value={message}
-          onChange={(value) => {
-            setMessage(value);
-          }}
+          onChange={handleOnChangeMessage}
           onPressEnter={handleMessageSend}
         />
 
