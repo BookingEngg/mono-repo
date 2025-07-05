@@ -7,55 +7,43 @@ import { ArrowLeft, SendHorizonalIcon } from "lucide-react";
 // Redux Store
 import { useSelector } from "react-redux";
 import { getAuthUser } from "@/store/auth";
-// Services
-import { getDirectMessages } from "@/services/Communication.service";
 // Style
 import style from "./ChatWindow.module.scss";
 import classNames from "classnames/bind";
-import { IChatPayload } from "@/typings/communication";
+import { IChatPayload, IEntity } from "@/typings/communication";
+import { IChatDetails, IChatMessages } from "../ChatMainLayout/ChatMainLayout";
 const cx = classNames.bind(style);
-
-const initialChatDetails = {
-  name: "Anonymous user",
-  entity_logo: "",
-};
-
-export interface IChatMessages {
-  date: string;
-  items: {
-    content: string;
-    sender_id: string;
-    sender_name: string;
-    timestamp: string;
-    is_sent_by_current_user: boolean;
-  }[];
-}
-
-export interface IChatDetails {
-  name: string;
-  entity_logo: string;
-}
 
 const ChatWindow = (props: {
   isMobileView: boolean;
   activeEntityId: string | null;
+  chatDetails: IChatDetails;
+  chatMessages: IChatMessages[];
+  setChatMessages: React.Dispatch<React.SetStateAction<IChatMessages[]>>;
+  entityList: IEntity[];
+  setEntityList: React.Dispatch<React.SetStateAction<IEntity[]>>;
   sendMessage: (messagePayload: IChatPayload) => void;
   navigateToChatSideBar?: () => void;
 }) => {
   const {
     isMobileView,
     activeEntityId: userId,
+    chatDetails,
+    chatMessages,
+    setChatMessages,
+    entityList,
+    setEntityList,
     navigateToChatSideBar,
     sendMessage,
   } = props;
+
+  // Handle message received from the receiver
+  React.useEffect(() => {}, [chatMessages]);
+
   const loggedInUser = useSelector(getAuthUser);
-
-  const [chatMessages, setChatMessages] = React.useState<IChatMessages[]>([]);
-
-  const [chatDetails, setChatDetails] =
-    React.useState<IChatDetails>(initialChatDetails);
   const [message, setMessage] = React.useState("");
 
+  // Handle send message from the sender
   const handleMessageSend = React.useCallback(() => {
     // Update sender message UI block to avoid (refetching)
     setChatMessages((updatedChatMessages) => {
@@ -115,9 +103,28 @@ const ChatWindow = (props: {
       }
     });
 
+    setEntityList((prevList) => {
+      const newList = [...prevList];
+      const filterUserIdx = newList.findIndex((user) => user.id === userId);
+
+      if (filterUserIdx === -1) return newList;
+
+      const filterUser = {
+        ...newList[filterUserIdx],
+        last_message: message,
+        last_online_at: Moment.utc().utcOffset("+05:30").format("hh:mm a"),
+      };
+
+      newList.splice(filterUserIdx, 1); // Remove old position
+      newList.unshift(filterUser); // Insert at top
+
+      return newList;
+    });
+
     // Raise socket event to receipent
     sendMessage({
       sender_id: loggedInUser.user?._id || "",
+      sender_name: loggedInUser.user?.first_name || "",
       receiver_id: userId || "",
       message,
     });
@@ -125,20 +132,6 @@ const ChatWindow = (props: {
     // Reset message state
     setMessage("");
   }, [message]);
-
-  // Fetch user messages if user changes
-  React.useEffect(() => {
-    const fetchChatMessages = async () => {
-      if (!userId) return;
-
-      const response = await getDirectMessages(userId);
-      if (response) {
-        setChatMessages(response.data.messages);
-        setChatDetails(response.data.entity_details);
-      }
-    };
-    fetchChatMessages();
-  }, [userId]);
 
   return (
     <Container className={cx("chat-outer-container")}>

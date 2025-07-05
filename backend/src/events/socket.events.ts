@@ -38,7 +38,7 @@ class SocketEvents {
 
   private addNewChatMessage = async (payload: string) => {
     const parsedPayload = JSON.parse(payload);
-    const { sender_id, receiver_id, message } = parsedPayload;
+    const { sender_id, sender_name, receiver_id, message } = parsedPayload;
 
     if (sender_id && receiver_id && message) {
       const eventPayload = {
@@ -50,8 +50,9 @@ class SocketEvents {
       const receiverSocketId = this.usersSocketHash.get(receiver_id);
       this.io.to(receiverSocketId).emit("received-user-chat", {
         user_id: sender_id,
+        name: sender_name,
         message,
-        created_at: moment.utc().format("hh:mm a"),
+        created_at: moment.utc().utcOffset("+05:30").format("hh:mm a"),
       });
     }
   };
