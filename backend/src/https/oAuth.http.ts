@@ -1,4 +1,3 @@
-// import fetch from "node-fetch";
 import { URLSearchParams } from "url";
 import { fetch } from "@/util/utils.util";
 

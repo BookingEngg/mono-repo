@@ -12,7 +12,7 @@ const getChatRoutes = () => {
       path: BASE_OLD_URL,
       element: <Communication />,
       icon: <MessageCircle />,
-      showOnSideNav: false, // Make the user not accessible from side nav
+      showOnSideNav: false, // Make the user not directly accessible
       key: "communication",
       label: "Communication",
       handle: {
