@@ -84,7 +84,9 @@ const ChatMainLayout = () => {
 
       if (response) {
         setEntityList(response.data);
-        setActiveEntityId(response?.data?.[0]?.id || "");
+        if (!isMobileView) {
+          setActiveEntityId(response.data[0]?.id);
+        }
       }
     };
 
