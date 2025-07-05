@@ -1,3 +1,4 @@
+import type { RequestInfo, RequestInit, Response } from 'node-fetch';
 import {
   redisConfig,
   isProduction,
@@ -6,6 +7,9 @@ import {
   serviceRoute,
   uiConfigs,
 } from "@config";
+
+export const fetch = (url: RequestInfo, init?: RequestInit): Promise<Response> =>
+  import('node-fetch').then(({ default: fetch }) => fetch(url, init));
 
 export const getRedisUrl = () => {
   const { username, password, host, port } = redisConfig;

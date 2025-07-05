@@ -100,6 +100,12 @@ class ExternalRoutes implements Routes {
       asyncWrapper(this.communicationController.getUserChats)
     );
 
+    this.router.get(
+      `${prefix}/chat-v2`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.communicationController.getMessages)
+    );
+
     this.router.post(
       `${prefix}/new-chat`,
       this.authMiddleware.getAuthUser,

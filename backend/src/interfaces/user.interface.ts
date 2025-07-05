@@ -30,6 +30,9 @@ export interface IUser {
   friends_ids: string[];
   blocked_user: IBlockedUser[];
   requested_friends: IRequestedUser[];
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface ICommonAuthUser {
@@ -55,10 +58,4 @@ export interface IOtp {
   otp_response: object;
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface ICommunication {
-  sender_user_id: string;
-  receiver_user_id: string;
-  message: string;
 }

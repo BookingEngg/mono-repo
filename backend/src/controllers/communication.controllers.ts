@@ -19,6 +19,20 @@ class CommunicationControllers {
     return res.send({ status: "success", data: response });
   };
 
+  public getMessages = async (req: Request, res: Response): Promise<any> => {
+    const receiverId: string = (req.query?.user_id || "") as string;
+    if (!req.user?._id || !receiverId) {
+      throw new Error("Invalid User");
+    }
+
+    const response = await this.communicationService.getDirectMessages(
+      req.user,
+      receiverId
+    );
+
+    return res.send({ status: "success", data: response });
+  };
+
   public getCommunicationChatUsers = async (
     req: Request,
     res: Response
@@ -37,11 +51,6 @@ class CommunicationControllers {
   public addNewChat = async (req: Request, res: Response): Promise<any> => {
     const { sender_id, receiver_id, message } = req.body;
 
-    /**
-     * TODO: Optimization Scope:
-     * 1. Need to update the message on bunch (10 message at a time on or time interval just like throttling)
-     * 2. And add the field message send time if we make message send at bunch
-     */
     await this.communicationService.createChat({
       senderId: sender_id,
       receiverId: receiver_id,
