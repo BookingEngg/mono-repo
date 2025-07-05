@@ -2,9 +2,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Moment from "moment";
-// Redux Store
-import { useSelector } from "react-redux";
-import { getAuthUser } from "@/store/auth";
 // Rsuite
 import { Button, Container, FlexboxGrid, Text } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
@@ -54,12 +51,12 @@ export interface IChatDetails {
 
 const ChatMainLayout = () => {
   const navigate = useNavigate();
-  const loggedInUser = useSelector(getAuthUser);
 
   const [entityList, setEntityList] = React.useState<IEntity[]>([]);
   const [activeEntityId, setActiveEntityId] = React.useState<string | null>(
     null
   );
+  const currentUserMessagesRef = React.useRef(activeEntityId);
 
   const [chatMessages, setChatMessages] = React.useState<IChatMessages[]>([]);
   const [chatDetails, setChatDetails] =
@@ -87,14 +84,16 @@ const ChatMainLayout = () => {
 
       if (response) {
         setEntityList(response.data);
-        if (!isMobileView) {
-          setActiveEntityId(response.data[0]?.id);
-        }
+        setActiveEntityId(response?.data?.[0]?.id || "");
       }
     };
 
     fetchEntityList();
   }, []);
+
+  React.useEffect(() => {
+    currentUserMessagesRef.current = activeEntityId;
+  }, [activeEntityId])
 
   // If mobile view then set the chat window on screen
   // Fetch user messages if user changes
@@ -146,7 +145,7 @@ const ChatMainLayout = () => {
       return newList;
     });
 
-    if(activeEntityId !== user_id){
+    if(currentUserMessagesRef.current !== user_id){
       return;
     }
 
@@ -245,7 +244,6 @@ const ChatMainLayout = () => {
                     chatDetails={chatDetails}
                     chatMessages={chatMessages}
                     setChatMessages={setChatMessages}
-                    entityList={entityList}
                     setEntityList={setEntityList}
                     sendMessage={socketClient.sendSocketMessage}
                     navigateToChatSideBar={() => {
@@ -280,7 +278,6 @@ const ChatMainLayout = () => {
                   chatDetails={chatDetails}
                   chatMessages={chatMessages}
                   setChatMessages={setChatMessages}
-                  entityList={entityList}
                   setEntityList={setEntityList}
                   sendMessage={socketClient.sendSocketMessage}
                 />
