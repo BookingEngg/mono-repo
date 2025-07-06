@@ -70,7 +70,7 @@ class CommunicationDao {
         { sender_user_id: senderId, receiver_user_id: receiverId },
         { sender_user_id: receiverId, receiver_user_id: senderId },
       ],
-      // message_type: CommunicationType.Private,
+      message_type: CommunicationType.Private,
     };
 
     const [data, count] = await Promise.all([
