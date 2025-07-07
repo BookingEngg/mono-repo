@@ -21,7 +21,7 @@ class UserDao {
 
   // Get the users by userId
   public getUserByUserId = async (userId: string, fields: string[] = []) => {
-    return await this.userModel.findOne({ _id: userId }).lean();
+    return await this.userModel.findOne({ _id: userId }).select(fields).lean();
   };
 
   // Get the users by userIds
@@ -36,8 +36,8 @@ class UserDao {
   };
 
   // Get all the user expect from the source
-  public getUsers = async (email: string) => {
-    return await this.userModel.find({ email: { $ne: email } });
+  public getUsers = async (email: string, fields: string[] = []) => {
+    return await this.userModel.find({ email: { $ne: email } }).select(fields).lean();
   };
 
   // Get community paginated user list

@@ -21,11 +21,12 @@ export interface IUser {
   last_name: string;
   email: string;
   contact?: string;
-  roles: string[];
   privileges: string[];
   origin: IOrigin;
   email_verified: boolean;
   user_profile_picture?: string;
+  roles: string[];
+  current_role_privledges?: string[]
 
   friends_ids: string[];
   blocked_user: IBlockedUser[];
