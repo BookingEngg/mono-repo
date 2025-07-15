@@ -1,74 +1,85 @@
-export interface IPrivledges {
+export interface Iprivileges {
   description: string;
   default: boolean;
 }
 
 export interface IRole {
   role: string;
-  extends: string[];
-  privledges: string[];
+  parents: string[];  // Refer to the immediate parent roles
+  children: string[], // Refer to the immediate child roles
+  privileges: string[];
 }
 
-const PRIVILEGE: Record<string, IPrivledges> = {
-  "privledge/community/viewer": {
+const PrivilegeDetails: Record<string, Iprivileges> = {
+  "privilege/community/viewer": {
     description: "Can View Community",
     default: true,
   },
-  "privledge/community/manipulate": {
+  "privilege/community/manipulate": {
     description: "Can Manipulate Community",
     default: true,
   },
-  "privledge/communication/viewer": {
+  "privilege/communication/viewer": {
     description: "Can View Communication Tab",
     default: true,
   },
-  "privledge/communication/writer": {
+  "privilege/communication/writer": {
     description: "Can Manipulate Communication Tab",
-    default: true,
-  },
-  "privledge/assign/roles-privledge": {
-    description: "Can Assign Roles Privledges",
     default: false,
   },
-  "privledge/remove/roles-privledge": {
-    description: "Can Remove Roles Privledges",
+  "privilege/communication/group/create": {
+    description: "Can Create Group in Communication Tab",
     default: false,
   },
-  "privledge/create-roles": {
-    description: "Can Create Roles",
+  "privilege/communication/group/manipulate": {
+    description: "Can Manipulate Group in Communication Tab",
+    default: false,
+  },
+  "privilege/system-block": {
+    description: "Can Block Some other user",
+    default: false,
+  },
+  "privilege/remove/roles-privilege": {
+    description: "Can Remove Roles privileges",
+    default: false,
+  },
+  "privilege/assign/roles-privilege": {
+    description: "Can Assign Roles privileges",
     default: false,
   },
 };
 
-const ROLES: IRole[] = [
+const RolesDetails: IRole[] = [
   {
     role: "roles/users",
-    extends: [],
-    privledges: [
-      "privledge/community/viewer",
-      "privledge/community/manipulate",
-      "privledge/communication/viewer",
-      "privledge/communication/writer",
+    parents: [],
+    children: ["roles/admin"],
+    privileges: [
+      "privilege/community/viewer",
+      "privilege/community/manipulate",
+      "privilege/communication/viewer",
+      "privilege/communication/writer",
     ],
   },
   {
     role: "roles/admin",
-    extends: ["roles/users"],
-    privledges: [
-      "privledge/communication/group/create",
-      "privledge/communication/group/manipulate",
-      "privledge/system-block",
+    parents: ["roles/users"],
+    children: ["roles/super-admin"],
+    privileges: [
+      "privilege/communication/group/create",
+      "privilege/communication/group/manipulate",
+      "privilege/system-block",
     ],
   },
   {
     role: "roles/super-admin",
-    extends: ["roles/admin"],
-    privledges: [
-      "privledge/assign/roles-privledge",
-      "privledge/remove/roles-privledge",
-      "privledge/create-roles",
+    parents: ["roles/admin"],
+    children: [],
+    privileges: [
+      "privilege/assign/roles-privilege",
+      "privilege/remove/roles-privilege",
     ],
   },
 ];
 
-export { ROLES, PRIVILEGE };
+export { RolesDetails, PrivilegeDetails };

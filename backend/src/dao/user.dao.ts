@@ -14,6 +14,13 @@ class UserDao {
     return await this.userModel.create(payload);
   };
 
+  public updateUserDetailsById = async (
+    userId: string,
+    updatedPayload: object
+  ) => {
+    return await this.userModel.updateOne({ _id: userId }, updatedPayload);
+  };
+
   // Get the user by email id
   public getUserByEmail = async (email: string): Promise<IUser> => {
     return await this.userModel.findOne({ email }).lean();
@@ -37,7 +44,10 @@ class UserDao {
 
   // Get all the user expect from the source
   public getUsers = async (email: string, fields: string[] = []) => {
-    return await this.userModel.find({ email: { $ne: email } }).select(fields).lean();
+    return await this.userModel
+      .find({ email: { $ne: email } })
+      .select(fields)
+      .lean();
   };
 
   // Get community paginated user list

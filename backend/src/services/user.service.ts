@@ -17,8 +17,7 @@ class UserService {
       email_verified: payload.email_verified,
       user_profile_picture: payload.user_profile_picture,
 
-      roles: [],
-      level: 1,
+      roles: ['roles/users'], // Default user roles while signup
       friends_ids: [],
       requested_friends: [],
       blocked_user: [],

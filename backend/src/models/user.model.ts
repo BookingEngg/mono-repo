@@ -35,7 +35,7 @@ const UserSchema = new Schema<IUser>(
 
     // Access Control
     roles: { type: Array(String), enum: ROLES, require: true }, // user, admin, super-admin, etc.
-    current_role_privledges: { type: Array(String), default: [] },
+    privileges: { type: Array(String), required: true}, // contain only the restricted priviledges of the roles.
 
     // Community Field
     friends_ids: { type: Array(String), default: [] }, // Contain all the friends user id
