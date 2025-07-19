@@ -111,6 +111,13 @@ class ExternalRoutes implements Routes {
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communicationController.addNewChat)
     );
+
+    // Communication Groups Routes
+    this.router.post(
+      `${prefix}/group/new`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.communicationController.createGroup)
+    )
   }
 
   private initializeCommunityRoutes(prefix: string) {

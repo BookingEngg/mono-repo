@@ -19,6 +19,7 @@ class RedisQueueService extends RedisUtil {
   }
 
   /**
+   * @deprecated
    * Publish message to redis stream
    */
   public publishMessageToStream = async (message: object) => {

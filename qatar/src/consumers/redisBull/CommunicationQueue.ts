@@ -37,8 +37,8 @@ class CommunicationQueue {
       const { type } = data;
 
       switch (type) {
-        case "new_message":
-          console.log("NEW MESSAGE >>>>>>", data);
+        case "direct_message":
+        case "group_message": 
           await this.backendHttp.createMessage(data);
           return;
       }

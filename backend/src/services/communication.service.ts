@@ -1,5 +1,6 @@
 import R from "ramda";
 import CommunicationDao from "@/dao/communication.dao";
+import CommunicationGroupDao from "@/dao/communicationGroup.dao";
 import UserDao from "@/dao/user.dao";
 import { IUser } from "@/interfaces/user.interface";
 import CommunicationFormatter from "@/formatter/communication.formatter";
@@ -9,27 +10,72 @@ import {
   RequestStatusType,
 } from "@/constants/common.constants";
 import moment from "moment";
-import { CommunicationType } from "@/interfaces/enum";
+import { CommunicationType, GroupType } from "@/interfaces/enum";
 import { ICommunication } from "@/interfaces/communication.interface";
 
 class CommunicationService {
+  // Dao
   private userDao = new UserDao();
   private communicationDao = new CommunicationDao();
+  private communicationGroupDao = new CommunicationGroupDao();
 
+  // Formatter
   private communicationFormatter = new CommunicationFormatter();
 
-  public createChat = async (payload: {
-    senderId: string;
-    receiverId: string;
-    message: string;
+  public createGroup = async (payload: {
+    group_name: string;
+    description: string;
+    admin_ids: string[];
+    members_ids: string[];
+    group_type: GroupType;
+    profile_picture: string;
   }) => {
-    const { senderId, receiverId, message } = payload;
-    await this.communicationDao.createMessage({
+    const {
+      group_name: name,
+      description,
+      admin_ids,
+      members_ids: group_member_ids,
+      group_type,
+      profile_picture: group_profile_picture,
+    } = payload;
+
+    const formattedPayload = {
+      name,
+      description,
+      admin_ids,
+      group_member_ids,
+      group_type,
+      group_profile_picture,
+
+      is_active: true,
+      is_visible: true,
+    };
+
+    return await this.communicationGroupDao.createGroup(formattedPayload);
+  };
+
+  public createNewChatMessage = async (payload: {
+    senderId: string;
+    message: string;
+    receiverId?: string;
+    groupShortId?: string;
+    messageType: string;
+  }) => {
+    const { senderId, receiverId, groupShortId, message, messageType } =
+      payload;
+
+    const communicationFormattedPayload = {
       sender_user_id: senderId,
-      receiver_user_id: receiverId,
+      ...(receiverId ? { receiver_user_id: receiverId } : {}),
+      ...(groupShortId ? { group_id: groupShortId } : {}),
       message,
-      message_type: CommunicationType.Private,
-    });
+      message_type:
+        messageType === "group_message"
+          ? CommunicationType.Group
+          : CommunicationType.Private,
+    };
+
+    await this.communicationDao.createMessage(communicationFormattedPayload);
   };
 
   public getUsersChat = async (userDetails: IUser, receiverId: string) => {

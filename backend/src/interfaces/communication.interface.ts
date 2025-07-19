@@ -14,10 +14,10 @@ export interface ICommunication {
 }
 
 export interface ICommunicationGroup {
-  short_id: string;
+  short_id?: string;
   name: string;
   description: string;
-  admin_id: string;
+  admin_ids: string[];
   group_member_ids: string[];
   group_profile_picture?: string;
   group_type: GroupType;
