@@ -13,7 +13,6 @@ export interface ISocketEvent {
 class SocketEvents {
   private io: Server;
   private communicationPublisher = new CommunicationPublisher();
-  private usersSocketHash = new Map();
 
   public initializeSocketEvents(payload: ISocketEvent) {
     const { eventName, socket, io } = payload;
@@ -26,11 +25,18 @@ class SocketEvents {
           const { user_id } = parsedPayload;
 
           if (user_id) {
-            this.usersSocketHash.set(user_id, socket.id);
+            const roomId = `room-${user_id}`;
+            socket.join(roomId);
+            socket.data.userId = user_id;
           }
         };
       case "new-chat-message":
         return this.addNewChatMessage;
+      case "disconnect": 
+        // Trigger if client refresh a tab several time then you can see it in action
+        return () => {
+          console.log("SOCKET ROOMS>>>> ", socket.rooms);
+        };
       default:
         return () => {};
     }
@@ -46,9 +52,10 @@ class SocketEvents {
         type: "new_message",
       };
       this.communicationPublisher.raiseEventForSendMessage(eventPayload);
+      const roomId = `room-${receiver_id}`;
 
-      const receiverSocketId = this.usersSocketHash.get(receiver_id);
-      this.io.to(receiverSocketId).emit("received-user-chat", {
+      // Send back the message to receiver client room
+      this.io.to(roomId).emit("received-user-chat", {
         user_id: sender_id,
         name: sender_name,
         message,

@@ -47,6 +47,7 @@ const SocketClient = <T, U>(payload: {
     }
 
     socketClient.on(SOCKET_EVENTS.RECEIVED_USER_CHAT, (data) => {
+      console.log("Received User Chat>>>", data);
       onMessageReceive(data);
     });
 
