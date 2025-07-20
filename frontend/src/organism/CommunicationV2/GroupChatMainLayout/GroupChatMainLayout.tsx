@@ -217,7 +217,6 @@ const GroupChatMainLayout = () => {
 
   return (
     <>
-      Group Chat
       <Container className={cx("chat-main-layout")}>
         {isMobileView ? (
           <>

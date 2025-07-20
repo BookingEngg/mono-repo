@@ -49,7 +49,7 @@ const ChatSideBar = (props: {
                 </div>
                 <div className={cx("wa-group-last")}>
                   <span>{entity.last_message}</span>
-                  {true ? (
+                  {false ? (
                     <span className={cx("wa-unread-badge")}>{0}</span>
                   ) : null}
                 </div>
