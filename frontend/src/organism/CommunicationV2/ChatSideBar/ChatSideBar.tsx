@@ -29,23 +29,28 @@ const ChatSideBar = (props: {
           return (
             <li
               key={entity.id}
-              className={`wa-group-item ${entity.id === activeEntityId ? "active" : ""}`}
+              className={cx([
+                "wa-group-item",
+                `${entity.id === activeEntityId ? "active" : ""}`,
+              ])}
               onClick={() => setActiveEntityId(entity.id)}
             >
               <img
                 src={entity.profile_picture}
                 alt="err"
-                className="wa-group-avatar"
+                className={cx("wa-group-avatar")}
               />
-              <div className="wa-group-info">
-                <div className="wa-group-name-time">
-                  <span className="wa-group-name">{entity.name}</span>
-                  <span className="wa-group-time">{entity.last_online_at}</span>
+              <div className={cx("wa-group-info")}>
+                <div className={cx("wa-group-name-time")}>
+                  <span className={cx("wa-group-name")}>{entity.name}</span>
+                  <span className={cx("wa-group-time")}>
+                    {entity.last_online_at}
+                  </span>
                 </div>
-                <div className="wa-group-last">
+                <div className={cx("wa-group-last")}>
                   <span>{entity.last_message}</span>
                   {true ? (
-                    <span className="wa-unread-badge">{0}</span>
+                    <span className={cx("wa-unread-badge")}>{0}</span>
                   ) : null}
                 </div>
               </div>

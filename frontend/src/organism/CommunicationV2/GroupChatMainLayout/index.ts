@@ -1,2 +1,2 @@
-import GroupCommunication from "./GroupCommunication";
-export default GroupCommunication;
+import GroupChatMainLayout from "./GroupChatMainLayout";
+export default GroupChatMainLayout;
