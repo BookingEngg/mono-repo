@@ -14,6 +14,7 @@ export interface ICommunication {
 }
 
 export interface ICommunicationGroup {
+  _id?: string;
   short_id?: string;
   name: string;
   description: string;
@@ -24,4 +25,7 @@ export interface ICommunicationGroup {
 
   is_active: boolean;
   is_visible: boolean;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }

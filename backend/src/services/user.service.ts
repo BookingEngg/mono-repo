@@ -1,13 +1,14 @@
 import moment from "moment";
 import R from "ramda";
 import CommunicationDao from "@/dao/communication.dao";
+import CommunicationGroupDao from "@/dao/communicationGroup.dao";
 import UserDao from "@/dao/user.dao";
 import { ICommonAuthUser, IUser } from "@/interfaces/user.interface";
-import { TokenPayload } from "google-auth-library";
 
 class UserService {
   private userDao = new UserDao();
   private communicationDao = new CommunicationDao();
+  private communicationGroupDao = new CommunicationGroupDao();
 
   public createUser = async (payload: ICommonAuthUser) => {
     const formattedUser = {
@@ -22,6 +23,8 @@ class UserService {
       friends_ids: [],
       requested_friends: [],
       blocked_user: [],
+
+      groups_ids: [],
     };
     return await this.userDao.createUser(formattedUser);
   };
@@ -32,6 +35,10 @@ class UserService {
 
   public getChatUsers = async (authUser: IUser) => {
     const chatUsers = await this.userDao.getUserByUserIds(authUser.friends_ids);
+    const groupDetails =
+      await this.communicationGroupDao.getGroupDetailsByShortIds(
+        authUser.groups_ids
+      );
     const lastReceivedChat = await this.communicationDao.getLastReceivedChat(
       authUser._id
     );
@@ -92,11 +99,26 @@ class UserService {
         user_id: user._id,
         name: `${user.first_name} ${user.last_name}`,
         time: user.updatedAt,
-        user_profile_picture: user.user_profile_picture,
+        profile_picture: user.user_profile_picture,
         last_message: lastMessage,
         last_online_at: lastOnlineAt,
       };
     });
+
+    // Formatted the group details as well
+    // const formattedGroupDetails = groupDetails.map((group) => {
+    //   return {
+    //     id: group._id,
+    //     user_id: group.short_id,
+    //     name: group.name,
+    //     time: group.updatedAt,
+    //     user_profile_picture: group.group_profile_picture,
+    //     last_message: "",
+    //     last_online_at: moment(group.updatedAt)
+    //       .utcOffset("+05:30")
+    //       .format("hh:mm a"),
+    //   };
+    // });
 
     return formattedChatUsers;
   };

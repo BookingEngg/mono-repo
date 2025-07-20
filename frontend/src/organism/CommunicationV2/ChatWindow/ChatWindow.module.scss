@@ -47,7 +47,8 @@
           word-wrap: break-word;
           word-break: break-word;
           white-space: pre-wrap;
-          padding: 8px 12px;
+          // padding: 8px 12px;
+          padding: 0.5rem 0.75rem;
           border-radius: 8px;
           font-size: 14px;
 
@@ -59,15 +60,13 @@
 
         .current-user-message {
           align-self: flex-end;
-          background-color: #dff7ff;
-          border: 1px solid #00aaff;
+          background-color: #d9fdd3;
           text-align: left;
         }
 
         .other-user-message {
           align-self: flex-start;
-          background-color: #f1f1f1;
-          border: 1px solid #ccc;
+          background-color: white;
           text-align: left;
         }
       }

@@ -31,6 +31,8 @@ export interface IUser {
   blocked_user: IBlockedUser[];
   requested_friends: IRequestedUser[];
 
+  groups_ids: string[];
+
   createdAt?: Date;
   updatedAt?: Date;
 }
