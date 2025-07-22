@@ -40,7 +40,7 @@ const UserSchema = new Schema<IUser>(
     requested_friends: { type: Array(IFriendsRequest), default: [] }, // Contain all the users who request to make friend
     blocked_user: { type: Array(IBlockedRequest), default: [] }, // Contain all the blocked users for the perticular user
     // Group Communication
-    groups_ids: { type: Array(String), default: [] },
+    group_ids: { type: Array(String), default: [] },
   },
   { timestamps: true }
 );

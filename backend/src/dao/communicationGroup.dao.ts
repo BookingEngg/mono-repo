@@ -8,6 +8,16 @@ class CommunicationGroupDao {
     return await this.communicationModel.create(payload);
   };
 
+  public getGroupDetailsByShortId = async (
+    shortId: string,
+    fields: string[] = []
+  ) => {
+    return await this.communicationModel
+      .findOne({ short_id: shortId })
+      .select(fields)
+      .lean();
+  };
+
   public getGroupDetailsByShortIds = async (
     shortIds: string[],
     fields: string[] = []

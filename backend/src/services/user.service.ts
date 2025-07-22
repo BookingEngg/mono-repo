@@ -24,7 +24,7 @@ class UserService {
       requested_friends: [],
       blocked_user: [],
 
-      groups_ids: [],
+      group_ids: [],
     };
     return await this.userDao.createUser(formattedUser);
   };
@@ -35,10 +35,6 @@ class UserService {
 
   public getChatUsers = async (authUser: IUser) => {
     const chatUsers = await this.userDao.getUserByUserIds(authUser.friends_ids);
-    const groupDetails =
-      await this.communicationGroupDao.getGroupDetailsByShortIds(
-        authUser.groups_ids
-      );
     const lastReceivedChat = await this.communicationDao.getLastReceivedChat(
       authUser._id
     );
@@ -96,7 +92,6 @@ class UserService {
 
       return {
         id: user._id,
-        user_id: user._id,
         name: `${user.first_name} ${user.last_name}`,
         time: user.updatedAt,
         profile_picture: user.user_profile_picture,
@@ -104,21 +99,6 @@ class UserService {
         last_online_at: lastOnlineAt,
       };
     });
-
-    // Formatted the group details as well
-    // const formattedGroupDetails = groupDetails.map((group) => {
-    //   return {
-    //     id: group._id,
-    //     user_id: group.short_id,
-    //     name: group.name,
-    //     time: group.updatedAt,
-    //     user_profile_picture: group.group_profile_picture,
-    //     last_message: "",
-    //     last_online_at: moment(group.updatedAt)
-    //       .utcOffset("+05:30")
-    //       .format("hh:mm a"),
-    //   };
-    // });
 
     return formattedChatUsers;
   };

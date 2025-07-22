@@ -118,6 +118,18 @@ class ExternalRoutes implements Routes {
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communicationController.createGroup)
     )
+
+    this.router.get(
+      `${prefix}/group/list`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.communicationController.getGroupList)
+    )
+
+    this.router.get(
+      `${prefix}/group/chats`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.communicationController.getGroupMessages)
+    );
   }
 
   private initializeCommunityRoutes(prefix: string) {

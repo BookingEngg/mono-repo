@@ -69,6 +69,34 @@ class CommunicationControllers {
     return res.send({ status: "success" });
   };
 
+  /**
+   * Get the list of communication groups
+   */
+  public getGroupList = async (req: Request, res: Response): Promise<any> => {
+    const user = req.user;
+    if(!user._id) {
+      throw new Error("Invalid User");
+    }
+    const response = await this.communicationService.getGroupsList(user);
+    return res.send({ status: "success", data: response });
+  };
+
+  /**
+   * Get the message of a group listed on communication groups
+   */
+  public getGroupMessages = async (req: Request, res: Response): Promise<any> => {
+    const groupId: string = (req.query?.group_id || "") as string;
+    if (!req.user?._id || !groupId) {
+      throw new Error("Invalid User or Group id not found");
+    }
+
+    const response = await this.communicationService.getGroupMessages(
+      req.user,
+      groupId
+    );
+
+    return res.send({ status: "success", data: response });
+  };
 }
 
 export default CommunicationControllers;

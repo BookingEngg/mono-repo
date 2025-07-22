@@ -11,7 +11,10 @@ import {
 } from "@/constants/common.constants";
 import moment from "moment";
 import { CommunicationType, GroupType } from "@/interfaces/enum";
-import { ICommunication } from "@/interfaces/communication.interface";
+import {
+  ICommunication,
+  ICommunicationGroup,
+} from "@/interfaces/communication.interface";
 
 class CommunicationService {
   // Dao
@@ -137,6 +140,61 @@ class CommunicationService {
     const formattedEntityDetails = {
       name: receiverUser.first_name + " " + receiverUser.last_name,
       entity_logo: receiverUser.user_profile_picture,
+    };
+
+    return {
+      meta: {
+        count,
+      },
+      entity_details: formattedEntityDetails,
+      messages: formattedMessages,
+    };
+  };
+
+  /**
+   * Get group messages of a user
+   */
+  public getGroupMessages = async (userDetails: IUser, groupId: string) => {
+    const senderId = userDetails._id.toString();
+
+    const groupDetails =
+      await this.communicationGroupDao.getGroupDetailsByShortId(groupId, [
+        "name",
+        "group_profile_picture",
+        "group_member_ids",
+      ]);
+
+    // Fetch all the messages and receiver user details
+    const [{ data: initialMessages, count }, groupMembersUsers] =
+      await Promise.all([
+        this.communicationDao.getGroupMessages(groupId),
+        this.userDao.getUserByUserIds(groupDetails.group_member_ids, ['first_name']),
+      ]);
+
+    // Create mapper for users
+    const userDetailsMapper = R.indexBy(R.prop<string>("_id"), [
+      userDetails,
+      ...groupMembersUsers,
+    ]);
+
+    // Create mapper for messages by date
+    const messagesDataHashByDate: Record<string, ICommunication[]> = R.groupBy(
+      (message: ICommunication) =>
+        moment(message.createdAt)
+          .add(330, "minutes")
+          .startOf("date")
+          .format("DD MMM YYYY") as unknown as string
+    )(initialMessages);
+
+    const formattedMessages = this.communicationFormatter.getFormattedMessages({
+      messagesDataHashByDate,
+      userDetailsHashById: userDetailsMapper,
+      userId: senderId,
+    });
+
+    const formattedEntityDetails = {
+      name: groupDetails.name,
+      entity_logo: groupDetails.group_profile_picture,
     };
 
     return {
@@ -305,6 +363,61 @@ class CommunicationService {
         friendId: user._id.toString(),
       }),
     ]);
+  };
+
+  /**
+   * Get list of groups
+   * @param user
+   */
+  public getGroupsList = async (user: IUser) => {
+    const [groupDetails, lastMessageOfGroups] = await Promise.all([
+      this.communicationGroupDao.getGroupDetailsByShortIds(user.group_ids),
+      this.communicationDao.getLastReceivedChatOfGroup(user.group_ids),
+    ]);
+
+    const lastMessageOfGroupMap = R.indexBy(R.prop("_id"), lastMessageOfGroups);
+
+    // Sort the groups accourding to last message
+    const sortedGroupDetails = groupDetails.slice().sort((groupA, groupB) => {
+      const senderApproachGrpA = groupA.short_id;
+      const senderApproachGrpB = groupB.short_id;
+
+      const senderGroupAMsg = lastMessageOfGroupMap[senderApproachGrpA];
+      const senderGroupBMsg = lastMessageOfGroupMap[senderApproachGrpB];
+
+      if (!senderGroupAMsg && !senderGroupBMsg) {
+        return 0;
+      }
+      if (!senderGroupAMsg) {
+        return 1;
+      }
+      if (!senderGroupBMsg) {
+        return -1;
+      }
+    });
+
+    const formattedChatUsers = sortedGroupDetails.map((group) => {
+      const senderApproachGrpA = `${group.short_id}`;
+      const receiverDetails = lastMessageOfGroupMap[senderApproachGrpA];
+
+      const lastMessage = receiverDetails?.last_message?.message || "";
+      const lastOnlineAt = receiverDetails?.last_message?.createdAt
+        ? moment(receiverDetails.last_message.createdAt)
+            .utcOffset("+05:30")
+            .format("hh:mm a")
+        : "";
+
+      return {
+        id: group.short_id,
+        name: group.name,
+        time: group.updatedAt,
+        profile_picture: group.group_profile_picture,
+        last_message: lastMessage,
+        last_online_at: lastOnlineAt,
+      };
+    });
+
+    return formattedChatUsers;
   };
 }
 
