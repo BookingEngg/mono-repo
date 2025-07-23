@@ -48,6 +48,7 @@ class CommunicationFormatter {
 
           const messageTime = moment
             .utc(messageItem.createdAt)
+            .add(330, 'minutes')
             .format("hh:mm a");
 
           return {

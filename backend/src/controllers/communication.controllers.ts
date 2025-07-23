@@ -57,11 +57,12 @@ class CommunicationControllers {
    * Create a new message entry in communication db
    */
   public addNewChat = async (req: Request, res: Response): Promise<any> => {
-    const { sender_id, receiver_id, message, type: messageType } = req.body;
+    const { sender_id, receiver_id, group_id, message, type: messageType } = req.body;
 
     await this.communicationService.createNewChatMessage({
       senderId: sender_id,
       receiverId: receiver_id,
+      groupShortId: group_id,
       message,
       messageType,
     });

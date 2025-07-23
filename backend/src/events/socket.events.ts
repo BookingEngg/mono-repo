@@ -30,7 +30,7 @@ class SocketEvents {
       case "disconnect":
         // Trigger if client refresh a tab several time then you can see it in action
         return () => {
-          console.log("SOCKET ROOMS>>>> ", socket.rooms);
+          // console.log("SOCKET ROOMS>>>> ", socket.rooms);
         };
       default:
         return () => {};
@@ -113,7 +113,7 @@ class SocketEvents {
     this.communicationPublisher.raiseEventForSendMessage(eventPayload);
 
     // Raise the client event to group room (Group Message)
-    this.io.to(`group-${group_short_id}`).emit("received-user-chat", {
+    this.socket.broadcast.to(`group-${group_short_id}`).emit("received-user-chat", {
       user_id: sender_id,
       name: sender_name,
       message,

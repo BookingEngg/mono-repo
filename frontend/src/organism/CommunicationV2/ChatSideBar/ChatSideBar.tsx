@@ -1,9 +1,11 @@
 // Modules
 import React from "react";
 // Rsuite
-import { Avatar, Container, Text } from "rsuite";
+import { Container, Text } from "rsuite";
 // Typings
 import { IEntity } from "@/typings/communication";
+// Icons
+import { User } from "lucide-react";
 // Style
 import style from "./ChatSideBar.module.scss";
 import classNames from "classnames/bind";
@@ -35,11 +37,17 @@ const ChatSideBar = (props: {
               ])}
               onClick={() => setActiveEntityId(entity.id)}
             >
-              <img
-                src={entity.profile_picture}
-                alt="err"
-                className={cx("wa-group-avatar")}
-              />
+              {!entity.profile_picture ? (
+                <div className={cx("wa-group-avatar")}>
+                  <User />
+                </div>
+              ) : (
+                <img
+                  src={entity.profile_picture}
+                  alt="err"
+                  className={cx("wa-group-avatar")}
+                />
+              )}
               <div className={cx("wa-group-info")}>
                 <div className={cx("wa-group-name-time")}>
                   <span className={cx("wa-group-name")}>{entity.name}</span>

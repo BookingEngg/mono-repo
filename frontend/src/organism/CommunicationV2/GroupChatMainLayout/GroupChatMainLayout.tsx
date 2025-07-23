@@ -93,7 +93,7 @@ const GroupChatMainLayout = () => {
 
   React.useEffect(() => {
     currentEntityRef.current = activeEntityId;
-  }, [activeEntityId])
+  }, [activeEntityId]);
 
   // If mobile view then set the chat window on screen
   // Fetch user messages if user changes
@@ -115,7 +115,11 @@ const GroupChatMainLayout = () => {
   }, [activeEntityId]);
 
   const handleMessageReceived = (payload: INewChatMessageReceive) => {
-    const { user_id, name, message, created_at } = payload;
+    const { type, group_id, user_id, message, name, created_at } = payload;
+
+    if (group_id !== currentEntityRef.current || type !== "group_message") {
+      return;
+    }
 
     const messagePayload = {
       content: message,
@@ -127,9 +131,7 @@ const GroupChatMainLayout = () => {
 
     setGroupList((prevList) => {
       const newList = [...prevList];
-      const filterUserIdx = newList.findIndex(
-        (user) => user.id === user_id
-      );
+      const filterUserIdx = newList.findIndex((user) => user.id === user_id);
 
       if (filterUserIdx === -1) return newList;
 
@@ -144,10 +146,6 @@ const GroupChatMainLayout = () => {
 
       return newList;
     });
-
-    if(currentEntityRef.current !== user_id){
-      return;
-    }
 
     // Update receiver message receiver chat window open
     setChatMessages((updatedChatMessages) => {
@@ -200,7 +198,7 @@ const GroupChatMainLayout = () => {
       <Container className={cx("chat-main-layout")}>
         <div className={cx("no-chat-container")}>
           <Text size="xl" weight="light">
-            Find a Friend and Start Chatting!
+            Find groups and Start Chatting!
           </Text>
           <Button
             appearance="ghost"
@@ -208,7 +206,7 @@ const GroupChatMainLayout = () => {
               navigate("/community/add");
             }}
           >
-            Make Friends
+            Join Groups
           </Button>
         </div>
       </Container>
@@ -239,6 +237,7 @@ const GroupChatMainLayout = () => {
                   className={cx(["chat-container", "chat-right-container"])}
                 >
                   <ChatWindow
+                    chatType={"group"}
                     isMobileView={isMobileView}
                     activeEntityId={currentEntityRef.current}
                     chatDetails={chatDetails}
@@ -246,7 +245,7 @@ const GroupChatMainLayout = () => {
                     setChatMessages={setChatMessages}
                     entityList={groupList}
                     setEntityList={setGroupList}
-                    sendMessage={socketClient.sendSocketMessage}
+                    sendMessage={socketClient.sendGroupMessage}
                     navigateToChatSideBar={() => {
                       setActiveMobileScreen("user-list");
                       setActiveEntityId(null);
@@ -258,7 +257,7 @@ const GroupChatMainLayout = () => {
           </>
         ) : (
           <>
-            <FlexboxGrid justify="space-between">
+            <FlexboxGrid justify="space-around">
               <FlexboxGridItem
                 colspan={8}
                 className={cx(["chat-container", "chat-left-container"])}
@@ -274,6 +273,7 @@ const GroupChatMainLayout = () => {
                 className={cx(["chat-container", "chat-right-container"])}
               >
                 <ChatWindow
+                  chatType={"group"}
                   isMobileView={isMobileView}
                   activeEntityId={currentEntityRef.current}
                   chatDetails={chatDetails}
@@ -281,7 +281,7 @@ const GroupChatMainLayout = () => {
                   setChatMessages={setChatMessages}
                   entityList={groupList}
                   setEntityList={setGroupList}
-                  sendMessage={socketClient.sendSocketMessage}
+                  sendMessage={socketClient.sendGroupMessage}
                 />
               </FlexboxGridItem>
             </FlexboxGrid>
