@@ -26,6 +26,18 @@ class SocketEvents {
           const { user_id } = parsedPayload;
 
           if (user_id) {
+            socket.join(user_id);
+            this.io.to(user_id).emit("server-ack", {
+              status: "acknowledged",
+            });
+          }
+        };
+      case "client-connect": 
+        return async (payload: string) => {
+          const parsedPayload = JSON.parse(payload);
+          const { user_id } = parsedPayload;
+
+          if (user_id) {
             this.usersSocketHash.set(user_id, socket.id);
           }
         };
