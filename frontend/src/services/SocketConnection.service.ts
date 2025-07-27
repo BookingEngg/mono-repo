@@ -4,7 +4,7 @@ import { io, Socket } from "socket.io-client";
 import { useSelector } from "react-redux";
 import { getAuthUser } from "@/store/auth";
 
-const BASE_SOCKET_URL = "http://localhost:8080";
+const BASE_SOCKET_URL = import.meta.env.VITE_SOCKET_URL || window.location.origin;
 
 const SOCKET_EVENTS = {
   INITIATE_CONNECTION: "init",
