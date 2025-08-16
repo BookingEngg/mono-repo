@@ -1,4 +1,4 @@
-import type { RequestInfo, RequestInit, Response } from 'node-fetch';
+import type { RequestInfo, RequestInit, Response } from "node-fetch";
 import {
   redisConfig,
   isProduction,
@@ -8,8 +8,11 @@ import {
   uiConfigs,
 } from "@config";
 
-export const fetch = (url: RequestInfo, init?: RequestInit): Promise<Response> =>
-  import('node-fetch').then(({ default: fetch }) => fetch(url, init));
+export const fetch = (
+  url: RequestInfo,
+  init?: RequestInit
+): Promise<Response> =>
+  import("node-fetch").then(({ default: fetch }) => fetch(url, init));
 
 export const getRedisUrl = () => {
   const { username, password, host, port } = redisConfig;
@@ -27,3 +30,6 @@ export const getRedirectionUrlToUi = () => {
   const externalUrl = `${isProduction ? "https://" : "http://"}${url}${isProduction ? "" : `:${port}`}/`;
   return externalUrl;
 };
+
+export const sleep = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms));

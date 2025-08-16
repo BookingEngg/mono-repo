@@ -1,3 +1,5 @@
+// Config
+import { isProduction } from "@/config";
 // Modules
 import moment from "moment";
 import { Server, Socket } from "socket.io";
@@ -23,6 +25,8 @@ class SocketEvents {
     switch (eventName) {
       case "init":
         return this.initialConfigurationOfSocketJoin;
+      case "client-connect":
+        return this.clientConnectAcknowledgement;
       case "new-chat-message":
         return this.addNewChatMessage;
       case "new-group-message":
@@ -49,6 +53,10 @@ class SocketEvents {
     if (userId) {
       this.socket.join(`room-${userId}`);
       this.socket.data.userId = userId;
+
+      this.io.to(userId).emit("server-ack", {
+        status: "acknowledged",
+      });
     }
 
     if (groupIds?.length) {
@@ -56,6 +64,19 @@ class SocketEvents {
       groupIds.forEach((groupId) => {
         this.socket.join(`group-${groupId}`);
       });
+    }
+  };
+
+  /**
+   * Client connect acknowledgement
+   * @param {string} payload
+   */
+  private clientConnectAcknowledgement = async (payload: string) => {
+    const parsedPayload = JSON.parse(payload);
+    const { user_id } = parsedPayload;
+
+    if (user_id && !isProduction) {
+      console.log("Client connected>>>>", user_id);
     }
   };
 
@@ -113,14 +134,16 @@ class SocketEvents {
     this.communicationPublisher.raiseEventForSendMessage(eventPayload);
 
     // Raise the client event to group room (Group Message)
-    this.socket.broadcast.to(`group-${group_short_id}`).emit("received-user-chat", {
-      user_id: sender_id,
-      name: sender_name,
-      message,
-      group_id: group_short_id,
-      type: "group_message",
-      created_at: moment.utc().utcOffset("+05:30").format("hh:mm a"),
-    });
+    this.socket.broadcast
+      .to(`group-${group_short_id}`)
+      .emit("received-user-chat", {
+        user_id: sender_id,
+        name: sender_name,
+        message,
+        group_id: group_short_id,
+        type: "group_message",
+        created_at: moment.utc().utcOffset("+05:30").format("hh:mm a"),
+      });
   };
 }
 
