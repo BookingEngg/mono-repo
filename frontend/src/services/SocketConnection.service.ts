@@ -4,10 +4,13 @@ import { io, Socket } from "socket.io-client";
 import { useSelector } from "react-redux";
 import { getAuthUser } from "@/store/auth";
 
-const BASE_SOCKET_URL = "http://localhost:8080";
+const BASE_SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL || window.location.origin;
 
 const SOCKET_EVENTS = {
   INITIATE_CONNECTION: "init",
+  SERVER_ACK: "server-ack",
+  CLIENT_CONNECT: "client-connect",
   RECEIVED_USER_CHAT: "received-user-chat",
   NEW_MESSAGE: "new-chat-message",
 };
@@ -45,6 +48,18 @@ const SocketClient = <T, U>(payload: {
     if (!socketClient) {
       return;
     }
+
+    socketClient.on(SOCKET_EVENTS.SERVER_ACK, (data) => {
+      if (data.status !== "acknowledged") {
+        alert("Socket connection failed");
+      }
+      socketClient.emit(
+        SOCKET_EVENTS.CLIENT_CONNECT,
+        JSON.stringify({
+          user_id: loggedInUser.user?._id,
+        })
+      );
+    });
 
     socketClient.on(SOCKET_EVENTS.RECEIVED_USER_CHAT, (data) => {
       onMessageReceive(data);

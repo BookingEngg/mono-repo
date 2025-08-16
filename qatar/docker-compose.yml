@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  qatar:
+    build:
+      context: ./
+      args:
+        GITHUB_PAT: "${GITHUB_PAT}"
+    container_name: qatar
+    restart: always
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge

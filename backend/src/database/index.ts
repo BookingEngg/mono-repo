@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { IDataBase } from "@/typings/config";
 
 const mongoConnectionInstance: Record<string, mongoose.Connection> = {};
-mongoose.set("debug", isProduction);
+// mongoose.set("debug", isProduction);
 
 const getConnectionUrl = (config) => {
   const url = [

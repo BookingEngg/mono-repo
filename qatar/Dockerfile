@@ -17,10 +17,6 @@ RUN apk add --no-cache git bash dos2unix
 # Copy the fetch-config script to the container and give it execute permissions
 COPY fetch-config.sh /fetch-config.sh
 
-# Copy nginx conf to shared directory
-RUN mkdir shared
-COPY nginx.conf shared/nginx.conf
-
 # Convert Windows line endings to Unix line endings
 RUN dos2unix /fetch-config.sh
 
@@ -35,7 +31,7 @@ RUN GITHUB_PAT=${GITHUB_PAT} /bin/bash /fetch-config.sh
 RUN npm run build
 
 # Expose the application port
-EXPOSE 8080
+EXPOSE 3015
 
 # Set the command to run the application
 CMD ["npm", "run", "prod"]
