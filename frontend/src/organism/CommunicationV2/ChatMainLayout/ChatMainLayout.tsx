@@ -261,7 +261,7 @@ const ChatMainLayout = () => {
           </>
         ) : (
           <>
-            <FlexboxGrid justify="space-between">
+            <FlexboxGrid justify="space-around">
               <FlexboxGridItem
                 colspan={8}
                 className={cx(["chat-container", "chat-left-container"])}
