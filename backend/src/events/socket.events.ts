@@ -54,7 +54,7 @@ class SocketEvents {
       this.socket.join(`room-${userId}`);
       this.socket.data.userId = userId;
 
-      this.io.to(userId).emit("server-ack", {
+      this.io.to(`room-${userId}`).emit("server-ack", {
         status: "acknowledged",
       });
     }
@@ -134,16 +134,14 @@ class SocketEvents {
     this.communicationPublisher.raiseEventForSendMessage(eventPayload);
 
     // Raise the client event to group room (Group Message)
-    this.socket.broadcast
-      .to(`group-${group_short_id}`)
-      .emit("received-user-chat", {
-        user_id: sender_id,
-        name: sender_name,
-        message,
-        group_id: group_short_id,
-        type: "group_message",
-        created_at: moment.utc().utcOffset("+05:30").format("hh:mm a"),
-      });
+    this.io.to(`group-${group_short_id}`).emit("received-user-chat", {
+      user_id: sender_id,
+      name: sender_name,
+      message,
+      group_id: group_short_id,
+      type: "group_message",
+      created_at: moment.utc().utcOffset("+05:30").format("hh:mm a"),
+    });
   };
 }
 

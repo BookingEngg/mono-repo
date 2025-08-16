@@ -64,6 +64,12 @@ const SocketClient = <T, U>(payload: {
     });
 
     socketClient.on(SOCKET_EVENTS.RECEIVED_USER_CHAT, (data) => {
+      // Ignore the same user raised events
+      const { user_id: userId } = data || {};
+      if (!data || userId === loggedInUser.user?._id) {
+        return;
+      }
+
       onMessageReceive(data);
     });
 

@@ -1,5 +1,5 @@
 import { ICommunicationGroup } from "@/interfaces/communication.interface";
-import CommunicationModel from "@/models/communicationGroup.model";
+import CommunicationModel from "@/models/groups.model";
 
 class CommunicationGroupDao {
   private communicationModel = CommunicationModel;

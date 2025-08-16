@@ -32,7 +32,7 @@ CommunicationGroupSchema.pre("save", function (next) {
 })
 
 const CommunicationGroupModel = dbConnection.model(
-  "communication-group",
+  "groups",
   CommunicationGroupSchema
 );
 export default CommunicationGroupModel;
