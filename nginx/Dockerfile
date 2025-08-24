@@ -4,11 +4,15 @@ FROM nginx:alpine
 # Set working directory
 WORKDIR /etc/nginx
 
-# Copy your custom nginx.conf
-COPY /nginx.conf /etc/nginx/nginx.conf
+# Install gettext for envsubst
+RUN apk add --no-cache gettext
 
-# Expose port 80
-EXPOSE 80
+# Copy the template
+COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
 
-# Run nginx in foreground (Docker best practice)
-CMD ["nginx", "-g", "daemon off;"]
+# On container start, substitute $PORT into config and start nginx
+CMD envsubst '$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/nginx.conf \
+    && exec nginx -g 'daemon off;'
+
+# Expose Cloud Run port
+EXPOSE 8080

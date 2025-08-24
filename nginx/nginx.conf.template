@@ -7,8 +7,8 @@ events {
 
 http {
   # For logging purpose
-  access_log /Users/tusharchandthakur/Documents/MacbookAir/mono-repo/nginx/logs/access.log;
-  error_log  /Users/tusharchandthakur/Documents/MacbookAir/mono-repo/nginx/logs/error.log;
+  # access_log /Users/tusharchandthakur/Documents/MacbookAir/mono-repo/nginx/logs/access.log;
+  # error_log  /Users/tusharchandthakur/Documents/MacbookAir/mono-repo/nginx/logs/error.log;
 
   # Contain all the mapping of file extensions with MIME types (Multipurpose Internet Mail Extensions) 
   include       mime.types;
@@ -28,7 +28,7 @@ http {
   }
 
   server {
-    listen 80;
+    listen ${PORT};
 
     location /socket.io/ {
       proxy_pass https://backend-dash/socket.io/;
