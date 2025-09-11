@@ -8,7 +8,7 @@ WORKDIR /etc/nginx
 RUN apk add --no-cache gettext
 
 # Copy the template
-COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
+COPY nginx.conf /etc/nginx/templates/nginx.conf.template
 
 # On container start, substitute $PORT into config and start nginx
 CMD envsubst '$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/nginx.conf \
