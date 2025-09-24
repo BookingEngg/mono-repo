@@ -26,15 +26,17 @@ jobs:
         with:
           project_id: feisty-lambda-469318-s9
 
-      # 4. Build & Push Docker Image to GCR
+      # 4. Build & Push Docker Image to Artifact Registry
       - name: Build & Push Docker Image
         env:
           GITHUB_PAT: ${{ secrets.SECRETS_PAT }}
         run: |
-          IMAGE="eu.gcr.io/feisty-lambda-469318-s9/backend-dash:0.0.1"
+          PROJECT_ID="feisty-lambda-469318-s9"
+          REPO_NAME="mono-repo"
+          IMAGE="europe-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/backend-dash:0.0.1"
 
-          # Authenticate Docker with GCR using gcloud credentials
-          gcloud auth configure-docker eu.gcr.io --quiet
+          # Authenticate Docker with Artifact Registry
+          gcloud auth configure-docker europe-docker.pkg.dev --quiet
 
           # Build and push Docker image from backend folder
           docker buildx build \
