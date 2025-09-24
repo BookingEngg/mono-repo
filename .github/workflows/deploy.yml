@@ -1,4 +1,4 @@
-name: Deploy to Cloud Run (GCP)
+name: Deploy Backend Dashboard to Cloud Run (GCP)
 
 on:
   push:
@@ -32,11 +32,13 @@ jobs:
           # Authenticate Docker with GCR
           gcloud auth configure-docker eu.gcr.io --quiet
 
+
           # Build & push with buildx
           docker buildx build \
             --platform linux/amd64 \
             --build-arg GITHUB_PAT="${GITHUB_PAT}" \
-            -t "$IMAGE" .
+            -t "$IMAGE" \
+            ./backend
 
           docker push "$IMAGE"
 
