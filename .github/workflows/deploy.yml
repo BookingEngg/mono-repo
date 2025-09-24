@@ -36,10 +36,10 @@ jobs:
           REGION="asia-south1"
 
           # Tag with commit SHA for uniqueness
-          IMAGE="europe-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/backend-dash:${{ github.sha }}"
+          IMAGE="asia-south1-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/backend-dash:${{ github.sha }}"
 
           # Authenticate Docker with Artifact Registry
-          gcloud auth configure-docker europe-docker.pkg.dev --quiet
+          gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
 
           # Build and push Docker image from backend folder
           docker buildx build \
