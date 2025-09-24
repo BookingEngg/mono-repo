@@ -1,0 +1,55 @@
+name: Deploy to Cloud Run (GCP)
+
+on:
+  push:
+    branches:
+      - prod-gcp
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # 2. Set up gcloud
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: feisty-lambda-469318-s9
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      # 3. Build & Push Docker Image to GCR
+      - name: Build & Push Docker Image
+        env:
+          GITHUB_PAT: ${{ secrets.SECRETS_PAT }}
+        run: |
+          IMAGE="eu.gcr.io/feisty-lambda-469318-s9/backend-dash:0.0.1"
+
+          # Authenticate Docker with GCR
+          gcloud auth configure-docker eu.gcr.io --quiet
+
+          # Build & push with buildx
+          docker buildx build \
+            --platform linux/amd64 \
+            --build-arg GITHUB_PAT="${GITHUB_PAT}" \
+            -t "$IMAGE" .
+
+          docker push "$IMAGE"
+
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      # 4. Deploy to Cloud Run
+      - name: Deploy to Cloud Run
+        run: |
+          SERVICE_NAME=backend-dash
+          REGION=asia-south1
+
+          gcloud run deploy $SERVICE_NAME \
+            --image $IMAGE \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated
