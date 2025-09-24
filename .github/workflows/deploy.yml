@@ -29,7 +29,7 @@ jobs:
       # 4. Build & Push Docker Image to GCR
       - name: Build & Push Docker Image
         env:
-          GITHUB_PAT: ${{ secrets.GITHUB_PAT }}
+          GITHUB_PAT: ${{ secrets.SECRETS_PAT }}
         run: |
           IMAGE="eu.gcr.io/feisty-lambda-469318-s9/backend-dash:0.0.1"
 
