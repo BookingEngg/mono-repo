@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import cookieSession from "cookie-session";
 import cookieParser from "cookie-parser";
+import morgan from "morgan";
 import { Server } from "socket.io";
 import SocketEvents from "@/events/socket.events";
 import {
@@ -37,6 +38,25 @@ class App {
     this.initilizeMiddlewares();
   }
 
+  public loggingMiddleware = () => {
+    morgan.token(
+      "time",
+      function getResponseTime(
+        req: Request & { _startTime: number },
+        res: Response
+      ) {
+        return Date.now() - req._startTime + "ms";
+      }
+    );
+
+    this.app.use((req, res, next) => {
+      req._startTime = Date.now();
+      next();
+    });
+
+    this.app.use(morgan(":method :status :url - :time"));
+  };
+
   public initilizeMiddlewares() {
     this.app.use(
       cors({
@@ -47,6 +67,7 @@ class App {
     this.app.use(cookieParser());
     this.app.use(express.json());
     this.app.use(cookieParser());
+    this.loggingMiddleware();
     this.app.use(
       cookieSession({
         name: "session",
