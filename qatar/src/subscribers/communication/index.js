@@ -1,5 +1,5 @@
 // Modules
-const { consumers, redisConfig } = require("../../config");
+const { consumers, redisConfig, isProduction } = require("../../config");
 // Consumers Handler
 const RedisBull = require("../../queues/RedisBull");
 // Http
@@ -20,7 +20,7 @@ const messageHandler = async (data) => {
 
     switch (type) {
       case "new_message":
-        console.log("NEW MESSAGE >>>>>>", data);
+        if (!isProduction) console.log("NEW MESSAGE >>>>>>", data);
         await backendHttp.createMessage(data);
         return;
     }
