@@ -42,7 +42,7 @@ class JwtService {
     }
     res.cookie("jwt-token", cookieDetails.jwtToken, {
       maxAge: 1000 * 60 * 60 * 24 * (tokenDetails.token_ttl_max_days || 10), // Default 10 Days JWT Expire
-      secure: tokenDetails.secure_token || true,
+      secure: true,
       sameSite: "none",
     });
   };
