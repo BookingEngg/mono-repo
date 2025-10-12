@@ -35,8 +35,8 @@ jobs:
           REPO_NAME="mono-repo"
           REGION="asia-south1"
 
-          # Tag with commit SHA for uniqueness
-          IMAGE="asia-south1-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/backend-dash:${{ github.sha }}"
+          # Tag with latest tag
+          IMAGE="asia-south1-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/backend-dash:latest"
 
           # Authenticate Docker with Artifact Registry
           gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
