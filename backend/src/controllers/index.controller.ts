@@ -14,7 +14,11 @@ class IndexController {
       {},
       {},
       {},
-      { secure: boolean; token: string; same_site: "lax" | "strict" | "none" }
+      {
+        secure: string | boolean;
+        token: string;
+        same_site: "lax" | "strict" | "none";
+      }
     >,
     res: Response
   ): Promise<any> => {
@@ -22,7 +26,7 @@ class IndexController {
 
     res.cookie("jwt-token", token, {
       maxAge: 1000 * 60 * 60 * 24 * 10, // Default 10 Days JWT Expire
-      secure: secure,
+      secure: secure === true || secure === "true",
       sameSite: same_site,
     });
 
