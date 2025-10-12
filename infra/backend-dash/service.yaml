@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-dash-service
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+    cloud.google.com/healthcheck-path: "/backend/health"
+spec:
+  type: ClusterIP
+  selector:
+    app: backend-dash
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
