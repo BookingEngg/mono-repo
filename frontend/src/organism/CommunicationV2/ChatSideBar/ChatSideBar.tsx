@@ -40,7 +40,7 @@ const ChatSideBar = (props: {
               <div className={cx("avatar-wrapper")}>
                 <Avatar
                   className={cx("sidenav-logo")} // Using the same class if you want specific avatar styling
-                  src={entity.profile_picture}
+                  src={entity.user_profile_picture}
                   alt="Profile Image"
                   circle
                   bordered
