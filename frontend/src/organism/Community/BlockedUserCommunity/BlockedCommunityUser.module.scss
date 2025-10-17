@@ -1,3 +1,132 @@
 .blocked-user-container {
   background-color: whitesmoke;
+  padding: 12px;
+
+  @media (min-width: 768px) {
+    padding: 16px;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 20px;
+  }
+
+  .filter-section {
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      
+      .filter-actions {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+      }
+    }
+  }
+
+  .users-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .user-card {
+    background: white;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: transform 0.2s, box-shadow 0.2s;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+
+    .label {
+      font-weight: 600;
+      color: #575757;
+      min-width: 80px;
+      font-size: 14px;
+    }
+
+    .value {
+      color: #272c36;
+      font-size: 14px;
+      word-break: break-word;
+      flex: 1;
+
+      &.user-id {
+        font-family: monospace;
+        font-size: 12px;
+        color: #666;
+      }
+    }
+  }
+
+  .user-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 8px;
+    border-top: 1px solid #f0f0f0;
+
+    .action-button {
+      min-width: 100px;
+    }
+
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+
+      &.waiting {
+        background-color: #f0f0f0;
+        color: #666;
+      }
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-size: 16px;
+    grid-column: 1 / -1;
+  }
+
+  .pagination-wrapper {
+    margin-top: 24px;
+    display: flex;
+    justify-content: center;
+
+    @media (max-width: 768px) {
+      :global(.rs-pagination) {
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+    }
+  }
 }
