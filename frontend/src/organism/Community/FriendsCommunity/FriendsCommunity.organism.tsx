@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import React from "react";
-// Atoms
-import Table from "@/atoms/Table";
 // Rsuite
-import { Button, FlexboxGrid, Input, InputGroup, Panel } from "rsuite";
+import { Button, FlexboxGrid, Input, InputGroup, Panel, Pagination } from "rsuite";
 import FlexboxGridItem from "rsuite/esm/FlexboxGrid/FlexboxGridItem";
 // Services
 import {
@@ -53,70 +51,62 @@ const AllFriendsCommunity = () => {
     []
   );
 
-  const columnsDetails = [
-    {
-      title: "Name",
-      columnDataKey: "name",
-      width: 2,
-    },
-    {
-      title: "Username",
-      columnDataKey: "username",
-      width: 2,
-    },
-    {
-      title: "User Id",
-      columnDataKey: "user_id",
-      width: 2,
-    },
-    {
-      title: "Actions",
-      width: 3,
-      actionCell: true,
-      actionDatum: (rowData: IFriendCommunity) => {
-        if (rowData.friends_details?.request_status === "send") {
-          return <>Request Pending</>;
-        }
+  React.useEffect(() => {
+    if (friendsCommunityUsers?.total) {
+      setPagination((prev) => ({ ...prev, total: friendsCommunityUsers.total }));
+    }
+  }, [friendsCommunityUsers?.total]);
 
-        return rowData.friends_details?.request_status === "receive" ? (
-          <div>
-            <Button
-              appearance="link"
-              onClick={() => {
-                handleUpdateFriendRequest(rowData, "approve");
-              }}
-            >
-              Accept
-            </Button>
-            <Button
-              appearance="link"
-              onClick={() => {
-                handleUpdateFriendRequest(rowData, "reject");
-              }}
-            >
-              Reject
-            </Button>
-          </div>
-        ) : (
+  const renderActions = (user: IFriendCommunity) => {
+    if (user.friends_details?.request_status === "send") {
+      return (
+        <div className={cx("status-badge", "pending")}>Request Pending</div>
+      );
+    }
+
+    if (user.friends_details?.request_status === "receive") {
+      return (
+        <div className={cx("action-buttons")}>
           <Button
-            appearance="link"
-            onClick={() => {
-              handleUpdateFriendRequest(rowData, "blocked");
-            }}
+            appearance="primary"
+            size="sm"
+            color="green"
+            onClick={() => handleUpdateFriendRequest(user, "approve")}
+            className={cx("action-button")}
           >
-            Block
+            Accept
           </Button>
-        );
-      },
-    },
-  ];
+          <Button
+            appearance="default"
+            size="sm"
+            onClick={() => handleUpdateFriendRequest(user, "reject")}
+            className={cx("action-button")}
+          >
+            Reject
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <Button
+        appearance="primary"
+        size="sm"
+        color="red"
+        onClick={() => handleUpdateFriendRequest(user, "blocked")}
+        className={cx("action-button")}
+      >
+        Block
+      </Button>
+    );
+  };
 
   return (
     <Panel className={cx("friend-container")}>
       <FlexboxGrid>
         {/* Filters */}
         <FlexboxGridItem colspan={24}>
-          <FlexboxGrid justify="space-between">
+          <FlexboxGrid justify="space-between" className={cx("filter-section")}>
             <FlexboxGridItem>
               <InputGroup inside>
                 <InputGroup.Addon>Name</InputGroup.Addon>
@@ -124,7 +114,7 @@ const AllFriendsCommunity = () => {
               </InputGroup>
             </FlexboxGridItem>
 
-            <FlexboxGridItem>
+            <FlexboxGridItem className={cx("filter-actions")}>
               <Button appearance="link" color="red">
                 Clear All
               </Button>
@@ -133,14 +123,57 @@ const AllFriendsCommunity = () => {
           </FlexboxGrid>
         </FlexboxGridItem>
 
-        {/* New Friends List */}
+        {/* Friends List - Card Layout */}
         <FlexboxGridItem colspan={24}>
-          <Table
-            datum={friendsCommunityUsers?.data || []}
-            columnsDetails={columnsDetails}
-            pagination={pagination}
-            refetchDatum={setPagination}
-          />
+          <div className={cx("users-grid")}>
+            {friendsCommunityUsers?.data && friendsCommunityUsers.data.length > 0 ? (
+              friendsCommunityUsers.data.map((user: IFriendCommunity) => (
+                <div key={user.user_id} className={cx("user-card")}>
+                  <div className={cx("user-info")}>
+                    <div className={cx("info-row")}>
+                      <span className={cx("label")}>Name:</span>
+                      <span className={cx("value")}>{user.name}</span>
+                    </div>
+                    <div className={cx("info-row")}>
+                      <span className={cx("label")}>Username:</span>
+                      <span className={cx("value")}>{user.username}</span>
+                    </div>
+                    <div className={cx("info-row")}>
+                      <span className={cx("label")}>User ID:</span>
+                      <span className={cx("value", "user-id")}>{user.user_id}</span>
+                    </div>
+                  </div>
+                  <div className={cx("user-actions")}>
+                    {renderActions(user)}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className={cx("empty-state")}>No friends found</div>
+            )}
+          </div>
+
+          {/* Pagination */}
+          {pagination.total > 0 && (
+            <div className={cx("pagination-wrapper")}>
+              <Pagination
+                prev
+                next
+                first
+                last
+                ellipsis
+                boundaryLinks
+                maxButtons={5}
+                size="md"
+                layout={['total', '-', 'pager']}
+                total={pagination.total}
+                limit={pagination.limit}
+                activePage={pagination.page_no}
+                onChangePage={(page) => setPagination((prev) => ({ ...prev, page_no: page }))}
+                onChangeLimit={(limit) => setPagination((prev) => ({ ...prev, limit, page_no: 1 }))}
+              />
+            </div>
+          )}
         </FlexboxGridItem>
       </FlexboxGrid>
     </Panel>
