@@ -15,6 +15,7 @@ import ChatRoutes from "@/pages/Chat";
 import SettingsRoutes from "@/pages/Settings";
 // Services
 import { getUser } from "@/services/Login.service";
+import { subscribeNotification } from "@/services/Notification.service";
 // Layout
 import MainLayout from "@/layout/MainLayout";
 // Store
@@ -126,6 +127,37 @@ function App() {
       navigate("/login");
     }
   }, [isAuthorized]);
+
+  React.useEffect(() => {
+    function urlBase64ToUint8Array(base64String: string) {
+      const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+      const base64 = (base64String + padding)
+        .replace(/-/g, "+")
+        .replace(/_/g, "/");
+      const rawData = atob(base64);
+      const outputArray = new Uint8Array(rawData.length);
+      for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i);
+      }
+      return outputArray;
+    }
+
+    navigator.serviceWorker.register("/sw.js").then(async (registration) => {
+      const permission = await Notification.requestPermission();
+
+      const applicationServerKey = urlBase64ToUint8Array(
+        "BAI4vA3iMD67LXSaYjTfcONDm7nGsTiGtXJ4tLJ-xiwtU1NUTfakjm8_6LKxSTycbvPtjh6sNSEx0RDFwlLJAXI"
+      );
+
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: applicationServerKey,
+      });
+
+      console.log("Push Subscription:", JSON.stringify(subscription));
+      await subscribeNotification(subscription);
+    });
+  }, []);
 
   return (
     <>

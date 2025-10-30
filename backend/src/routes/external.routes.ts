@@ -8,6 +8,7 @@ import OtpController from "@/controllers/otp.controllers";
 import CommunicationController from "@/controllers/communication.controllers";
 import CommunityControllers from "@/controllers/community.controllers";
 import OAuthController from "@/controllers/oAuth.controller";
+import NotificationController from "@/controllers/pushNotification.controllers";
 // Middlewares
 import AuthMiddleware from "@/middleware/auth.middleware";
 // Wrappers
@@ -25,6 +26,7 @@ class ExternalRoutes implements Routes {
   private communicationController = new CommunicationController();
   private communityController = new CommunityControllers();
   private oAuthController = new OAuthController();
+  private notificationController = new NotificationController();
 
   constructor() {
     this.initializeUsersRoutes(`${this.path}/user`);
@@ -33,6 +35,7 @@ class ExternalRoutes implements Routes {
     this.initializeCommunityRoutes(`${this.path}/community`);
 
     this.initializeOAuthAuthRoutes(`${this.path}/oauth`);
+    this.initializeNotificationRoutes(`${this.path}/notification`);
   }
 
   private initializeOAuthAuthRoutes(prefix: string) {
@@ -136,6 +139,20 @@ class ExternalRoutes implements Routes {
       `${prefix}/friend/unblock`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communityController.unblockUserStatus)
+    );
+  }
+
+  private initializeNotificationRoutes(prefix: string) {
+    this.router.post(
+      `${prefix}/subscribe`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.notificationController.userSubscribeNotification)
+    );
+
+    this.router.post(
+      `${prefix}/publish`,
+      // this.authMiddleware.getAuthUser,
+      asyncWrapper(this.notificationController.publishNotificationSubscription)
     );
   }
 }
