@@ -6,17 +6,35 @@ export interface Function<T> {
   (data: T): void;
 }
 
+export interface IPubSubTopicInitConfig {
+  project_id: string;
+  client_email: string;
+  private_key: string;
+  subscription_name: string;
+}
+
 class PubSubTopic {
   private subscription: Subscription;
   private messageHandler: Function<any>;
   private onConsumerError: Function<any>;
 
-  constructor(consumerConfig: { subscription_name: string }) {
+  constructor(consumerConfig: Partial<IPubSubTopicInitConfig>) {
+    const {
+      project_id: projectId,
+      client_email: clientEmail,
+      private_key: privateKey,
+      subscription_name: subscriptionName,
+    } = consumerConfig;
+
     const pubsub = new PubSub({
-      
+      projectId,
+      credentials: {
+        client_email: clientEmail,
+        private_key: privateKey,
+      },
     });
 
-    this.subscription = pubsub.subscription(consumerConfig.subscription_name);
+    this.subscription = pubsub.subscription(subscriptionName);
   }
 
   addListeners = (payload: {

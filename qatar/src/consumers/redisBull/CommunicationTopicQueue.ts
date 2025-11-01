@@ -1,7 +1,8 @@
 // Modules
-import { consumers } from "@/config";
+import { consumers, gcpConfig } from "@/config";
 // Consumers Handler
 import PubSubTopic from "@/consumers/redisBull/PubSubTopic";
+import RedisBull from "@/consumers/redisBull/RedisBull";
 // Http
 import BackendHttp from "@/http/backend.http";
 import { ICommunicationQueueMessage } from "./redisbulll.interface";
@@ -12,7 +13,8 @@ class CommunicationTopicQueue {
 
   constructor() {
     this.pubsubTopic = new PubSubTopic({
-      subscription_name: consumers.communication_queue.subscription_name,
+      ...gcpConfig,
+      ...consumers.communication_queue,
     });
 
     this.pubsubTopic.addListeners({

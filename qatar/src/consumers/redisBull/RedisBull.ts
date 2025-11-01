@@ -12,7 +12,7 @@ class RedisBull {
   private onConsumerError: (error: any) => void;
 
   constructor(consumerConfig: IRedisBullConsumerConfig) {
-    this.queue = new Queue(consumerConfig.queue, {
+    this.queue = new Queue(consumerConfig.consumer_name, {
       redis: consumerConfig,
     });
   }

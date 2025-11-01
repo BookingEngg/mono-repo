@@ -8,14 +8,14 @@ class Consumers {
 
   constructor() {
     // Init all the consumers
-    // this.communicationQueue = new CommunicationQueue();
-    this.communicationTopicQueue = new CommunicationTopicQueue();
+    this.communicationQueue = new CommunicationQueue();
+    // this.communicationTopicQueue = new CommunicationTopicQueue();
   }
 
   public startConsumers = () => {
     // Run all the consumers
-    // this.communicationQueue.startConsumers();
-    this.communicationTopicQueue.startConsumers();
+    this.communicationQueue.startConsumers();
+    // this.communicationTopicQueue.startConsumers();
   };
 }
 

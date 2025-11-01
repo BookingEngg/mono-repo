@@ -1,11 +1,9 @@
 export interface IRedisConsumerConfig {
-  stream: string;
-  consumer_group: string;
   consumer_name: string; 
 }
 
 export interface IRedisBullConsumerConfig {
-  queue: string;
+  consumer_name: string;
   host: string;
   port: number;
   username: string;

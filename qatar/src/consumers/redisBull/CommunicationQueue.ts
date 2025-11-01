@@ -17,8 +17,8 @@ class CommunicationQueue {
     }
 
     this.redisBull = new RedisBull({
-      queue: consumers.communication_queue.consumer_name,
       ...redisConfig,
+      consumer_name: consumers.communication_queue.consumer_name,
     });
     this.redisBull.addListeners({
       messageHandler: this.messageHandler,
