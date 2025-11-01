@@ -1,5 +1,3 @@
-const { subscribe } = require("diagnostics_channel");
-
 module.exports = {
   apps: [
     {

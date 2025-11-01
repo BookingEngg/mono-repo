@@ -1,15 +1,18 @@
 // Modules
-const { consumers, redisConfig, isProduction } = require("../../config");
+const { consumers, redisConfig, gcpConfig } = require("../../config");
 // Consumers Handler
-const RedisBull = require("../../queues/RedisBull");
+const QueueService = require("../../queues/QueueService");
 // Http
 const BackendHttp = require("../../http/backend.http");
 
 const backendHttp = new BackendHttp();
-const redisBull = new RedisBull({
-  queue: consumers.communication_queue.consumer_name,
-  ...redisConfig,
-});
+
+const queueConfig = {
+  ...gcpConfig, // In case of pubsub
+  ...redisConfig, // In case of bull queue
+  ...consumers.communication_queue,
+};
+const queueService = new QueueService(queueConfig);
 
 /**
  * All the message listen to the communication queue will come this place
@@ -20,7 +23,7 @@ const messageHandler = async (data) => {
 
     switch (type) {
       case "new_message":
-        if (!isProduction) console.log("NEW MESSAGE >>>>>>", data);
+        console.log("NEW MESSAGE >>>>>>", data);
         await backendHttp.createMessage(data);
         return;
     }
@@ -33,9 +36,9 @@ const onConsumerError = (error) => {
   console.log("Error IN Communication Queue>>>>>>>>", error);
 };
 
-redisBull.addListeners({
+queueService.addListeners({
   messageHandler,
   onConsumerError,
 });
 
-redisBull.onConsumerStart();
+queueService.onConsumerStart();

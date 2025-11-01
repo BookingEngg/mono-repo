@@ -10,6 +10,7 @@ const serviceRoute = nconf.get("service_route");
 const PORT = nconf.get("server").port;
 const isProduction = env === "prod";
 
+const gcpConfig = nconf.get("gcp");
 const redisConfig = nconf.get("redis");
 const consumers = nconf.get("consumers");
 
@@ -22,6 +23,7 @@ module.exports = {
   serviceRoute,
   PORT,
   isProduction,
+  gcpConfig,
   redisConfig,
   env,
 };

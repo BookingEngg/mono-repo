@@ -1,0 +1,11 @@
+// Start pm2 with env
+pm2 reload ecosystem.config.js --env production;
+
+// Check logs
+pm2 logs <process_id>;
+
+// Reload process
+pm2 reload <process_id>
+
+// Stop all process
+pm2 stop all;
