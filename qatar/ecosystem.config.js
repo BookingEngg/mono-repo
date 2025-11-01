@@ -6,6 +6,10 @@ module.exports = {
       name: "communication-queue",
       script: "./src/subscribers/communication/index.js",
     },
+    {
+      name: "communication-queue-topic",
+      script: "./src/subscribers/communication/topic_queue.js",
+    },
   ].map((subscriber) => {
     return {
       ...subscriber,
