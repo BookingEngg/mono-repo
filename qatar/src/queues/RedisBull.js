@@ -8,7 +8,7 @@ class RedisBull {
   onConsumerError = null;
 
   constructor(consumerConfig) {
-    this.queue = new Queue(consumerConfig.queue, {
+    this.queue = new Queue(consumerConfig.consumer_name, {
       redis: consumerConfig,
     });
   }
@@ -31,7 +31,7 @@ class RedisBull {
       }
       done();
     });
-    console.log(`QUEUE START LISTENING... ENV: ${JSON.stringify({ env })}`);
+    console.log(`BULL QUEUE START LISTENING... ENV: ${JSON.stringify({ env })}`);
   };
 }
 

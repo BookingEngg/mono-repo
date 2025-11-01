@@ -34,7 +34,8 @@ class PubSubTopic {
   onConsumerStart = () => {
     this.subscription.on("message", (message) => {
       try {
-        this.messageHandler(message);
+        const parsedMessage = JSON.parse(message.data);
+        this.messageHandler(parsedMessage);
         message.ack(); // Mark message with ack as message processed
       } catch (err) {
         this.onConsumerError(err);
