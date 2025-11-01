@@ -14,6 +14,7 @@ export interface IConsumers {
     stream: string;
     consumer_name: string;
     consumer_group: string;
+    subscription_name?: string;
   }
 }
 

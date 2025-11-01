@@ -20,7 +20,7 @@ const messageHandler = async (data) => {
 
     switch (type) {
       case "new_message":
-        if (!isProduction) console.log("NEW MESSAGE >>>>>>", data);
+        console.log("NEW MESSAGE >>>>>>", data);
         await backendHttp.createMessage(data);
         return;
     }
