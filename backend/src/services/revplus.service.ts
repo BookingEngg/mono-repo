@@ -10,7 +10,7 @@ class RevplusService {
     ip_address: string;
   }) => {
     const { email, user_agent: userAgent, ip_address: ipAddress } = payload;
-    const isLeadHistoryAvailable = userAgent && ipAddress;
+    const isLeadHistoryAvailable = !!userAgent || !!ipAddress;
 
     const lead = await this.revplusDao.getLeadsByEmail(email);
 
@@ -18,7 +18,9 @@ class RevplusService {
       // Store the lead history if exists
       isLeadHistoryAvailable &&
         (await this.revplusDao.updateLeadByEmail(email, {
-          lead_history: { $push: { userAgent, ipAddress } },
+          $push: {
+            lead_history: { user_agent: userAgent, ip_address: ipAddress },
+          },
         }));
       return;
     }
@@ -26,9 +28,7 @@ class RevplusService {
     // Create lead in case of no such lead exist with the email
     const leadPayload = {
       email,
-      ...(isLeadHistoryAvailable
-        ? { lead_history: { $push: { userAgent, ipAddress } } }
-        : {}),
+      lead_history: [{ user_agent: userAgent, ip_address: ipAddress }],
       is_verified: false,
     };
     await this.revplusDao.createLead(leadPayload);
