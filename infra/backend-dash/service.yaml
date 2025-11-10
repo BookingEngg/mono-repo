@@ -4,7 +4,7 @@ metadata:
   name: backend-dash-service
   annotations:
     cloud.google.com/neg: '{"ingress": true}'
-    cloud.google.com/healthcheck-path: "/backend/health"
+    cloud.google.com/healthcheck-path: /backend/health
 spec:
   type: ClusterIP
   selector:
