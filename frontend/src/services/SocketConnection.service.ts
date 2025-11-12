@@ -55,6 +55,7 @@ const SocketClient = <T, U>(payload: {
       if (data.status !== "acknowledged") {
         alert("Socket connection failed");
       }
+      console.log("Socket connection acknowledged received >>>", data);
       socketClient.emit(
         SOCKET_EVENTS.CLIENT_CONNECT,
         JSON.stringify({

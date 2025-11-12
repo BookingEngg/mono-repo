@@ -37,13 +37,13 @@ const ChatSideBar = (props: {
               ])}
               onClick={() => setActiveEntityId(entity.id)}
             >
-              {!entity.profile_picture ? (
+              {!entity.user_profile_picture ? (
                 <div className={cx("wa-group-avatar")}>
                   <User />
                 </div>
               ) : (
                 <img
-                  src={entity.profile_picture}
+                  src={entity.user_profile_picture}
                   alt="err"
                   className={cx("wa-group-avatar")}
                 />

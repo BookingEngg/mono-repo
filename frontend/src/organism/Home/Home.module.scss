@@ -1,0 +1,297 @@
+.home-container {
+  padding: 8px;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  @media (min-width: 768px) {
+    padding: 20px;
+  }
+
+  @media (min-width: 1024px) {
+    padding: 24px;
+  }
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  width: 100%;
+}
+
+// Hero Section (Combined Welcome & Profile)
+.hero-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: 1.5fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  @media (min-width: 1024px) {
+    gap: 20px;
+  }
+}
+
+.hero-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  padding: 14px;
+  box-shadow: 0 2px 12px rgba(102, 126, 234, 0.25);
+  border: none;
+
+  @media (min-width: 768px) {
+    padding: 24px;
+    border-radius: 16px;
+  }
+}
+
+.hero-content {
+  color: white;
+}
+
+.greeting-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+
+  @media (min-width: 768px) {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 26px;
+  }
+}
+
+.greeting-subtitle {
+  font-size: 12px;
+  opacity: 0.95;
+  margin: 0;
+
+  @media (min-width: 768px) {
+    font-size: 14px;
+  }
+}
+
+// Profile Card
+.profile-card {
+  background: white;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+
+  @media (min-width: 768px) {
+    padding: 20px;
+    border-radius: 16px;
+  }
+}
+
+.profile-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  @media (min-width: 768px) {
+    gap: 16px;
+  }
+}
+
+.profile-avatar {
+  flex-shrink: 0;
+  width: 48px !important;
+  height: 48px !important;
+  border: 2px solid #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+
+  @media (min-width: 768px) {
+    width: 64px !important;
+    height: 64px !important;
+  }
+}
+
+.profile-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #272c36;
+  margin: 0 0 3px 0;
+  line-height: 1.2;
+
+  @media (min-width: 768px) {
+    font-size: 17px;
+    margin-bottom: 6px;
+  }
+}
+
+.profile-email {
+  font-size: 11px;
+  color: #666;
+  margin: 0;
+  word-break: break-word;
+
+  @media (min-width: 768px) {
+    font-size: 13px;
+  }
+}
+
+// Summary Section
+.summary-section {
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #272c36;
+  margin: 0 0 8px 0;
+
+  @media (min-width: 768px) {
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+
+  @media (min-width: 640px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.summary-card {
+  background: white;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+  transition: all 0.2s ease;
+  height: 100%;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-color: #667eea;
+  }
+
+  @media (min-width: 768px) {
+    padding: 18px;
+    border-radius: 12px;
+  }
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  @media (min-width: 768px) {
+    gap: 10px;
+  }
+}
+
+.card-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #666;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  @media (min-width: 768px) {
+    font-size: 12px;
+  }
+}
+
+.card-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #667eea;
+  line-height: 1.1;
+  word-break: break-word;
+
+  @media (min-width: 768px) {
+    font-size: 28px;
+  }
+
+  @media (min-width: 1024px) {
+    font-size: 30px;
+  }
+}
+
+// Responsive adjustments for very small screens
+@media (max-width: 360px) {
+  .home-container {
+    padding: 6px;
+  }
+
+  .hero-card {
+    padding: 12px;
+  }
+
+  .greeting-title {
+    font-size: 16px;
+  }
+
+  .greeting-subtitle {
+    font-size: 11px;
+  }
+
+  .profile-card {
+    padding: 10px;
+  }
+
+  .profile-avatar {
+    width: 44px !important;
+    height: 44px !important;
+  }
+
+  .profile-name {
+    font-size: 13px;
+  }
+
+  .profile-email {
+    font-size: 10px;
+  }
+
+  .summary-grid {
+    gap: 6px;
+  }
+
+  .summary-card {
+    padding: 10px;
+  }
+
+  .card-label {
+    font-size: 9px;
+  }
+
+  .card-value {
+    font-size: 18px;
+  }
+}

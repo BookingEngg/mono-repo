@@ -1,10 +1,10 @@
-import { services } from "@/config";
-import fetch from 'node-fetch'
+const { services } = require("../config");
+const fetch = require("node-fetch");
 
 class BackendHttp {
-  private backendHttp = services.backend;
+  backendHttp = services.backend;
 
-  public createMessage = async (payload: object) => {
+  createMessage = async (payload) => {
     return await fetch(`${this.backendHttp}/communication/new-message`, {
       method: "POST",
       body: JSON.stringify(payload),
@@ -13,4 +13,4 @@ class BackendHttp {
   };
 }
 
-export default BackendHttp;
+module.exports = BackendHttp;

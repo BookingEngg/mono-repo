@@ -8,6 +8,7 @@ import OtpController from "@/controllers/otp.controllers";
 import CommunicationController from "@/controllers/communication.controllers";
 import CommunityControllers from "@/controllers/community.controllers";
 import OAuthController from "@/controllers/oAuth.controller";
+import RevplusController from "@/controllers/revplus.controller";
 // Middlewares
 import AuthMiddleware from "@/middleware/auth.middleware";
 // Wrappers
@@ -25,6 +26,7 @@ class ExternalRoutes implements Routes {
   private communicationController = new CommunicationController();
   private communityController = new CommunityControllers();
   private oAuthController = new OAuthController();
+  private revplusController = new RevplusController();
 
   constructor() {
     this.initializeUsersRoutes(`${this.path}/user`);
@@ -33,6 +35,7 @@ class ExternalRoutes implements Routes {
     this.initializeCommunityRoutes(`${this.path}/community`);
 
     this.initializeOAuthAuthRoutes(`${this.path}/oauth`);
+    this.initializeRevplusRoutes(`${this.path}`);
   }
 
   private initializeOAuthAuthRoutes(prefix: string) {
@@ -155,6 +158,13 @@ class ExternalRoutes implements Routes {
       `${prefix}/friend/unblock`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communityController.unblockUserStatus)
+    );
+  }
+
+  private initializeRevplusRoutes(prefix: string) {
+    this.router.post(
+      `${prefix}/leads`,
+      asyncWrapper(this.revplusController.newLeadRequest)
     );
   }
 }

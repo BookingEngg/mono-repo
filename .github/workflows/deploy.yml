@@ -1,0 +1,66 @@
+name: Deploy Backend Dashboard to Cloud Run (GCP)
+
+on:
+  push:
+    branches:
+      - prod-gcp
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repo
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # 2. Authenticate to GCP using service account
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      # 3. Set up Cloud SDK
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: feisty-lambda-469318-s9
+
+      # 4. Build & Push Docker Image to Artifact Registry
+      - name: Build & Push Docker Image
+        env:
+          GITHUB_PAT: ${{ secrets.SECRETS_PAT }}
+        run: |
+          PROJECT_ID="feisty-lambda-469318-s9"
+          REPO_NAME="mono-repo"
+          REGION="asia-south1"
+
+          # Tag with latest tag
+          IMAGE="asia-south1-docker.pkg.dev/$PROJECT_ID/$REPO_NAME/backend-dash:latest"
+
+          # Authenticate Docker with Artifact Registry
+          gcloud auth configure-docker asia-south1-docker.pkg.dev --quiet
+
+          # Build and push Docker image from backend folder
+          docker buildx build \
+            --platform linux/amd64 \
+            --build-arg GITHUB_PAT="${GITHUB_PAT}" \
+            -t "$IMAGE" \
+            ./backend
+
+          docker push "$IMAGE"
+
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      # 5. Deploy to Cloud Run
+      - name: Deploy to Cloud Run
+        run: |
+          SERVICE_NAME=backend-dash
+
+          gcloud run deploy backend-dash \
+            --image $IMAGE \
+            --region asia-south1 \
+            --platform managed \
+            --allow-unauthenticated \
+            --service-account backend-dash-run-sa@feisty-lambda-469318-s9.iam.gserviceaccount.com
+
