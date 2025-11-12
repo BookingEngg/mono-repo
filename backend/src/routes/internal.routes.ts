@@ -15,14 +15,14 @@ class InternalRoutes implements Routes {
   private communicationController = new CommunicationController();
 
   constructor() {
-    this.initializeGoogleAuthRoutes(`${this.path}/communication`);
+    this.initializeCommunicationRoutes(`${this.path}/communication`);
   }
 
-  private initializeGoogleAuthRoutes(prefix: string) {
-    this.router.put(
-      `${prefix}/create`,
+  private initializeCommunicationRoutes(prefix: string) {
+    this.router.post(
+      `${prefix}/new-message`,
       asyncWrapper(this.communicationController.addNewChat)
-    )
+    );
   }
 }
 

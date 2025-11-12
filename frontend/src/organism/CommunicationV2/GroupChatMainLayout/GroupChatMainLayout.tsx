@@ -11,8 +11,8 @@ import ChatWindow from "@/organism/CommunicationV2/ChatWindow";
 // Services
 import SocketClient from "@/services/SocketConnection.service";
 import {
-  getCommunicationUsers,
-  getDirectMessages,
+  getCommunicationGroups,
+  getGroupMessages,
 } from "@/services/Communication.service";
 // Typings
 import {
@@ -21,7 +21,7 @@ import {
   INewChatMessageReceive,
 } from "@/typings/communication";
 // Style
-import style from "./ChatMainLayout.module.scss";
+import style from "./GroupChatMainLayout.module.scss";
 import classNames from "classnames/bind";
 
 const cx = classNames.bind(style);
@@ -49,10 +49,10 @@ export interface IChatDetails {
   entity_logo: string;
 }
 
-const ChatMainLayout = () => {
+const GroupChatMainLayout = () => {
   const navigate = useNavigate();
 
-  const [entityList, setEntityList] = React.useState<IEntity[]>([]);
+  const [groupList, setGroupList] = React.useState<IEntity[]>([]);
   const [activeEntityId, setActiveEntityId] = React.useState<string | null>(
     null
   );
@@ -80,13 +80,11 @@ const ChatMainLayout = () => {
   // Fetch the entity list initial
   React.useEffect(() => {
     const fetchEntityList = async () => {
-      const response = await getCommunicationUsers();
+      const response = await getCommunicationGroups();
 
       if (response) {
-        setEntityList(response.data);
-        if (!isMobileView) {
-          setActiveEntityId(response.data[0]?.id);
-        }
+        setGroupList(response.data);
+        setActiveEntityId(response?.data?.[0]?.id || "");
       }
     };
 
@@ -95,7 +93,7 @@ const ChatMainLayout = () => {
 
   React.useEffect(() => {
     currentEntityRef.current = activeEntityId;
-  }, [activeEntityId])
+  }, [activeEntityId]);
 
   // If mobile view then set the chat window on screen
   // Fetch user messages if user changes
@@ -106,7 +104,7 @@ const ChatMainLayout = () => {
     const fetchChatMessages = async () => {
       if (!activeEntityId) return;
 
-      const response = await getDirectMessages(activeEntityId);
+      const response = await getGroupMessages(activeEntityId);
       if (response) {
         setChatMessages(response.data.messages);
         setChatDetails(response.data.entity_details);
@@ -117,7 +115,11 @@ const ChatMainLayout = () => {
   }, [activeEntityId]);
 
   const handleMessageReceived = (payload: INewChatMessageReceive) => {
-    const { user_id, name, message, created_at } = payload;
+    const { type, group_id, user_id, message, name, created_at } = payload;
+
+    if (group_id !== currentEntityRef.current || type !== "group_message") {
+      return;
+    }
 
     const messagePayload = {
       content: message,
@@ -127,11 +129,9 @@ const ChatMainLayout = () => {
       is_sent_by_current_user: false,
     };
 
-    setEntityList((prevList) => {
+    setGroupList((prevList) => {
       const newList = [...prevList];
-      const filterUserIdx = newList.findIndex(
-        (user) => user.id === user_id
-      );
+      const filterUserIdx = newList.findIndex((user) => user.id === user_id);
 
       if (filterUserIdx === -1) return newList;
 
@@ -146,10 +146,6 @@ const ChatMainLayout = () => {
 
       return newList;
     });
-
-    if(currentEntityRef.current !== user_id){
-      return;
-    }
 
     // Update receiver message receiver chat window open
     setChatMessages((updatedChatMessages) => {
@@ -197,12 +193,12 @@ const ChatMainLayout = () => {
     onMessageReceive: handleMessageReceived,
   });
 
-  if (!entityList.length) {
+  if (!groupList.length) {
     return (
       <Container className={cx("chat-main-layout")}>
         <div className={cx("no-chat-container")}>
           <Text size="xl" weight="light">
-            Find a Friend and Start Chatting!
+            Find groups and Start Chatting!
           </Text>
           <Button
             appearance="ghost"
@@ -210,7 +206,7 @@ const ChatMainLayout = () => {
               navigate("/community/add");
             }}
           >
-            Make Friends
+            Join Groups
           </Button>
         </div>
       </Container>
@@ -229,7 +225,7 @@ const ChatMainLayout = () => {
                   className={cx(["chat-container", "chat-left-container"])}
                 >
                   <ChatSideBar
-                    entityList={entityList}
+                    entityList={groupList}
                     activeEntityId={activeEntityId}
                     setActiveEntityId={setActiveEntityId}
                   />
@@ -241,15 +237,15 @@ const ChatMainLayout = () => {
                   className={cx(["chat-container", "chat-right-container"])}
                 >
                   <ChatWindow
-                    chatType={"private"}
+                    chatType={"group"}
                     isMobileView={isMobileView}
                     activeEntityId={currentEntityRef.current}
                     chatDetails={chatDetails}
                     chatMessages={chatMessages}
                     setChatMessages={setChatMessages}
-                    entityList={entityList}
-                    setEntityList={setEntityList}
-                    sendMessage={socketClient.sendDirectMessage}
+                    entityList={groupList}
+                    setEntityList={setGroupList}
+                    sendMessage={socketClient.sendGroupMessage}
                     navigateToChatSideBar={() => {
                       setActiveMobileScreen("user-list");
                       setActiveEntityId(null);
@@ -267,7 +263,7 @@ const ChatMainLayout = () => {
                 className={cx(["chat-container", "chat-left-container"])}
               >
                 <ChatSideBar
-                  entityList={entityList}
+                  entityList={groupList}
                   activeEntityId={activeEntityId}
                   setActiveEntityId={setActiveEntityId}
                 />
@@ -277,15 +273,15 @@ const ChatMainLayout = () => {
                 className={cx(["chat-container", "chat-right-container"])}
               >
                 <ChatWindow
-                  chatType={"private"}
+                  chatType={"group"}
                   isMobileView={isMobileView}
                   activeEntityId={currentEntityRef.current}
                   chatDetails={chatDetails}
                   chatMessages={chatMessages}
                   setChatMessages={setChatMessages}
-                  entityList={entityList}
-                  setEntityList={setEntityList}
-                  sendMessage={socketClient.sendDirectMessage}
+                  entityList={groupList}
+                  setEntityList={setGroupList}
+                  sendMessage={socketClient.sendGroupMessage}
                 />
               </FlexboxGridItem>
             </FlexboxGrid>
@@ -296,4 +292,4 @@ const ChatMainLayout = () => {
   );
 };
 
-export default ChatMainLayout;
+export default GroupChatMainLayout;

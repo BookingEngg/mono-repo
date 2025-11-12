@@ -22,7 +22,8 @@ const messageHandler = async (data) => {
     const { type } = data;
 
     switch (type) {
-      case "new_message":
+      case "direct_message":
+      case "group_message":
         console.log("NEW MESSAGE >>>>>>", data);
         await backendHttp.createMessage(data);
         return;

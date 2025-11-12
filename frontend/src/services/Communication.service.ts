@@ -43,3 +43,25 @@ export const addNewChatMessage = async (payload: object) => {
 
   return response.data;
 };
+
+/**
+ * Get all the groups of user
+ */
+export const getCommunicationGroups = async () => {
+  const response = await axiosClient.get({
+    url: "/comm/group/list",
+  });
+
+  return response.data;
+};
+
+/**
+ * Get all the initial chat details of group
+ */
+export const getGroupMessages = async (groupId: string) => {
+  const response = await axiosClient.get({
+    url: `/comm/group/chats?group_id=${groupId}`,
+  });
+
+  return response.data;
+}

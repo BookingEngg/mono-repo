@@ -1,5 +1,6 @@
 import R from "ramda";
 import CommunicationDao from "@/dao/communication.dao";
+import CommunicationGroupDao from "@/dao/communicationGroup.dao";
 import UserDao from "@/dao/user.dao";
 import { IUser } from "@/interfaces/user.interface";
 import CommunicationFormatter from "@/formatter/communication.formatter";
@@ -9,27 +10,75 @@ import {
   RequestStatusType,
 } from "@/constants/common.constants";
 import moment from "moment";
-import { CommunicationType } from "@/interfaces/enum";
-import { ICommunication } from "@/interfaces/communication.interface";
+import { CommunicationType, GroupType } from "@/interfaces/enum";
+import {
+  ICommunication,
+  ICommunicationGroup,
+} from "@/interfaces/communication.interface";
 
 class CommunicationService {
+  // Dao
   private userDao = new UserDao();
   private communicationDao = new CommunicationDao();
+  private communicationGroupDao = new CommunicationGroupDao();
 
+  // Formatter
   private communicationFormatter = new CommunicationFormatter();
 
-  public createChat = async (payload: {
-    senderId: string;
-    receiverId: string;
-    message: string;
+  public createGroup = async (payload: {
+    group_name: string;
+    description: string;
+    admin_ids: string[];
+    members_ids: string[];
+    group_type: GroupType;
+    profile_picture: string;
   }) => {
-    const { senderId, receiverId, message } = payload;
-    await this.communicationDao.createMessage({
+    const {
+      group_name: name,
+      description,
+      admin_ids,
+      members_ids: group_member_ids,
+      group_type,
+      profile_picture: group_profile_picture,
+    } = payload;
+
+    const formattedPayload = {
+      name,
+      description,
+      admin_ids,
+      group_member_ids,
+      group_type,
+      group_profile_picture,
+
+      is_active: true,
+      is_visible: true,
+    };
+
+    return await this.communicationGroupDao.createGroup(formattedPayload);
+  };
+
+  public createNewChatMessage = async (payload: {
+    senderId: string;
+    message: string;
+    receiverId?: string;
+    groupShortId?: string;
+    messageType: string;
+  }) => {
+    const { senderId, receiverId, groupShortId, message, messageType } =
+      payload;
+
+    const communicationFormattedPayload = {
       sender_user_id: senderId,
-      receiver_user_id: receiverId,
+      ...(receiverId ? { receiver_user_id: receiverId } : {}),
+      ...(groupShortId ? { group_id: groupShortId } : {}),
       message,
-      message_type: CommunicationType.Private,
-    });
+      message_type:
+        messageType === "group_message"
+          ? CommunicationType.Group
+          : CommunicationType.Private,
+    };
+
+    await this.communicationDao.createMessage(communicationFormattedPayload);
   };
 
   public getUsersChat = async (userDetails: IUser, receiverId: string) => {
@@ -91,6 +140,61 @@ class CommunicationService {
     const formattedEntityDetails = {
       name: receiverUser.first_name + " " + receiverUser.last_name,
       entity_logo: receiverUser.user_profile_picture,
+    };
+
+    return {
+      meta: {
+        count,
+      },
+      entity_details: formattedEntityDetails,
+      messages: formattedMessages,
+    };
+  };
+
+  /**
+   * Get group messages of a user
+   */
+  public getGroupMessages = async (userDetails: IUser, groupId: string) => {
+    const senderId = userDetails._id.toString();
+
+    const groupDetails =
+      await this.communicationGroupDao.getGroupDetailsByShortId(groupId, [
+        "name",
+        "group_profile_picture",
+        "group_member_ids",
+      ]);
+
+    // Fetch all the messages and receiver user details
+    const [{ data: initialMessages, count }, groupMembersUsers] =
+      await Promise.all([
+        this.communicationDao.getGroupMessages(groupId),
+        this.userDao.getUserByUserIds(groupDetails.group_member_ids, ['first_name']),
+      ]);
+
+    // Create mapper for users
+    const userDetailsMapper = R.indexBy(R.prop<string>("_id"), [
+      userDetails,
+      ...groupMembersUsers,
+    ]);
+
+    // Create mapper for messages by date
+    const messagesDataHashByDate: Record<string, ICommunication[]> = R.groupBy(
+      (message: ICommunication) =>
+        moment(message.createdAt)
+          .add(330, "minutes")
+          .startOf("date")
+          .format("DD MMM YYYY") as unknown as string
+    )(initialMessages);
+
+    const formattedMessages = this.communicationFormatter.getFormattedMessages({
+      messagesDataHashByDate,
+      userDetailsHashById: userDetailsMapper,
+      userId: senderId,
+    });
+
+    const formattedEntityDetails = {
+      name: groupDetails.name,
+      entity_logo: groupDetails.group_profile_picture,
     };
 
     return {
@@ -259,6 +363,61 @@ class CommunicationService {
         friendId: user._id.toString(),
       }),
     ]);
+  };
+
+  /**
+   * Get list of groups
+   * @param user
+   */
+  public getGroupsList = async (user: IUser) => {
+    const [groupDetails, lastMessageOfGroups] = await Promise.all([
+      this.communicationGroupDao.getGroupDetailsByShortIds(user.group_ids),
+      this.communicationDao.getLastReceivedChatOfGroup(user.group_ids),
+    ]);
+
+    const lastMessageOfGroupMap = R.indexBy(R.prop("_id"), lastMessageOfGroups);
+
+    // Sort the groups accourding to last message
+    const sortedGroupDetails = groupDetails.slice().sort((groupA, groupB) => {
+      const senderApproachGrpA = groupA.short_id;
+      const senderApproachGrpB = groupB.short_id;
+
+      const senderGroupAMsg = lastMessageOfGroupMap[senderApproachGrpA];
+      const senderGroupBMsg = lastMessageOfGroupMap[senderApproachGrpB];
+
+      if (!senderGroupAMsg && !senderGroupBMsg) {
+        return 0;
+      }
+      if (!senderGroupAMsg) {
+        return 1;
+      }
+      if (!senderGroupBMsg) {
+        return -1;
+      }
+    });
+
+    const formattedChatUsers = sortedGroupDetails.map((group) => {
+      const senderApproachGrpA = `${group.short_id}`;
+      const receiverDetails = lastMessageOfGroupMap[senderApproachGrpA];
+
+      const lastMessage = receiverDetails?.last_message?.message || "";
+      const lastOnlineAt = receiverDetails?.last_message?.createdAt
+        ? moment(receiverDetails.last_message.createdAt)
+            .utcOffset("+05:30")
+            .format("hh:mm a")
+        : "";
+
+      return {
+        id: group.short_id,
+        name: group.name,
+        time: group.updatedAt,
+        profile_picture: group.group_profile_picture,
+        last_message: lastMessage,
+        last_online_at: lastOnlineAt,
+      };
+    });
+
+    return formattedChatUsers;
   };
 }
 

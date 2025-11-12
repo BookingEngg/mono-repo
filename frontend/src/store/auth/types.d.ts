@@ -4,6 +4,7 @@ export interface IUser {
   last_name: string;
   user_profile_picture?: string;
   role: string;
+  group_ids: string[];
 }
 
 export interface IAuth {

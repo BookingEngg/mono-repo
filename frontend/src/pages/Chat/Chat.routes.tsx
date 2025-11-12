@@ -1,7 +1,10 @@
-import { TRoutes } from "@/typings/common";
+// Organism
 import Communication from "@/organism/Communication";
-import CommunicationV2 from "@/organism/CommunicationV2";
-import { MessageCircle, MessageCircleMore } from "lucide-react";
+import {CommunicationV2, GroupCommunication} from "@/organism/CommunicationV2";
+// Icons
+import { MessageCircle, MessageCircleMore, MessagesSquare } from "lucide-react";
+// Typings
+import { TRoutes } from "@/typings/common";
 
 const BASE_OLD_URL = "/chat";
 const BASE_URL = "/chat-v2";
@@ -26,6 +29,17 @@ const getChatRoutes = () => {
       showOnSideNav: true,
       key: "communication-v2",
       label: "Communication",
+      handle: {
+        identifier: "root",
+      },
+    },
+    {
+      path: `${BASE_URL}/groups`,
+      element: <GroupCommunication />,
+      icon: <MessagesSquare />,
+      showOnSideNav: true,
+      key: "communication-group-v2",
+      label: "Groups",
       handle: {
         identifier: "root",
       },

@@ -1,13 +1,14 @@
 import moment from "moment";
 import R from "ramda";
 import CommunicationDao from "@/dao/communication.dao";
+import CommunicationGroupDao from "@/dao/communicationGroup.dao";
 import UserDao from "@/dao/user.dao";
 import { ICommonAuthUser, IUser } from "@/interfaces/user.interface";
-import { TokenPayload } from "google-auth-library";
 
 class UserService {
   private userDao = new UserDao();
   private communicationDao = new CommunicationDao();
+  private communicationGroupDao = new CommunicationGroupDao();
 
   public createUser = async (payload: ICommonAuthUser) => {
     const formattedUser = {
@@ -22,6 +23,8 @@ class UserService {
       friends_ids: [],
       requested_friends: [],
       blocked_user: [],
+
+      group_ids: [],
     };
     return await this.userDao.createUser(formattedUser);
   };
@@ -89,10 +92,9 @@ class UserService {
 
       return {
         id: user._id,
-        user_id: user._id,
         name: `${user.first_name} ${user.last_name}`,
         time: user.updatedAt,
-        user_profile_picture: user.user_profile_picture,
+        profile_picture: user.user_profile_picture,
         last_message: lastMessage,
         last_online_at: lastOnlineAt,
       };

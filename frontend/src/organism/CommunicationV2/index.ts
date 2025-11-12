@@ -1,2 +1,3 @@
 import CommunicationV2 from "./ChatMainLayout";
-export default CommunicationV2;
+import GroupCommunication from "./GroupChatMainLayout";
+export { CommunicationV2, GroupCommunication };

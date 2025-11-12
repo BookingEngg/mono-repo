@@ -5,8 +5,8 @@ class BackendHttp {
   backendHttp = services.backend;
 
   createMessage = async (payload) => {
-    return await fetch(`${this.backendHttp}/communication/create`, {
-      method: "PUT",
+    return await fetch(`${this.backendHttp}/communication/new-message`, {
+      method: "POST",
       body: JSON.stringify(payload),
       headers: { "Content-Type": "application/json" },
     });

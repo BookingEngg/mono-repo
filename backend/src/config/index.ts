@@ -31,8 +31,10 @@ export const publishers = nconf.get("publishers") as IPublisher;
 
 export const SOCKET_EVENTS_NAMES: readonly string[] = [
   "init",
-  "new-chat-message",
   "client-connect",
+  "disconnect",
+  "new-chat-message",
+  "new-group-message",
 ];
 
 export const nodeMailConfig = nconf.get("nodemailer") as INodeMailer;

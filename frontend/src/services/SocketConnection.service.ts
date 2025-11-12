@@ -13,6 +13,7 @@ const SOCKET_EVENTS = {
   CLIENT_CONNECT: "client-connect",
   RECEIVED_USER_CHAT: "received-user-chat",
   NEW_MESSAGE: "new-chat-message",
+  NEW_GROUP_MESSAGE: "new-group-message",
 };
 
 const SocketClient = <T, U>(payload: {
@@ -35,6 +36,7 @@ const SocketClient = <T, U>(payload: {
       SOCKET_EVENTS.INITIATE_CONNECTION,
       JSON.stringify({
         user_id: loggedInUser.user?._id,
+        group_ids: loggedInUser.user?.group_ids,
       })
     );
 
@@ -63,6 +65,12 @@ const SocketClient = <T, U>(payload: {
     });
 
     socketClient.on(SOCKET_EVENTS.RECEIVED_USER_CHAT, (data) => {
+      // Ignore the same user raised events
+      const { user_id: userId } = data || {};
+      if (!data || userId === loggedInUser.user?._id) {
+        return;
+      }
+
       onMessageReceive(data);
     });
 
@@ -70,13 +78,23 @@ const SocketClient = <T, U>(payload: {
   }, [socketClient]);
 
   return {
-    sendSocketMessage: (messagePayload: U) => {
+    sendDirectMessage: (messagePayload: U) => {
       if (!socketClient) {
         return;
       }
 
       socketClient.emit(
         SOCKET_EVENTS.NEW_MESSAGE,
+        JSON.stringify(messagePayload)
+      );
+    },
+    sendGroupMessage: (messagePayload: U) => {
+      if (!socketClient) {
+        return;
+      }
+
+      socketClient.emit(
+        SOCKET_EVENTS.NEW_GROUP_MESSAGE,
         JSON.stringify(messagePayload)
       );
     },

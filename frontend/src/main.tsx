@@ -16,18 +16,15 @@ const queryClient = new QueryClient({
   },
 });
 
-
-
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <CustomProvider theme="light">
-      <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </QueryClientProvider>
-      </Provider>
-    </CustomProvider>
-  </StrictMode>
+  // Remove the strict mode for retriggering the apis and UI states on development
+  <CustomProvider theme="light">
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
+    </Provider>
+  </CustomProvider>
 );

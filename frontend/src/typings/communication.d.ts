@@ -12,12 +12,15 @@ export interface IChatPayload {
   message: string;
   sender_id: string,
   sender_name: string,
-  receiver_id: string,
+  group_id?: string,
+  receiver_id?: string,
 }
 
 export interface INewChatMessageReceive {
-  user_id: string;
-  name: string;
-  message: string;
-  created_at: string;
+  type: string;   // direct_message or group_message
+  user_id: string;  // sender id
+  name: string;   // sender name
+  message: string;  // message content
+  created_at: string; // message time
+  group_id?: string;  // in case of group message
 }
