@@ -4,11 +4,11 @@ import RBAC from "@/services/rolesPrivilege.service";
 class AccessControlController {
   private rbac = new RBAC();
 
-  public setUserRolesAndPrivilege = async (
+  public assignNewRolesAndPrivileges = async (
     req: Request<
       {},
       {},
-      { role: string; priviledges: string[]; action: "add" | "remove" }
+      { roles: string[]; privileges: string[]; type: "role" | "privilege" }
     >,
     res: Response
   ): Promise<any> => {
@@ -16,9 +16,10 @@ class AccessControlController {
     if (!user) {
       throw new Error("User Not Found");
     }
-    const { action, role = '', priviledges = [] } = req.body;
+    const { type, roles = [], privileges = [] } = req.body;
 
-    this.rbac.setUserRolesAndPrivilege({ role, priviledges, user, action });
+    await this.rbac.assignNewRoleAndPrivileges({ type, roles, privileges, user})
+    
     return res.send({ status: "success" });
   };
 }

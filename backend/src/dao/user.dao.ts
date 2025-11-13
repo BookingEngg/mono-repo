@@ -70,8 +70,8 @@ class UserDao {
 
   /**
    * Set the group id into the user group list
-   * @param userId 
-   * @param groupId 
+   * @param userId
+   * @param groupId
    */
   public setUserGroupId = async (userId: string, groupId: string) => {
     return await this.userModel.updateOne(
@@ -168,6 +168,26 @@ class UserDao {
           blocked_user: {
             user_id: friendId,
           },
+        },
+      }
+    );
+  };
+
+  // RBAC DAO
+  public setRolesAndPrivilegesOfUser = async (payload: {
+    user_id: string;
+    roles?: string[];
+    privileges?: string[];
+  }) => {
+    const { user_id, roles = [], privileges = [] } = payload;
+    await this.userModel.updateOne(
+      {
+        _id: user_id,
+      },
+      {
+        $addToSet: {
+          ...(roles.length ? { roles: { $each: roles } } : {}),
+          ...(privileges.length ? { privileges: { $each: privileges } } : {}),
         },
       }
     );

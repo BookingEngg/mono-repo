@@ -1,3 +1,4 @@
+import R from "ramda";
 import { RolesDetails, PrivilegeDetails } from "@/constants/roles.constants";
 import { IUser } from "@/interfaces/user.interface";
 import UserDao from "@/dao/user.dao";
@@ -66,80 +67,78 @@ export default class RBAC {
     const allRoles = dfs(roleName);
 
     // Remove the root role itself from the result (optional)
-    allRoles.shift();
+    // allRoles.shift();
 
     return allRoles;
   };
 
-  public setUserRolesAndPrivilege = async ({
-    role,
-    privileges,
-    user,
-  }: {
-    role: string;
-    privileges: string[];
-    user: IUser;
-    action: "add" | "remove";
-  }) => {
-    await this.setRolesPrivilegesOfUser({
-      user,
-      newRole: role,
-      newPrivileges: privileges,
-    });
+  /**
+   * Get all the validated roles for user
+   */
+  public getAllValidatedRoles = (roles: string[]) => {
+    const allValidatedNewRoles = roles.reduce((acc, role) => {
+      // Get all the parent roles of this current role
+      const allParentRolesApplied = this.getAllRoles(role, false);
+      return [...acc, ...allParentRolesApplied];
+    }, []);
+
+    // Return the unique roles
+    return R.uniq(allValidatedNewRoles);
   };
 
-  public unsetRolesPrivilegesOfUser = async ({
-    user,
-    newRole,
-    newPrivileges,
-  }: {
-    user: IUser;
-    newRole: string;
-    newPrivileges: string[];
-  }) => {
-    const roleDetails = RolesDetails.find((r) => r.role === newRole);
-    if (!roleDetails) throw new Error("Invalid Role");
-    // TODO: for unset the roles
-  };
+  /**
+   * Get all the validated privileges for user
+   */
+  public getAllValidatedPriviledges = (user: IUser, privileges: string[]) => {
+    // Get all the roles applied to user
+    const userAssignedRoles = user.roles;
 
-  public setRolesPrivilegesOfUser = async ({
-    user,
-    newRole,
-    newPrivileges,
-  }: {
-    user: IUser;
-    newRole: string;
-    newPrivileges: string[];
-  }) => {
-    const roleDetails = RolesDetails.find((r) => r.role === newRole);
-    if (!roleDetails) throw new Error("Invalid Role");
+    // Get all the privileges of the roles applied to user
+    const userEligiblePrivileges = userAssignedRoles.reduce((acc, role) => {
+      const currentRolePrev =
+        RolesDetails.find((r) => r.role === role)?.privileges || [];
+      return [...acc, ...currentRolePrev];
+    }, []);
 
-    for (const privilege of newPrivileges) {
-      if (!roleDetails.privileges.includes(privilege)) {
-        throw new Error(
-          `Invalid privilege "${privilege}" for role "${newRole}"`
-        );
-      }
-    }
-
-    const descendantPrivileges = this.getAllPrivileges([newRole], true);
-    const allRoles = this.getAllRoles(newRole, true);
-
-    let finalPrivileges = descendantPrivileges.filter(
-      (priv) => !roleDetails.privileges.includes(priv)
+    // Filter the privileges which are eligible for user
+    const finalPrivileges = userEligiblePrivileges.filter((priv) =>
+      privileges.includes(priv)
     );
 
-    if (newPrivileges.length) {
-      finalPrivileges.push(...newPrivileges);
+    console.log("LOGS>>> ", userEligiblePrivileges, finalPrivileges);
+
+    // Return the unique privileges
+    return R.uniq(finalPrivileges);
+  };
+
+  public assignNewRoleAndPrivileges = async (payload: {
+    type: "role" | "privilege";
+    roles: string[];
+    privileges: string[];
+    user: IUser;
+  }) => {
+    const { type, user, roles, privileges } = payload;
+
+    switch (type) {
+      case "role":
+        const validatedRoles = this.getAllValidatedRoles(roles);
+        await this.userDao.setRolesAndPrivilegesOfUser({
+          user_id: user._id,
+          roles: validatedRoles,
+        });
+        break;
+      case "privilege":
+        const validatedPrivileges = this.getAllValidatedPriviledges(
+          user,
+          privileges
+        );
+        await this.userDao.setRolesAndPrivilegesOfUser({
+          user_id: user._id,
+          privileges: validatedPrivileges,
+        });
+        break;
+      default:
+        throw new Error("Invalid Type for Assign Role and Privileges");
     }
-
-    const updatePayload = {
-      $addToSet: {
-        roles: { $each: allRoles },
-        privileges: { $each: [...new Set(finalPrivileges)] },
-      },
-    };
-
-    await this.userDao.updateUserDetailsById(user._id, updatePayload);
   };
 }

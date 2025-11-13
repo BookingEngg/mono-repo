@@ -86,7 +86,7 @@ class ExternalRoutes implements Routes {
     this.router.post(
       `${prefix}/`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.accessControlController.setUserRolesAndPrivilege)
+      asyncWrapper(this.accessControlController.assignNewRolesAndPrivileges)
     );
   }
 
