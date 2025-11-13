@@ -167,9 +167,19 @@ export default class RBAC {
     );
 
     return {
-      deleted_roles: filteredDeletedRolesFromUserRoles,
-      deleted_privileges: filteredRemovePrivileges,
+      deleted_roles: R.uniq(filteredDeletedRolesFromUserRoles),
+      deleted_privileges: R.uniq(filteredRemovePrivileges),
     };
+  };
+
+  public getAllRemovedPrivileges = (user: IUser, deletedPrivileges: string[]) => {
+    const userAssignedPrivileges = user.privileges;
+    
+    const filteredDeletedPrivileges = deletedPrivileges.filter((privilege) =>
+      userAssignedPrivileges.includes(privilege)
+    );
+    
+    return R.uniq(filteredDeletedPrivileges);
   };
 
   public removeRolesAndPrivileges = async (payload: {
@@ -200,6 +210,11 @@ export default class RBAC {
         /**
          * 1. If privilege is assigned to user romover that privilege
          */
+        const unsetPrivileges = this.getAllRemovedPrivileges(user, privileges);
+        await this.userDao.unsetRolesAndPrivilegesOfUser({
+          user_id: user._id,
+          privileges: unsetPrivileges,
+        });
         break;
       default:
         throw new Error("Invalid Type for Assign Role and Privileges");
