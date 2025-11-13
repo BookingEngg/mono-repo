@@ -58,6 +58,24 @@ class UserDao {
     return { response, count };
   };
 
+  /**
+   * Set the group id into the user group list
+   * @param userId 
+   * @param groupId 
+   */
+  public setUserGroupId = async (userId: string, groupId: string) => {
+    return await this.userModel.updateOne(
+      {
+        _id: userId,
+      },
+      {
+        $addToSet: {
+          group_ids: groupId,
+        },
+      }
+    );
+  };
+
   // Add friend id into the requested friend list
   public addUserFriendRequest = async (
     userId: string,
