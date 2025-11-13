@@ -31,6 +31,8 @@ export interface IUser {
   blocked_user: IBlockedUser[];
   requested_friends: IRequestedUser[];
 
+  group_ids: string[];
+
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -56,6 +58,21 @@ export interface IOtp {
   otp: number;
   is_verified: boolean;
   otp_response: object;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface ILeadHistory {
+  user_agent: string;
+  ip_address: string;
+}
+
+export interface IRevplusLead {
+  _id: string;
+  email: string;
+  is_verified: boolean;
+  lead_history: ILeadHistory[];
+
   createdAt: Date;
   updatedAt: Date;
 }

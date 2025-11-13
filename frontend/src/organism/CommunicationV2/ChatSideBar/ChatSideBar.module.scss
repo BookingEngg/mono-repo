@@ -12,81 +12,66 @@
     padding: 4px 4px 8px 4px;
   }
 
+  .wa-group-item {
+    display: flex;
+    padding: 0.75rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+  }
+
+  .wa-group-item:hover {
+    background-color: #f5f5f5;
+  }
+
+  .wa-group-item.active {
+    background-color: #e1f3fb;
+  }
+
+  .wa-group-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 0.75rem;
+  }
+
+  .wa-group-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .wa-group-name-time {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .wa-group-last {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: #666;
+  }
+
+  .wa-unread-badge {
+    background-color: #25d366;
+    color: white;
+    font-size: 0.75rem;
+    border-radius: 10px;
+    padding: 2px 6px;
+    margin-left: 6px;
+  }
+
   .chat-side-bar-scroll-container {
     overflow-y: auto; /* Only keep one overflow declaration */
     overflow-x: hidden; /* Hide horizontal scrollbar if any */
   }
 
-  .active-chat-message-container {
-    background-color: #ADB2D4;
-  }
-
-  .default-chat-message-container {
-    background-color: #E6F0FA;
-  }
-
-  .chat-message-container {
-    display: flex;
-    align-items: flex-start;
-    padding: 10px;
-    margin: 0px 4px 10px 4px;
-    border-radius: 5px;
-    box-sizing: border-box;
-    overflow: hidden;
-    flex: 0 0 auto;
-
-    p {
-      color: #1B3B6F;
-    }
-  }
-
   .avatar-wrapper {
     flex-shrink: 0;
     margin-right: 15px;
-  }
-
-  .message-content {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1;
-    flex-shrink: 1;
-    min-width: 0;
-    overflow: hidden;
-  }
-
-  .header-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-  }
-
-  .user-name {
-    font-weight: bold;
-    font-size: 1.1em;
-    color: #333;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    flex-grow: 1;
-    flex-shrink: 1;
-    min-width: 0;
-    margin-right: 10px;
-  }
-
-  .timestamp {
-    font-size: 0.8em;
-    color: #666;
-    flex-shrink: 0;
-    white-space: nowrap;
-  }
-
-  .message-text {
-    font-size: 0.9em;
-    color: #555;
-    margin-top: 5px;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    hyphens: auto;
   }
 }

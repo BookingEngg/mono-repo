@@ -44,6 +44,7 @@ export interface INodeMailer {
 export interface IToken {
   secret_key: string;
   token_ttl_max_days: number;
+  secure_token: boolean;
 }
 
 export interface IOAuth {

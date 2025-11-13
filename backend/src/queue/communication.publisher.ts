@@ -1,4 +1,4 @@
-import RedisQueueService from "@/services/redisQueueService";
+import RedisQueueService from "@/services/redis.service";
 import * as config from "@/config";
 
 class CommunicationPublisher {

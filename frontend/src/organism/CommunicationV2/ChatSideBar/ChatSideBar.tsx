@@ -1,9 +1,11 @@
 // Modules
 import React from "react";
 // Rsuite
-import { Avatar, Container, Text } from "rsuite";
+import { Container, Text } from "rsuite";
 // Typings
 import { IEntity } from "@/typings/communication";
+// Icons
+import { User } from "lucide-react";
 // Style
 import style from "./ChatSideBar.module.scss";
 import classNames from "classnames/bind";
@@ -20,52 +22,47 @@ const ChatSideBar = (props: {
     <Container className={cx("chat-side-bar-container")}>
       <div className={cx("chat-side-bar-header")}>
         <Text size="xl" weight="bold">
-          Direct Messages
+          Messages
         </Text>
       </div>
 
       <div className={cx("chat-side-bar-scroll-container")}>
         {entityList.map((entity) => {
           return (
-            <div
+            <li
+              key={entity.id}
               className={cx([
-                "chat-message-container",
-                `${entity.id === activeEntityId ? "active-chat-message-container" : "default-chat-message-container"}`,
+                "wa-group-item",
+                `${entity.id === activeEntityId ? "active" : ""}`,
               ])}
-              onClick={() => {
-                setActiveEntityId(entity.id);
-              }}
+              onClick={() => setActiveEntityId(entity.id)}
             >
-              {/* Avatar Section */}
-              <div className={cx("avatar-wrapper")}>
-                <Avatar
-                  className={cx("sidenav-logo")} // Using the same class if you want specific avatar styling
-                  src={entity.profile_picture}
-                  alt="Profile Image"
-                  circle
-                  bordered
-                  size="md"
-                />
-              </div>
-
-              {/* Message Content Section */}
-              <div className={cx("message-content")}>
-                {/* Header Row: Name and Timestamp */}
-                <div className={cx("header-row")}>
-                  <Text size="lg" weight="bold" className={cx("user-name")}>
-                    {entity.name}
-                  </Text>
-                  <Text size="sm" weight="thin" className={cx("timestamp")}>
-                    {entity.last_online_at}
-                  </Text>
+              {!entity.user_profile_picture ? (
+                <div className={cx("wa-group-avatar")}>
+                  <User />
                 </div>
-
-                {/* Message Text */}
-                <Text className={cx("message-text")}>
-                  {entity.last_message}
-                </Text>
+              ) : (
+                <img
+                  src={entity.user_profile_picture}
+                  alt="err"
+                  className={cx("wa-group-avatar")}
+                />
+              )}
+              <div className={cx("wa-group-info")}>
+                <div className={cx("wa-group-name-time")}>
+                  <span className={cx("wa-group-name")}>{entity.name}</span>
+                  <span className={cx("wa-group-time")}>
+                    {entity.last_online_at}
+                  </span>
+                </div>
+                <div className={cx("wa-group-last")}>
+                  <span>{entity.last_message}</span>
+                  {false ? (
+                    <span className={cx("wa-unread-badge")}>{0}</span>
+                  ) : null}
+                </div>
               </div>
-            </div>
+            </li>
           );
         })}
       </div>

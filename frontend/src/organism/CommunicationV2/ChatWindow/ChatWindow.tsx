@@ -15,6 +15,7 @@ import { IChatDetails, IChatMessages } from "../ChatMainLayout/ChatMainLayout";
 const cx = classNames.bind(style);
 
 const ChatWindow = (props: {
+  chatType: "private" | "group";
   isMobileView: boolean;
   activeEntityId: string | null;
   chatDetails: IChatDetails;
@@ -26,6 +27,7 @@ const ChatWindow = (props: {
   navigateToChatSideBar?: () => void;
 }) => {
   const {
+    chatType,
     isMobileView,
     activeEntityId,
     chatDetails,
@@ -40,13 +42,17 @@ const ChatWindow = (props: {
   const loggedInUser = useSelector(getAuthUser);
   const [message, setMessage] = React.useState("");
 
-  React.useEffect(() => {
-    const activeEntity = entityList.find((entity) => entity.id === activeEntityId);
-    if(activeEntity?.unsend_last_message) {
-      setMessage(activeEntity.unsend_last_message);
-    }
+  // // Maintain the unsend message history (TODO: need to check)
+  // React.useEffect(() => {
+  //   if(chatType === "group") return;
 
-  }, [activeEntityId, entityList]);
+  //   const activeEntity = entityList.find(
+  //     (entity) => entity.id === activeEntityId
+  //   );
+  //   if (activeEntity?.unsend_last_message) {
+  //     setMessage(activeEntity.unsend_last_message);
+  //   }
+  // }, [activeEntityId, entityList]);
 
   // Handle send message from the sender
   const handleMessageSend = React.useCallback(() => {
@@ -132,7 +138,8 @@ const ChatWindow = (props: {
     sendMessage({
       sender_id: loggedInUser.user?._id || "",
       sender_name: loggedInUser.user?.first_name || "",
-      receiver_id: activeEntityId || "",
+      ...(chatType === "private" ? { receiver_id: activeEntityId || "" } : {}),
+      ...(chatType === "group" ? { group_id: activeEntityId || "" } : {}),
       message,
     });
 
@@ -142,6 +149,7 @@ const ChatWindow = (props: {
 
   const handleOnChangeMessage = (value: string) => {
     setMessage(value);
+    if(chatType === "group") return;
 
     setEntityList((prevList) => {
       const newList = [...prevList];
@@ -153,7 +161,7 @@ const ChatWindow = (props: {
       newList[filterUserIdx].unsend_last_message = value;
       return newList;
     });
-  }
+  };
 
   return (
     <Container className={cx("chat-outer-container")}>

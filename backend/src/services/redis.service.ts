@@ -19,6 +19,7 @@ class RedisQueueService extends RedisUtil {
   }
 
   /**
+   * @deprecated
    * Publish message to redis stream
    */
   public publishMessageToStream = async (message: object) => {
@@ -35,8 +36,12 @@ class RedisQueueService extends RedisUtil {
   /**
    * Publish message to bull queue
    */
-  public publishMessageToBull = async (message: object) => {
-    this.queue.add(message);
+  public publishMessageToBull = async (
+    message: object,
+    options = {},
+    delay = 0
+  ) => {
+    this.queue.add(message, { ...options, removeOnComplete: true, delay });
   };
 }
 

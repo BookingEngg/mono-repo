@@ -241,6 +241,7 @@ const ChatMainLayout = () => {
                   className={cx(["chat-container", "chat-right-container"])}
                 >
                   <ChatWindow
+                    chatType={"private"}
                     isMobileView={isMobileView}
                     activeEntityId={currentEntityRef.current}
                     chatDetails={chatDetails}
@@ -248,7 +249,7 @@ const ChatMainLayout = () => {
                     setChatMessages={setChatMessages}
                     entityList={entityList}
                     setEntityList={setEntityList}
-                    sendMessage={socketClient.sendSocketMessage}
+                    sendMessage={socketClient.sendDirectMessage}
                     navigateToChatSideBar={() => {
                       setActiveMobileScreen("user-list");
                       setActiveEntityId(null);
@@ -260,7 +261,7 @@ const ChatMainLayout = () => {
           </>
         ) : (
           <>
-            <FlexboxGrid justify="space-between">
+            <FlexboxGrid justify="space-around">
               <FlexboxGridItem
                 colspan={8}
                 className={cx(["chat-container", "chat-left-container"])}
@@ -276,6 +277,7 @@ const ChatMainLayout = () => {
                 className={cx(["chat-container", "chat-right-container"])}
               >
                 <ChatWindow
+                  chatType={"private"}
                   isMobileView={isMobileView}
                   activeEntityId={currentEntityRef.current}
                   chatDetails={chatDetails}
@@ -283,7 +285,7 @@ const ChatMainLayout = () => {
                   setChatMessages={setChatMessages}
                   entityList={entityList}
                   setEntityList={setEntityList}
-                  sendMessage={socketClient.sendSocketMessage}
+                  sendMessage={socketClient.sendDirectMessage}
                 />
               </FlexboxGridItem>
             </FlexboxGrid>

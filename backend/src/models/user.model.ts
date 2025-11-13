@@ -37,10 +37,13 @@ const UserSchema = new Schema<IUser>(
     roles: { type: Array(String), enum: ROLES, require: true }, // user, admin, super-admin, etc.
     privileges: { type: Array(String), required: true}, // contain only the restricted priviledges of the roles.
 
+    
     // Community Field
     friends_ids: { type: Array(String), default: [] }, // Contain all the friends user id
     requested_friends: { type: Array(IFriendsRequest), default: [] }, // Contain all the users who request to make friend
     blocked_user: { type: Array(IBlockedRequest), default: [] }, // Contain all the blocked users for the perticular user
+    // Group Communication
+    group_ids: { type: Array(String), default: [] },
   },
   { timestamps: true }
 );

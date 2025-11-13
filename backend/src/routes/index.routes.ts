@@ -15,6 +15,7 @@ class IndexRoutes implements Routes {
 
   private initilizeRoutes(path: string) {
     this.router.get(`${path}health`, this.indexController.healthController);
+    this.router.get(`${path}dichka-dichka`, this.indexController.dichkaController);
   }
 }
 

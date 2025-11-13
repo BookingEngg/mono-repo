@@ -6,7 +6,8 @@
     "start": "npm run build && cross-env NODE_ENV=prod ts-node -r tsconfig-paths/register --transpile-only ./dist/src/server.js",
     "build": "swc src -d dist --source-maps --copy-files",
     "dev": "cross-env NODE_ENV=development nodemon",
-    "prod": "cross-env NODE_ENV=prod nodemon"
+    "prod": "cross-env NODE_ENV=prod nodemon",
+    "script": "npm run build && cross-env NODE_ENV=prod ts-node -r tsconfig-paths/register --transpile-only ./dist/src/evolution/createGroup.js"
   },
   "keywords": [
     "node-js"
@@ -14,6 +15,7 @@
   "author": "Tushar Chand Thakur",
   "license": "ISC",
   "dependencies": {
+    "@socket.io/redis-adapter": "^8.3.0",
     "bull": "^4.16.5",
     "cookie-parser": "^1.4.7",
     "cookie-session": "^2.1.0",
@@ -25,6 +27,8 @@
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
     "mongoose": "^8.8.1",
+    "nanoid": "^5.1.5",
+    "morgan": "^1.10.1",
     "nconf": "^0.12.1",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.16",

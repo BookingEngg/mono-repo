@@ -27,6 +27,9 @@ class CommunicationDao {
       .limit(100);
   };
 
+  /**
+   * Get aggregated user list with last message
+   */
   public getLastReceivedChat = async (user_id: string) => {
     return await this.communicationModel.aggregate([
       {
@@ -60,6 +63,40 @@ class CommunicationDao {
     ]);
   };
 
+  /**
+   * Get aggregated group list with last message
+   */
+  public getLastReceivedChatOfGroup = async (groupIds: string[]) => {
+    return await this.communicationModel.aggregate([
+      {
+        $match: {
+          group_id: {
+            $in: groupIds,
+          },
+        },
+      },
+      {
+        $addFields: {
+          conversation_id: {
+            $concat: ["$group_id"],
+          },
+        },
+      },
+      {
+        $sort: { updatedAt: -1 },
+      },
+      {
+        $group: {
+          _id: "$conversation_id",
+          last_message: { $first: "$$ROOT" },
+        },
+      },
+    ]);
+  };
+
+  /**
+   * Get the direct messages of a user
+   */
   public getDirectMessages = async (
     senderId: string,
     receiverId: string,
@@ -71,6 +108,30 @@ class CommunicationDao {
         { sender_user_id: receiverId, receiver_user_id: senderId },
       ],
       message_type: CommunicationType.Private,
+    };
+
+    const [data, count] = await Promise.all([
+      this.communicationModel
+        .find(filterObject)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean(),
+      this.communicationModel.countDocuments(filterObject),
+    ]);
+
+    return { data, count };
+  };
+
+  /**
+   * Get the direct messages of a group
+   */
+  public getGroupMessages = async (
+    groupId: string,
+    limit: number = 100
+  ) => {
+    const filterObject = {
+      group_id: groupId,
+      message_type: CommunicationType.Group,
     };
 
     const [data, count] = await Promise.all([

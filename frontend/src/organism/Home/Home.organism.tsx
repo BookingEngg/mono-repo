@@ -2,9 +2,13 @@
 import React from "react";
 import { motion } from "framer-motion";
 // Rsuite
-import { Panel, Avatar, Grid, Row, Col, Badge } from "rsuite";
+import { Panel, Avatar, Loader } from "rsuite";
 // Services
 import { getSummaryDetails } from "@/services/Home.service";
+// Style
+import style from "./Home.module.scss";
+import classNames from "classnames/bind";
+const cx = classNames.bind(style);
 
 export interface ISummaryPayload {
   first_name: string;
@@ -22,6 +26,7 @@ const DashboardHome = () => {
     null
   );
   const [greeting, setGreeting] = React.useState("");
+  const [loading, setLoading] = React.useState(true);
 
   React.useEffect(() => {
     const hour = new Date().getHours();
@@ -30,57 +35,88 @@ const DashboardHome = () => {
     else setGreeting("Good Evening");
 
     const fetchSummaryDetails = async () => {
-      const response = await getSummaryDetails();
-      setSummaryData(response.data);
+      try {
+        setLoading(true);
+        const response = await getSummaryDetails();
+        setSummaryData(response.data);
+      } catch (error) {
+        console.error("Failed to fetch summary details:", error);
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchSummaryDetails();
   }, []);
 
-  if (!summaryData) return <></>;
+  if (loading) {
+    return (
+      <div className={cx("loading-container")}>
+        <Loader size="lg" content="Loading..." />
+      </div>
+    );
+  }
+
+  if (!summaryData) return null;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="p-4"
+      className={cx("home-container")}
     >
-      <Grid fluid>
-        <Row>
-          <Col xs={24} md={12}>
-            <Panel className="shadow-lg p-4 rounded-xl">
-              <h2 className="text-xl md:text-2xl font-semibold">
-                {greeting}, {summaryData.first_name}
-              </h2>
-              <p className="text-gray-500">Welcome back to EAPC</p>
-            </Panel>
-          </Col>
-        </Row>
+      {/* Combined Welcome & Profile Section */}
+      <div className={cx("hero-section")}>
+        <Panel className={cx("hero-card")}>
+          <div className={cx("hero-content")}>
+            <h1 className={cx("greeting-title")}>
+              {greeting}, {summaryData.first_name}!
+            </h1>
+            <p className={cx("greeting-subtitle")}>Welcome back to EAPC</p>
+          </div>
+        </Panel>
 
-        <Row className="mt-4">
-          <Col xs={24} md={8}>
-            <Panel className="flex flex-col items-center p-4">
-              <Avatar circle size="lg" src={summaryData.user_profile_picture} />
-              <h3 className="mt-2 text-lg font-medium">
-                {summaryData?.first_name} {summaryData?.last_name}
+        <Panel className={cx("profile-card")}>
+          <div className={cx("profile-content")}>
+            <Avatar
+              circle
+              size="lg"
+              src={summaryData.user_profile_picture}
+              alt={`${summaryData.first_name} ${summaryData.last_name}`}
+              className={cx("profile-avatar")}
+            />
+            <div className={cx("profile-info")}>
+              <h3 className={cx("profile-name")}>
+                {summaryData.first_name} {summaryData.last_name}
               </h3>
-              <p className="text-gray-500">{summaryData.email}</p>
-            </Panel>
-          </Col>
-        </Row>
+              <p className={cx("profile-email")}>{summaryData.email}</p>
+            </div>
+          </div>
+        </Panel>
+      </div>
 
-        <Row className="mt-4">
-          {summaryData.summary_cards.map((card_details) => (
-            <Col xs={24} md={8}>
-              <Panel>
-                <h4 className="text-lg font-semibold">{card_details.label}</h4>
-                <Badge content={card_details.value} />
+      {/* Summary Cards Section */}
+      <div className={cx("summary-section")}>
+        <h2 className={cx("section-title")}>Summary</h2>
+        <div className={cx("summary-grid")}>
+          {summaryData.summary_cards.map((card_details, index) => (
+            <motion.div
+              key={`${card_details.label}-${index}`}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+            >
+              <Panel className={cx("summary-card")}>
+                <div className={cx("card-content")}>
+                  <h4 className={cx("card-label")}>{card_details.label}</h4>
+                  <div className={cx("card-value")}>{card_details.value}</div>
+                </div>
               </Panel>
-            </Col>
+            </motion.div>
           ))}
-        </Row>
-      </Grid>
+        </div>
+      </div>
     </motion.div>
   );
 };

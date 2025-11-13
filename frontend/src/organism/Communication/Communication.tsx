@@ -54,6 +54,8 @@ export interface ICommUser {
 const Communication = () => {
   const loggedInUser = useSelector(getAuthUser);
   const navigate = useNavigate();
+  const BASE_SOCKET_URL =
+    import.meta.env.VITE_SOCKET_URL || window.location.origin;
 
   const [socket, setSocket] = React.useState<Socket | null>(null);
   const [message, setMessage] = React.useState("");
@@ -152,7 +154,7 @@ const Communication = () => {
     fetchCommunicationUsers();
 
     // Socket IO connection url
-    const newSocket = io("http://localhost:8080", {
+    const newSocket = io(BASE_SOCKET_URL, {
       transports: ["websocket"],
     });
     setSocket(newSocket);

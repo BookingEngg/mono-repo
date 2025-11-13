@@ -48,16 +48,55 @@ class CommunicationControllers {
   /**
    * Create a new message entry in communication db
    */
-  public addNewChat = async (req: Request, res: Response): Promise<any> => {
-    const { sender_id, receiver_id, message } = req.body;
+  public createGroup = async (req: Request, res: Response): Promise<any> => {
+    await this.communicationService.createGroup(req.body);
+    return res.send({ status: "success" });
+  };
 
-    await this.communicationService.createChat({
+  /**
+   * Create a new message entry in communication db
+   */
+  public addNewChat = async (req: Request, res: Response): Promise<any> => {
+    const { sender_id, receiver_id, group_id, message, type: messageType } = req.body;
+
+    await this.communicationService.createNewChatMessage({
       senderId: sender_id,
       receiverId: receiver_id,
+      groupShortId: group_id,
       message,
+      messageType,
     });
 
     return res.send({ status: "success" });
+  };
+
+  /**
+   * Get the list of communication groups
+   */
+  public getGroupList = async (req: Request, res: Response): Promise<any> => {
+    const user = req.user;
+    if(!user._id) {
+      throw new Error("Invalid User");
+    }
+    const response = await this.communicationService.getGroupsList(user);
+    return res.send({ status: "success", data: response });
+  };
+
+  /**
+   * Get the message of a group listed on communication groups
+   */
+  public getGroupMessages = async (req: Request, res: Response): Promise<any> => {
+    const groupId: string = (req.query?.group_id || "") as string;
+    if (!req.user?._id || !groupId) {
+      throw new Error("Invalid User or Group id not found");
+    }
+
+    const response = await this.communicationService.getGroupMessages(
+      req.user,
+      groupId
+    );
+
+    return res.send({ status: "success", data: response });
   };
 }
 

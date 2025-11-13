@@ -1,5 +1,5 @@
 # Use the official Node.js LTS image
-FROM node:16
+FROM node:20-alpine
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -12,7 +12,7 @@ RUN npm install
 COPY . .
 
 # Install Git and dos2unix (for line-ending conversion)
-RUN apt-get update && apt-get install -y git bash dos2unix && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache git bash dos2unix
 
 # Copy the fetch-config script to the container and give it execute permissions
 COPY fetch-config.sh /fetch-config.sh

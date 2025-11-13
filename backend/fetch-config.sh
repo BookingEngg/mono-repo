@@ -13,7 +13,7 @@ SECRETS_GITHUB_REPO="https://${GITHUB_PAT}@github.com/tusharthakurepc1/secrets"
 git clone "$SECRETS_GITHUB_REPO" /tmp/repo --depth=1
 
 # Copy the prod config
-cp /tmp/repo/mono-repo/config.prod.json /app/src/config/config.prod.json
+cp /tmp/repo/mono-repo/backend/config.prod.json /app/src/config/config.prod.json
 # Copy the nginx config to shared folder
 # mkdir -p /app/shared
 # cp /tmp/repo/mono-repo/nginx.conf /app/shared/nginx.conf

@@ -41,8 +41,7 @@ const getClient = (baseURL: string, timeout: number = 180000) => {
   };
 };
 
-// TODO: move this to .env
-const BASE_URL = "http://localhost:8080/backend/api/v1/platform";
+const BASE_URL = import.meta.env.VITE_API_URL || window.location.origin;
 
 const axiosClient = getClient(BASE_URL);
 export default axiosClient;
