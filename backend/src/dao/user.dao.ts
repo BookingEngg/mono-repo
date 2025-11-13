@@ -180,7 +180,7 @@ class UserDao {
     privileges?: string[];
   }) => {
     const { user_id, roles = [], privileges = [] } = payload;
-    await this.userModel.updateOne(
+    return await this.userModel.updateOne(
       {
         _id: user_id,
       },
@@ -188,6 +188,25 @@ class UserDao {
         $addToSet: {
           ...(roles.length ? { roles: { $each: roles } } : {}),
           ...(privileges.length ? { privileges: { $each: privileges } } : {}),
+        },
+      }
+    );
+  };
+
+  public unsetRolesAndPrivilegesOfUser = async (payload: {
+    user_id: string;
+    roles?: string[];
+    privileges?: string[];
+  }) => {
+    const { user_id, roles = [], privileges = [] } = payload;
+    return await this.userModel.updateOne(
+      {
+        _id: user_id,
+      },
+      {
+        $pull: {
+          ...(roles.length ? { roles: { $in: roles } } : {}),
+          ...(privileges.length ? { privileges: { $in: privileges } } : {}),
         },
       }
     );

@@ -88,6 +88,12 @@ class ExternalRoutes implements Routes {
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.accessControlController.assignNewRolesAndPrivileges)
     );
+
+    this.router.post(
+      `${prefix}/remove`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.accessControlController.removeRolesAndPrivileges)
+    )
   }
 
   private initializeOtpRoutes(prefix: string) {

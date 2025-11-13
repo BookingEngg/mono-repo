@@ -105,8 +105,6 @@ export default class RBAC {
       privileges.includes(priv)
     );
 
-    console.log("LOGS>>> ", userEligiblePrivileges, finalPrivileges);
-
     // Return the unique privileges
     return R.uniq(finalPrivileges);
   };
@@ -136,6 +134,72 @@ export default class RBAC {
           user_id: user._id,
           privileges: validatedPrivileges,
         });
+        break;
+      default:
+        throw new Error("Invalid Type for Assign Role and Privileges");
+    }
+  };
+
+  public getAllRemovedRolesAndPrivileges = (
+    user: IUser,
+    deletedRoles: string[]
+  ) => {
+    // Get all the roles and privileges assigned to user
+    const userAssignedRoles = user.roles;
+    const userAssignedPrivileges = user.privileges;
+
+    // Filter from the deleted roles which are assigned to user
+    const filteredDeletedRolesFromUserRoles = deletedRoles.filter((role) =>
+      userAssignedRoles.includes(role)
+    );
+
+    // Get all the privileges of the filtered deleted roles
+    const appliedPrivilegesForFilteredRoles =
+      filteredDeletedRolesFromUserRoles.reduce((acc, role) => {
+        const currentRolePrev =
+          RolesDetails.find((r) => r.role === role)?.privileges || [];
+        return [...acc, ...currentRolePrev];
+      }, []);
+
+    // Filter the privileges which are assigned to user
+    const filteredRemovePrivileges = appliedPrivilegesForFilteredRoles.filter(
+      (privilege) => userAssignedPrivileges.includes(privilege)
+    );
+
+    return {
+      deleted_roles: filteredDeletedRolesFromUserRoles,
+      deleted_privileges: filteredRemovePrivileges,
+    };
+  };
+
+  public removeRolesAndPrivileges = async (payload: {
+    type: "role" | "privilege";
+    roles: string[];
+    privileges: string[];
+    user: IUser;
+  }) => {
+    const { type, user, roles, privileges } = payload;
+
+    switch (type) {
+      case "role":
+        /**
+         * 1. If role is assigned to user romover that role
+         * 2. If removed roles privileges is assigned to user romove that privileges too.
+         */
+        const {
+          deleted_roles: deletedRoles,
+          deleted_privileges: deletedPrivileges,
+        } = this.getAllRemovedRolesAndPrivileges(user, roles);
+        await this.userDao.unsetRolesAndPrivilegesOfUser({
+          user_id: user._id,
+          roles: deletedRoles,
+          privileges: deletedPrivileges,
+        });
+        break;
+      case "privilege":
+        /**
+         * 1. If privilege is assigned to user romover that privilege
+         */
         break;
       default:
         throw new Error("Invalid Type for Assign Role and Privileges");
