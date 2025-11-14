@@ -5,8 +5,8 @@ export interface Iprivileges {
 
 export interface IRole {
   role: string;
-  parents: string[];  // Refer to the immediate parent roles
-  children: string[], // Refer to the immediate child roles
+  parents: string[]; // Refer to the immediate parent roles
+  children: string[]; // Refer to the immediate child roles
   privileges: string[];
 }
 
@@ -27,27 +27,46 @@ const PrivilegeDetails: Record<string, Iprivileges> = {
     description: "Can Manipulate Communication Tab",
     default: false,
   },
+  "privilege/communication/group/viewer": {
+    description: "Can View Group in Group Tab",
+    default: false,
+  },
+  "privilege/communication/group/writer": {
+    description: "Can Send Message in Group in Group Tab",
+    default: false,
+  },
   "privilege/communication/group/create": {
-    description: "Can Create Group in Communication Tab",
+    description: "Can Create Group in Group Tab",
     default: false,
   },
   "privilege/communication/group/manipulate": {
-    description: "Can Manipulate Group in Communication Tab",
+    description: "Can Manipulate Group in Group Tab",
     default: false,
   },
   "privilege/system-block": {
     description: "Can Block Some other user",
     default: false,
   },
-  "privilege/remove/roles-privilege": {
-    description: "Can Remove Roles privileges",
-    default: false,
-  },
-  "privilege/assign/roles-privilege": {
+  "privilege/assign/add-roles-privilege": {
     description: "Can Assign Roles privileges",
     default: false,
   },
+  "privilege/assign/remove-roles-privilege": {
+    description: "Can Remove Roles privileges",
+    default: false,
+  },
 };
+
+// Default roles and privileges while signup
+export const defaultUserAssignedRolesWhileSignup = ["roles/users"];
+export const defaultUserAssignedPrivilegeWhileSignup = [
+  "privilege/community/viewer",
+  "privilege/community/manipulate",
+  "privilege/communication/viewer",
+  "privilege/communication/writer",
+  "privilege/communication/group/viewer",
+  "privilege/communication/group/writer",
+];
 
 const RolesDetails: IRole[] = [
   {
@@ -59,6 +78,8 @@ const RolesDetails: IRole[] = [
       "privilege/community/manipulate",
       "privilege/communication/viewer",
       "privilege/communication/writer",
+      "privilege/communication/group/viewer",
+      "privilege/communication/group/writer",
     ],
   },
   {
@@ -76,8 +97,8 @@ const RolesDetails: IRole[] = [
     parents: ["roles/admin"],
     children: [],
     privileges: [
-      "privilege/assign/roles-privilege",
-      "privilege/remove/roles-privilege",
+      "privilege/assign/add-roles-privilege",
+      "privilege/assign/remove-roles-privilege",
     ],
   },
 ];

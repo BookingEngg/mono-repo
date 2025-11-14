@@ -1,7 +1,7 @@
 Access Control Docs
 
 Roles is defined as permission given to Users
--> roles/users
+-> roles/users (default role while signup)
 -> roles/admin
 -> roles/super-admin
 
@@ -10,22 +10,24 @@ NOTE: **If you assign some role to user then the default privileges will be assi
 If you are at the higher role you have inherit the descendent privileges as well (but not the Restricted one)
 
 -> roles/users
-  -> privilege/community/viewer                 // Default
-  -> privilege/community/manipulate             // Default
+  -> privilege/community/viewer                     // Default
+  -> privilege/community/manipulate                 // Default
 
-  -> privilege/communication/viewer             // Restricted
-  -> privilege/communication/writer             // Restricted
+  -> privilege/communication/viewer                 // Restricted
+  -> privilege/communication/writer                 // Restricted
+
+  -> privilege/communication/group/viewer           // Restricted
+  -> privilege/communication/group/writer           // Restricted
 
 -> roles/admin (inherit roles/users)
-  -> privilege/communication/group/create       // Default
-  -> privilege/communication/group/manipulate   // Default
+  -> privilege/communication/group/create           // Default
+  -> privilege/communication/group/manipulate       // Default
 
-  -> privilege/system-block                     // Restricted
+  -> privilege/system-block                         // Restricted
 
 -> roles/super-admin (inherit roles/admin)
-  -> privilege/assign/roles-privilege           // Default
-  -> privilege/remove/roles-privilege           // Need to verify can be possible
-  -> privilege/create-roles                     // Need to verify can be possible
+  -> privilege/assign/add-roles-privilege           // Restricted
+  -> privilege/assign/remove-roles-privilege        // Restricted
 
 
 // Rules for assign and remove the roles and privileges
