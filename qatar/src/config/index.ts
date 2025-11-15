@@ -1,8 +1,14 @@
 const nconf = require("nconf");
-import { IConsumers, IGCPConfig, IRedisConfig, IServer, IServices } from "../typings/config";
+import {
+  IConsumers,
+  IGCPConfig,
+  IRedisConfig,
+  IServer,
+  IServices,
+} from "../typings/config";
 
 export const env = process.env.NODE_ENV || "development";
-let configFile = `src/config/config.${env}.json`;
+const configFile = `etc/secrets/config.${env}.json`;
 
 nconf.argv().env().file({ file: configFile });
 
