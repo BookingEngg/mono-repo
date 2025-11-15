@@ -12,7 +12,7 @@ import {
 
 export const env = process.env.NODE_ENV || "development";
 const configFile = `etc/secrets/config.${env}.json`;
-console.log("CONFIG FILE PATH >>>>>> ", configFile);
+console.log("CONFIG FILE PATH >>>>>> ", configFile, env);
 
 nconf.argv().env().file({ file: configFile });
 
