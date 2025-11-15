@@ -229,6 +229,7 @@ const ChatMainLayout = () => {
                   className={cx(["chat-container", "chat-left-container"])}
                 >
                   <ChatSideBar
+                    chatType={"user"}
                     entityList={entityList}
                     activeEntityId={activeEntityId}
                     setActiveEntityId={setActiveEntityId}
@@ -267,6 +268,7 @@ const ChatMainLayout = () => {
                 className={cx(["chat-container", "chat-left-container"])}
               >
                 <ChatSideBar
+                  chatType={"user"}
                   entityList={entityList}
                   activeEntityId={activeEntityId}
                   setActiveEntityId={setActiveEntityId}

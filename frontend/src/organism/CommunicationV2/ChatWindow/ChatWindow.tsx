@@ -3,7 +3,7 @@ import React from "react";
 import Moment from "moment";
 // Rsuite and Icons
 import { Avatar, Button, Container, Input, Text } from "rsuite";
-import { ArrowLeft, SendHorizonalIcon } from "lucide-react";
+import { ArrowLeft, SendHorizonalIcon, User } from "lucide-react";
 // Redux Store
 import { useSelector } from "react-redux";
 import { getAuthUser } from "@/store/auth";
@@ -149,7 +149,7 @@ const ChatWindow = (props: {
 
   const handleOnChangeMessage = (value: string) => {
     setMessage(value);
-    if(chatType === "group") return;
+    if (chatType === "group") return;
 
     setEntityList((prevList) => {
       const newList = [...prevList];
@@ -171,7 +171,13 @@ const ChatWindow = (props: {
             <ArrowLeft size={20} />
           </div>
         )}
-        <Avatar src={chatDetails.entity_logo} alt="Entity" circle size="md" />
+        {!chatDetails.entity_logo ? (
+          <div className={cx("wa-group-avatar")}>
+            <User />
+          </div>
+        ) : (
+          <Avatar src={chatDetails.entity_logo} alt="Entity" circle size="md" />
+        )}
         <Text size="xl" weight="bold">
           {chatDetails.name}
         </Text>

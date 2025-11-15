@@ -12,11 +12,17 @@ import classNames from "classnames/bind";
 const cx = classNames.bind(style);
 
 const ChatSideBar = (props: {
+  chatType: "user" | "group";
   entityList: IEntity[];
   activeEntityId: string | null;
   setActiveEntityId: React.Dispatch<React.SetStateAction<string | null>>;
 }) => {
-  const { entityList = [], activeEntityId, setActiveEntityId } = props;
+  const {
+    chatType,
+    entityList = [],
+    activeEntityId,
+    setActiveEntityId,
+  } = props;
 
   return (
     <Container className={cx("chat-side-bar-container")}>
@@ -37,13 +43,13 @@ const ChatSideBar = (props: {
               ])}
               onClick={() => setActiveEntityId(entity.id)}
             >
-              {!entity.user_profile_picture ? (
+              {!entity.profile_picture || chatType === "group" ? (
                 <div className={cx("wa-group-avatar")}>
                   <User />
                 </div>
               ) : (
                 <img
-                  src={entity.user_profile_picture}
+                  src={entity.profile_picture}
                   alt="err"
                   className={cx("wa-group-avatar")}
                 />

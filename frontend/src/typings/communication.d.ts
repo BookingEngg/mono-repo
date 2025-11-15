@@ -1,7 +1,7 @@
 export interface IEntity {
   id: string;
   name: string;
-  user_profile_picture: string;
+  profile_picture: string;
   last_message: string;
   last_online_at: string;
 

@@ -84,7 +84,6 @@ const GroupChatMainLayout = () => {
 
       if (response) {
         setGroupList(response.data);
-        setActiveEntityId(response?.data?.[0]?.id || "");
       }
     };
 
@@ -225,6 +224,7 @@ const GroupChatMainLayout = () => {
                   className={cx(["chat-container", "chat-left-container"])}
                 >
                   <ChatSideBar
+                    chatType={"group"}
                     entityList={groupList}
                     activeEntityId={activeEntityId}
                     setActiveEntityId={setActiveEntityId}
@@ -263,6 +263,7 @@ const GroupChatMainLayout = () => {
                 className={cx(["chat-container", "chat-left-container"])}
               >
                 <ChatSideBar
+                  chatType={"group"}
                   entityList={groupList}
                   activeEntityId={activeEntityId}
                   setActiveEntityId={setActiveEntityId}
