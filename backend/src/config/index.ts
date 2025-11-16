@@ -12,12 +12,12 @@ import {
 
 export const env = process.env.NODE_ENV || "development";
 const configFile = `etc/secrets/config.${env}.json`;
-console.log("CONFIG FILE PATH >>>>>> ", configFile, env);
 
 nconf.argv().env().file({ file: configFile });
 
 export const serviceName = nconf.get("service_name");
 export const serviceRoute = nconf.get("service_route");
+console.log("CONFIG FILE PATH >>>>>> ", configFile, serviceRoute);
 export const serverRoute = (nconf.get("server") as IServer).url;
 export const PORT = (nconf.get("server") as IServer).port;
 export const isProduction = env === "prod";
