@@ -38,4 +38,4 @@ COPY --from=build /app/repo/frontend /opt/github_repo/frontend
 CMD envsubst '$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/nginx.conf \
     && exec nginx -g 'daemon off;'
 
-EXPOSE 8080
+EXPOSE 80
