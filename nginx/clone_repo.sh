@@ -13,7 +13,7 @@ CLONE_DIR="/tmp/repo"
 TARGET_DIR="/app/repo"
 
 echo "Cloning repo..."
-git clone "$REPO_URL" "$CLONE_DIR" --depth=1
+git clone -b prod-render "$REPO_URL" "$CLONE_DIR" --depth=1
 echo "Clone completed."
 
 echo "Copying repo to $TARGET_DIR ..."
