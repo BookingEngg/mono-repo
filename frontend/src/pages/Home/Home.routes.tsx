@@ -17,6 +17,7 @@ const getHomeRoutes = () => {
       key: "home",
       label: "Summary",
       handle: { identifier: "root" },
+      accessible: ["roles/users", "roles/admin", "roles/super-admin"],
     },
   ];
 

@@ -12,4 +12,7 @@ export type TRoutes = {
   showOnTab?: boolean;
   parent?: TRoutes;
   handle?: { identifier: string };
+
+  //roles and privileges
+  accessible?: string[];
 };

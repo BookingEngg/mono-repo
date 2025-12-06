@@ -25,6 +25,8 @@ import CurrentRouteContext from "@/contextProvider/routeContext";
 // Typings
 import { TRoutes } from "@/typings/common";
 import { useSelector } from "react-redux";
+// Utils
+import { isRolesAccessibleToUser } from "@/utils/util";
 
 /**
  * Get all the routes passing in the routes parameter
@@ -106,7 +108,9 @@ function App() {
     const currentRoute = [
       ...(isAuthorized ? flatternAuthRoutesTree : flatternLoginRoutesTree),
     ].find((route) => {
-      return route.path === location.pathname;
+      // Is the matched route allowed to that role
+      const isRouteAccessible = isRolesAccessibleToUser(route.accessible || []);
+      return route.path === location.pathname && isRouteAccessible;
     });
 
     if (!currentRoute) {

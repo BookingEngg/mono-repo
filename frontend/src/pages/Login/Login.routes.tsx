@@ -18,6 +18,7 @@ const getLoginRoutes = () => {
       showOnTab: false,
       key: "login",
       label: "Login",
+      accessible: ["roles/users", "roles/admin", "roles/super-admin"],
     },
   ];
 

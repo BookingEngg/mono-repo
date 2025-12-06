@@ -20,6 +20,7 @@ const getSettingsRoutes = () => {
       handle: {
         identifier: "root",
       },
+      accessible: ["admin", "super_admin"], // only to accessible by admin and super admin
     },
   ];
 

@@ -16,6 +16,8 @@ import { useSelector } from "react-redux";
 // style
 import { FlexboxGrid, Text } from "rsuite";
 import "./SideNav.scss";
+// Utils
+import { isRolesAccessibleToUser } from "@/utils/util";
 
 const SideNav = (props: SideNavProps) => {
   const { routes } = props;
@@ -30,7 +32,12 @@ const SideNav = (props: SideNavProps) => {
 
   const validRoutesForNav =
     React.useMemo(() => {
-      return routes.filter((route) => !!route.showOnSideNav);
+      return routes.filter((route) => {
+        const isRouteAccessible = isRolesAccessibleToUser(
+          route.accessible || []
+        );
+        return !!route.showOnSideNav && isRouteAccessible;
+      });
     }, [routes]) || [];
 
   if (!expanded) {
@@ -119,7 +126,12 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
 
   const validRoutesForNav =
     React.useMemo(() => {
-      return routes.filter((route) => !!route.showOnSideNav);
+      return routes.filter((route) => {
+        const isRouteAccessible = isRolesAccessibleToUser(
+          route.accessible || []
+        );
+        return !!route.showOnSideNav && isRouteAccessible;
+      });
     }, [routes]) || [];
 
   return (
@@ -136,9 +148,12 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
         </FlexboxGrid>
       </div>
       {validRoutesForNav.map((route) => {
-        const validSubRouteForSideNav = route.children?.filter((route) =>
-          Boolean(route.showOnSideNav)
-        );
+        const validSubRouteForSideNav = route.children?.filter((route) => {
+          const isRouteAccessible = isRolesAccessibleToUser(
+            route.accessible || []
+          );
+          return Boolean(route.showOnSideNav) && isRouteAccessible;
+        });
 
         return (
           <div className={`sidenav-item-container`}>

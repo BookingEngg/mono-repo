@@ -1,6 +1,9 @@
 // Organism
 import Communication from "@/organism/Communication";
-import {CommunicationV2, GroupCommunication} from "@/organism/CommunicationV2";
+import {
+  CommunicationV2,
+  GroupCommunication,
+} from "@/organism/CommunicationV2";
 // Icons
 import { MessageCircle, MessageCircleMore, MessagesSquare } from "lucide-react";
 // Typings
@@ -21,6 +24,7 @@ const getChatRoutes = () => {
       handle: {
         identifier: "root",
       },
+      accessible: ["roles/users", "roles/admin", "roles/super-admin"],
     },
     {
       path: BASE_URL,
@@ -32,6 +36,7 @@ const getChatRoutes = () => {
       handle: {
         identifier: "root",
       },
+      accessible: ["roles/users", "roles/admin", "roles/super-admin"],
     },
     {
       path: `${BASE_URL}/groups`,
@@ -43,6 +48,7 @@ const getChatRoutes = () => {
       handle: {
         identifier: "root",
       },
+      accessible: ["roles/users", "roles/admin", "roles/super-admin"],
     },
   ];
 
