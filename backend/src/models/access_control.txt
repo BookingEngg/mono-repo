@@ -1,0 +1,41 @@
+Access Control Docs
+
+Roles is defined as permission given to Users
+-> roles/users (default role while signup)
+-> roles/admin
+-> roles/super-admin
+
+privilege is defined as what all features is accessible_roles in the roles
+NOTE: **If you assign some role to user then the default privileges will be assigned only **
+If you are at the higher role you have inherit the descendent privileges as well (but not the Restricted one)
+
+-> roles/users
+  -> privilege/community/viewer                     // Default
+  -> privilege/community/manipulate                 // Default
+
+  -> privilege/communication/viewer                 // Restricted
+  -> privilege/communication/writer                 // Restricted
+
+  -> privilege/communication/group/viewer           // Restricted
+  -> privilege/communication/group/writer           // Restricted
+
+-> roles/admin (inherit roles/users)
+  -> privilege/communication/group/create           // Default
+  -> privilege/communication/group/manipulate       // Default
+
+  -> privilege/system-block                         // Restricted
+
+-> roles/super-admin (inherit roles/admin)
+  -> privilege/assign/add-roles-privilege           // Restricted
+  -> privilege/assign/remove-roles-privilege        // Restricted
+
+
+// Rules for assign and remove the roles and privileges
+1. When assign a role to a user
+  -> All the privileges of the descendent roles will be assigned to them but not the current role privilege
+  -> In user model 
+     -> roles contain all the distinct roles assigned.
+     -> contain all the restricted privilege which are accessible_roles by the user.
+
+2. When un-assign a role to a user
+  -> All the 

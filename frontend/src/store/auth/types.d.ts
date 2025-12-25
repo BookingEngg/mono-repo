@@ -5,6 +5,8 @@ export interface IUser {
   user_profile_picture?: string;
   role: string;
   group_ids: string[];
+  roles: string[];
+  privileges: string[];
 }
 
 export interface IAuth {

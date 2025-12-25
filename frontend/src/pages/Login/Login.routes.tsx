@@ -4,6 +4,7 @@ import { Outlet } from "react-router-dom";
 
 export const BASE_URL = "/login";
 
+// This route is visible to all the users when non logged in
 const getLoginRoutes = () => {
   const routes: TRoutes[] = [
     {
