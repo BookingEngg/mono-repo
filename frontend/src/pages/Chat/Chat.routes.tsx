@@ -6,6 +6,8 @@ import {
 } from "@/organism/CommunicationV2";
 // Icons
 import { MessageCircle, MessageCircleMore, MessagesSquare } from "lucide-react";
+// Constants
+import { ROLES } from "@/constants/common.constant";
 // Typings
 import { TRoutes } from "@/typings/common";
 
@@ -24,7 +26,7 @@ const getChatRoutes = () => {
       handle: {
         identifier: "root",
       },
-      accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
+      accessible_roles: [ROLES.USER, ROLES.ADMIN, ROLES.SUPER_ADMIN],
     },
     {
       path: BASE_URL,
@@ -36,7 +38,7 @@ const getChatRoutes = () => {
       handle: {
         identifier: "root",
       },
-      accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
+      accessible_roles: [ROLES.USER, ROLES.ADMIN, ROLES.SUPER_ADMIN],
     },
     {
       path: `${BASE_URL}/groups`,
@@ -48,7 +50,7 @@ const getChatRoutes = () => {
       handle: {
         identifier: "root",
       },
-      accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
+      accessible_roles: [ROLES.USER, ROLES.ADMIN, ROLES.SUPER_ADMIN],
     },
   ];
 

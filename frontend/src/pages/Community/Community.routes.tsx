@@ -6,6 +6,8 @@ import Community from "./Community";
 import NewFriendsCommunity from "@/organism/Community/NewFriendCommunity";
 import FriendsCommunity from "@/organism/Community/FriendsCommunity";
 import BlockedUserCommunity from "@/organism/Community/BlockedUserCommunity";
+// Constants
+import { ROLES } from "@/constants/common.constant";
 // Typings
 import { TRoutes } from "@/typings/common";
 
@@ -23,7 +25,7 @@ const getCommunityRoutes = () => {
       handle: {
         identifier: "root",
       },
-      accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
+      accessible_roles: [ROLES.USER, ROLES.ADMIN, ROLES.SUPER_ADMIN],
       children: [
         {
           path: `${BASE_URL}/add`,
@@ -32,7 +34,7 @@ const getCommunityRoutes = () => {
           showOnTab: true,
           key: "add-new-friend",
           label: "Add New Friend",
-          accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
+          accessible_roles: [ROLES.USER, ROLES.ADMIN, ROLES.SUPER_ADMIN],
         },
         {
           path: `${BASE_URL}/friends`,
@@ -41,7 +43,7 @@ const getCommunityRoutes = () => {
           showOnTab: true,
           key: "all-friends",
           label: "Friends",
-          accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
+          accessible_roles: [ROLES.USER, ROLES.ADMIN, ROLES.SUPER_ADMIN],
         },
         {
           path: `${BASE_URL}/blocked`,
@@ -50,7 +52,7 @@ const getCommunityRoutes = () => {
           showOnTab: true,
           key: "blocked-user",
           label: "Blocked User",
-          accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
+          accessible_roles: [ROLES.USER, ROLES.ADMIN, ROLES.SUPER_ADMIN],
         },
       ],
     },

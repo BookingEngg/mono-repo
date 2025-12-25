@@ -16,6 +16,7 @@ class AccessControlController {
     if (!user) {
       throw new Error("User Not Found");
     }
+    // If type is role then assign roles else assign privileges
     const { type, roles = [], privileges = [] } = req.body;
 
     await this.rbac.assignNewRoleAndPrivileges({ type, roles, privileges, user})

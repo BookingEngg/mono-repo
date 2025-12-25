@@ -4,6 +4,8 @@ import { HomeIcon } from "lucide-react";
 import Home from "@/organism/Home";
 // Typings
 import { TRoutes } from "@/typings/common";
+// Constants
+import { ROLES } from "@/constants/common.constant";
 
 export const BASE_URL = "/";
 
@@ -17,7 +19,7 @@ const getHomeRoutes = () => {
       key: "home",
       label: "Summary",
       handle: { identifier: "root" },
-      accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
+      accessible_roles: [ROLES.USER, ROLES.ADMIN, ROLES.SUPER_ADMIN],
     },
   ];
 
