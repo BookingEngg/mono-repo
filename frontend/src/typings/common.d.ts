@@ -14,5 +14,5 @@ export type TRoutes = {
   handle?: { identifier: string };
 
   //roles and privileges
-  accessible?: string[];
+  accessible_roles?: string[];
 };

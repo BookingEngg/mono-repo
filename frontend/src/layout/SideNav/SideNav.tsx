@@ -11,7 +11,7 @@ import { SideNavProps } from "./types";
 // Context Provider
 import CurrentRouteContext from "@/contextProvider/routeContext";
 // Store
-import { getAuthUser } from "@/store/auth";
+import { getAuthUser, getUserRolesAndPrivileges } from "@/store/auth";
 import { useSelector } from "react-redux";
 // style
 import { FlexboxGrid, Text } from "rsuite";
@@ -21,6 +21,7 @@ import { isRolesAccessibleToUser } from "@/utils/util";
 
 const SideNav = (props: SideNavProps) => {
   const { routes } = props;
+  const userRolesAndPrivileges = useSelector(getUserRolesAndPrivileges);
 
   const { currentRoute: selectedRoute } = useContext(CurrentRouteContext);
   if (!selectedRoute) {
@@ -34,7 +35,8 @@ const SideNav = (props: SideNavProps) => {
     React.useMemo(() => {
       return routes.filter((route) => {
         const isRouteAccessible = isRolesAccessibleToUser(
-          route.accessible || []
+          route.accessible_roles || [],
+          userRolesAndPrivileges.roles
         );
         return !!route.showOnSideNav && isRouteAccessible;
       });
@@ -51,7 +53,7 @@ const SideNav = (props: SideNavProps) => {
             setExpanded(false);
           }}
         >
-          <div className="sidenav-item-container">
+          <div className="sidenav-item-container" key={"sidenav-item-container"}>
             <div className="sidenav-iconholder">
               <span>
                 <LayoutDashboard color="blue" />
@@ -67,6 +69,7 @@ const SideNav = (props: SideNavProps) => {
                       selectedRoute.parent?.key === route.key) &&
                     "selected-menuitem"
                   }`}
+                  key={`sidenav-iconholder-${route.key}`}
                 >
                   <span>{route.icon}</span>
                 </div>
@@ -96,6 +99,7 @@ const SideNav = (props: SideNavProps) => {
 
 const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
   const authUser = useSelector(getAuthUser);
+  const userRolesAndPrivileges = useSelector(getUserRolesAndPrivileges);
 
   const { routes } = props;
   const navigate = useNavigate();
@@ -128,7 +132,8 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
     React.useMemo(() => {
       return routes.filter((route) => {
         const isRouteAccessible = isRolesAccessibleToUser(
-          route.accessible || []
+          route.accessible_roles || [],
+          userRolesAndPrivileges.roles
         );
         return !!route.showOnSideNav && isRouteAccessible;
       });
@@ -150,7 +155,8 @@ const ExpandedSideNav = (props: { routes: TRoutes[] }) => {
       {validRoutesForNav.map((route) => {
         const validSubRouteForSideNav = route.children?.filter((route) => {
           const isRouteAccessible = isRolesAccessibleToUser(
-            route.accessible || []
+            route.accessible_roles || [],
+            userRolesAndPrivileges.roles
           );
           return Boolean(route.showOnSideNav) && isRouteAccessible;
         });

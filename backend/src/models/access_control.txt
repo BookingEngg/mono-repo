@@ -5,7 +5,7 @@ Roles is defined as permission given to Users
 -> roles/admin
 -> roles/super-admin
 
-privilege is defined as what all features is accessible in the roles
+privilege is defined as what all features is accessible_roles in the roles
 NOTE: **If you assign some role to user then the default privileges will be assigned only **
 If you are at the higher role you have inherit the descendent privileges as well (but not the Restricted one)
 
@@ -35,7 +35,7 @@ If you are at the higher role you have inherit the descendent privileges as well
   -> All the privileges of the descendent roles will be assigned to them but not the current role privilege
   -> In user model 
      -> roles contain all the distinct roles assigned.
-     -> contain all the restricted privilege which are accessible by the user.
+     -> contain all the restricted privilege which are accessible_roles by the user.
 
 2. When un-assign a role to a user
   -> All the 

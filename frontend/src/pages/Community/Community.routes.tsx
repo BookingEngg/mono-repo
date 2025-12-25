@@ -23,7 +23,7 @@ const getCommunityRoutes = () => {
       handle: {
         identifier: "root",
       },
-      accessible: ["roles/users", "roles/admin", "roles/super-admin"],
+      accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
       children: [
         {
           path: `${BASE_URL}/add`,
@@ -32,7 +32,7 @@ const getCommunityRoutes = () => {
           showOnTab: true,
           key: "add-new-friend",
           label: "Add New Friend",
-          accessible: ["roles/users", "roles/admin", "roles/super-admin"],
+          accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
         },
         {
           path: `${BASE_URL}/friends`,
@@ -41,7 +41,7 @@ const getCommunityRoutes = () => {
           showOnTab: true,
           key: "all-friends",
           label: "Friends",
-          accessible: ["roles/users", "roles/admin", "roles/super-admin"],
+          accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
         },
         {
           path: `${BASE_URL}/blocked`,
@@ -50,7 +50,7 @@ const getCommunityRoutes = () => {
           showOnTab: true,
           key: "blocked-user",
           label: "Blocked User",
-          accessible: ["roles/users", "roles/admin", "roles/super-admin"],
+          accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
         },
       ],
     },

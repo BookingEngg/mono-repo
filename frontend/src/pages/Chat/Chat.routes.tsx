@@ -18,13 +18,13 @@ const getChatRoutes = () => {
       path: BASE_OLD_URL,
       element: <Communication />,
       icon: <MessageCircle />,
-      showOnSideNav: false, // Make the user not directly accessible
+      showOnSideNav: false, // Make the user not directly accessible_roles
       key: "communication",
       label: "Communication",
       handle: {
         identifier: "root",
       },
-      accessible: ["roles/users", "roles/admin", "roles/super-admin"],
+      accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
     },
     {
       path: BASE_URL,
@@ -36,7 +36,7 @@ const getChatRoutes = () => {
       handle: {
         identifier: "root",
       },
-      accessible: ["roles/users", "roles/admin", "roles/super-admin"],
+      accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
     },
     {
       path: `${BASE_URL}/groups`,
@@ -48,7 +48,7 @@ const getChatRoutes = () => {
       handle: {
         identifier: "root",
       },
-      accessible: ["roles/users", "roles/admin", "roles/super-admin"],
+      accessible_roles: ["roles/users", "roles/admin", "roles/super-admin"],
     },
   ];
 
