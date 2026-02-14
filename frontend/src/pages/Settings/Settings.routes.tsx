@@ -17,7 +17,8 @@ const getSettingsRoutes = () => {
       path: BASE_URL,
       element: <SettingPage />,
       icon: <Settings />,
-      showOnSideNav: true,
+      showOnSideNav: false,
+      showOnTab: false,
       label: "Setting",
       key: "setting",
       handle: {

@@ -44,7 +44,7 @@ const getChatRoutes = () => {
       path: `${BASE_URL}/groups`,
       element: <GroupCommunication />,
       icon: <MessagesSquare />,
-      showOnSideNav: true,
+      showOnSideNav: false,
       key: "communication-group-v2",
       label: "Groups",
       handle: {
