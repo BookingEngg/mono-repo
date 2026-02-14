@@ -18,13 +18,19 @@ import { getUser } from "@/services/Login.service";
 // Layout
 import MainLayout from "@/layout/MainLayout";
 // Store
-import { isUserAuthorized, login } from "./store/auth";
+import {
+  getUserRolesAndPrivileges,
+  isUserAuthorized,
+  login,
+} from "./store/auth";
 import { useAppDispatch } from "./store/hooks";
 // Context Provider
 import CurrentRouteContext from "@/contextProvider/routeContext";
 // Typings
 import { TRoutes } from "@/typings/common";
 import { useSelector } from "react-redux";
+// Utils
+import { isRolesAccessibleToUser } from "@/utils/util";
 
 /**
  * Get all the routes passing in the routes parameter
@@ -68,6 +74,7 @@ function App() {
   const location = useLocation();
   const dispatch = useAppDispatch();
   const isAuthorized = useSelector(isUserAuthorized);
+  const userRolesAndPrivileges = useSelector(getUserRolesAndPrivileges);
 
   //User Authorized check
   React.useEffect(() => {
@@ -106,7 +113,15 @@ function App() {
     const currentRoute = [
       ...(isAuthorized ? flatternAuthRoutesTree : flatternLoginRoutesTree),
     ].find((route) => {
-      return route.path === location.pathname;
+      let isRouteAccessible = true;
+      if (isAuthorized) {
+        // Is the matched route allowed to that role
+        isRouteAccessible = isRolesAccessibleToUser(
+          route.accessible_roles || [],
+          userRolesAndPrivileges.roles
+        );
+      }
+      return route.path === location.pathname && isRouteAccessible;
     });
 
     if (!currentRoute) {
@@ -119,7 +134,13 @@ function App() {
     }
 
     return currentRoute;
-  }, [flatternAuthRoutesTree, flatternLoginRoutesTree, location]);
+  }, [
+    flatternAuthRoutesTree,
+    flatternLoginRoutesTree,
+    isAuthorized,
+    userRolesAndPrivileges,
+    location,
+  ]);
 
   React.useEffect(() => {
     if (!isAuthorized) {

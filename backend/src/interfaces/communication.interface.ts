@@ -1,3 +1,4 @@
+import { CreateOptionals } from "./common.interface";
 import { CommunicationType, GroupType } from "./enum";
 
 export interface ICommunication {
@@ -29,3 +30,6 @@ export interface ICommunicationGroup {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export type ICommunicationGroupOptional = CreateOptionals<ICommunicationGroup>;
+

@@ -14,6 +14,13 @@ class UserDao {
     return await this.userModel.create(payload);
   };
 
+  public updateUserDetailsById = async (
+    userId: string,
+    updatedPayload: object
+  ) => {
+    return await this.userModel.updateOne({ _id: userId }, updatedPayload);
+  };
+
   // Get the user by email id
   public getUserByEmail = async (email: string): Promise<IUser> => {
     return await this.userModel.findOne({ email }).lean();
@@ -21,7 +28,7 @@ class UserDao {
 
   // Get the users by userId
   public getUserByUserId = async (userId: string, fields: string[] = []) => {
-    return await this.userModel.findOne({ _id: userId }).lean();
+    return await this.userModel.findOne({ _id: userId }).select(fields).lean();
   };
 
   // Get the users by userIds
@@ -36,8 +43,11 @@ class UserDao {
   };
 
   // Get all the user expect from the source
-  public getUsers = async (email: string) => {
-    return await this.userModel.find({ email: { $ne: email } });
+  public getUsers = async (email: string, fields: string[] = []) => {
+    return await this.userModel
+      .find({ email: { $ne: email } })
+      .select(fields)
+      .lean();
   };
 
   // Get community paginated user list
@@ -59,14 +69,32 @@ class UserDao {
   };
 
   /**
-   * Set the group id into the user group list
-   * @param userId 
-   * @param groupId 
+   * Set the group id into the single user group list
+   * @param userId
+   * @param groupId
    */
   public setUserGroupId = async (userId: string, groupId: string) => {
     return await this.userModel.updateOne(
       {
         _id: userId,
+      },
+      {
+        $addToSet: {
+          group_ids: groupId,
+        },
+      }
+    );
+  };
+
+  /**
+   * Set the group id into the multiple users group list
+   * @param userIds
+   * @param groupId
+   */
+  public setUsersGroupId = async (userIds: string[], groupId: string) => {
+    return await this.userModel.updateMany(
+      {
+        _id: { $in: userIds },
       },
       {
         $addToSet: {
@@ -158,6 +186,45 @@ class UserDao {
           blocked_user: {
             user_id: friendId,
           },
+        },
+      }
+    );
+  };
+
+  // RBAC DAO
+  public setRolesAndPrivilegesOfUser = async (payload: {
+    user_id: string;
+    roles?: string[];
+    privileges?: string[];
+  }) => {
+    const { user_id, roles = [], privileges = [] } = payload;
+    return await this.userModel.updateOne(
+      {
+        _id: user_id,
+      },
+      {
+        $addToSet: {
+          ...(roles.length ? { roles: { $each: roles } } : {}),
+          ...(privileges.length ? { privileges: { $each: privileges } } : {}),
+        },
+      }
+    );
+  };
+
+  public unsetRolesAndPrivilegesOfUser = async (payload: {
+    user_id: string;
+    roles?: string[];
+    privileges?: string[];
+  }) => {
+    const { user_id, roles = [], privileges = [] } = payload;
+    return await this.userModel.updateOne(
+      {
+        _id: user_id,
+      },
+      {
+        $pull: {
+          ...(roles.length ? { roles: { $in: roles } } : {}),
+          ...(privileges.length ? { privileges: { $in: privileges } } : {}),
         },
       }
     );

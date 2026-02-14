@@ -4,6 +4,7 @@ import { Router } from "express";
 import { Routes } from "@interfaces/common.interface";
 // Controllers
 import UserController from "@/controllers/user.controllers";
+import AccessControlController from "@/controllers/accessControl.controllers";
 import OtpController from "@/controllers/otp.controllers";
 import CommunicationController from "@/controllers/communication.controllers";
 import CommunityControllers from "@/controllers/community.controllers";
@@ -22,6 +23,7 @@ class ExternalRoutes implements Routes {
 
   // Controllers
   private userController = new UserController();
+  private accessControlController = new AccessControlController();
   private otpController = new OtpController();
   private communicationController = new CommunicationController();
   private communityController = new CommunityControllers();
@@ -30,6 +32,7 @@ class ExternalRoutes implements Routes {
 
   constructor() {
     this.initializeUsersRoutes(`${this.path}/user`);
+    this.initializeAccessControlRoutes(`${this.path}/access`);
     this.initializeOtpRoutes(`${this.path}/otp`);
     this.initializeCommunicationRoutes(`${this.path}/comm`);
     this.initializeCommunityRoutes(`${this.path}/community`);
@@ -79,6 +82,20 @@ class ExternalRoutes implements Routes {
     );
   }
 
+  private initializeAccessControlRoutes(prefix: string) {
+    this.router.post(
+      `${prefix}/`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.accessControlController.assignNewRolesAndPrivileges)
+    );
+
+    this.router.post(
+      `${prefix}/remove`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.accessControlController.removeRolesAndPrivileges)
+    );
+  }
+
   private initializeOtpRoutes(prefix: string) {
     this.router.post(
       `${prefix}/create`,
@@ -116,22 +133,34 @@ class ExternalRoutes implements Routes {
     );
 
     // Communication Groups Routes
-    this.router.post(
-      `${prefix}/group/new`,
-      this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communicationController.createGroup)
-    )
-
     this.router.get(
       `${prefix}/group/list`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communicationController.getGroupList)
-    )
+    );
 
     this.router.get(
       `${prefix}/group/chats`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communicationController.getGroupMessages)
+    );
+
+    this.router.get(
+      `${prefix}/group/:group_id`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.communicationController.getGroupDetailsFromGroupId)
+    );
+
+    this.router.post(
+      `${prefix}/group/new`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.communicationController.createGroup)
+    );
+
+    this.router.put(
+      `${prefix}/group/:shortId`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.communicationController.updateGroupDetails)
     );
   }
 

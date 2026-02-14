@@ -1,14 +1,20 @@
-import moment from "moment";
+// Modules
 import R from "ramda";
+import moment from "moment";
+// Dao
 import CommunicationDao from "@/dao/communication.dao";
-import CommunicationGroupDao from "@/dao/communicationGroup.dao";
 import UserDao from "@/dao/user.dao";
+// Interfaces
 import { ICommonAuthUser, IUser } from "@/interfaces/user.interface";
+// Constants
+import {
+  defaultUserAssignedPrivilegeWhileSignup,
+  defaultUserAssignedRolesWhileSignup,
+} from "@/constants/roles.constants";
 
 class UserService {
   private userDao = new UserDao();
   private communicationDao = new CommunicationDao();
-  private communicationGroupDao = new CommunicationGroupDao();
 
   public createUser = async (payload: ICommonAuthUser) => {
     const formattedUser = {
@@ -18,8 +24,8 @@ class UserService {
       email_verified: payload.email_verified,
       user_profile_picture: payload.user_profile_picture,
 
-      roles: [],
-      level: 1,
+      roles: defaultUserAssignedRolesWhileSignup, // Default user roles while signup
+      privileges: defaultUserAssignedPrivilegeWhileSignup, // Default user privileges while signup
       friends_ids: [],
       requested_friends: [],
       blocked_user: [],

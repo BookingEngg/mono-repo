@@ -35,5 +35,22 @@ export const isUserAuthorized = (state: { auth: IAuth }): boolean => {
   return state.auth.isAuthorized;
 };
 
+export const getUserRolesAndPrivileges = (state: {
+  auth: IAuth;
+}): { roles: string[]; privileges: string[] } => {
+  const user = state.auth?.user;
+  if (!user) {
+    return {
+      roles: [],
+      privileges: [],
+    };
+  }
+
+  return {
+    roles: user?.roles,
+    privileges: user?.privileges,
+  };
+};
+
 export const { login, logout } = userSlice.actions;
 export default userSlice.reducer;

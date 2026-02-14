@@ -11,10 +11,7 @@ import {
 } from "@/constants/common.constants";
 import moment from "moment";
 import { CommunicationType, GroupType } from "@/interfaces/enum";
-import {
-  ICommunication,
-  ICommunicationGroup,
-} from "@/interfaces/communication.interface";
+import { ICommunication } from "@/interfaces/communication.interface";
 
 class CommunicationService {
   // Dao
@@ -25,21 +22,27 @@ class CommunicationService {
   // Formatter
   private communicationFormatter = new CommunicationFormatter();
 
-  public createGroup = async (payload: {
-    group_name: string;
-    description: string;
-    admin_ids: string[];
-    members_ids: string[];
-    group_type: GroupType;
-    profile_picture: string;
-  }) => {
+  /**
+   * Create a new group entry in group DB
+   */
+  public createGroup = async (
+    user: IUser,
+    payload: {
+      name: string;
+      description: string;
+      admin_ids: string[];
+      members_ids: string[];
+      group_type: GroupType;
+      profile_picture: string;
+    },
+  ) => {
     const {
-      group_name: name,
-      description,
-      admin_ids,
-      members_ids: group_member_ids,
-      group_type,
-      profile_picture: group_profile_picture,
+      name = "",
+      description = "",
+      admin_ids = [user._id],
+      members_ids: group_member_ids = [user._id],
+      group_type = GroupType.Public,
+      profile_picture: group_profile_picture = "",
     } = payload;
 
     const formattedPayload = {
@@ -54,7 +57,74 @@ class CommunicationService {
       is_visible: true,
     };
 
-    return await this.communicationGroupDao.createGroup(formattedPayload);
+    // Create the group
+    const groupDetails =
+      await this.communicationGroupDao.createGroup(formattedPayload);
+    // Set the group id in the user group list
+    await this.userDao.setUsersGroupId(
+      formattedPayload.group_member_ids,
+      groupDetails.short_id,
+    );
+    return groupDetails;
+  };
+
+  /**
+   * Update the group details from the short_id
+   */
+  public updateGroupDetails = async (
+    shortId: string,
+    payload: {
+      name: string;
+      description: string;
+      admin_ids: string[];
+      group_member_ids: string[];
+      group_type: GroupType;
+      profile_picture: string;
+      is_active: boolean;
+    },
+  ) => {
+    const {
+      name = "",
+      description = "",
+      admin_ids = [],
+      group_member_ids: group_member_ids = [],
+      group_type = GroupType.Public,
+      profile_picture: group_profile_picture = "",
+      is_active,
+    } = payload;
+
+    if (!admin_ids.length) {
+      throw new Error("Minimum one admin is required");
+    }
+
+    const groupDetails =
+      await this.communicationGroupDao.getGroupDetailsByShortId(shortId);
+    if (!groupDetails) {
+      throw new Error("Group not found");
+    }
+    const groupMemberIds = groupDetails.group_member_ids;
+    admin_ids.forEach((adminId) => {
+      if (!groupMemberIds.includes(adminId)) {
+        throw new Error("Admin is not a member of the group");
+      }
+    });
+
+    const formattedPayload = {
+      ...(name ? { name } : {}),
+      ...(description ? { description } : {}),
+      ...(admin_ids ? { admin_ids } : {}),
+      ...(group_member_ids ? { group_member_ids } : {}),
+      ...(group_type ? { group_type } : {}),
+      ...(group_profile_picture ? { group_profile_picture } : {}),
+      ...(is_active ? { is_active } : {}),
+    };
+
+    console.log("Payload>>> ", formattedPayload);
+
+    return await this.communicationGroupDao.updateGroupByShortId(
+      shortId,
+      formattedPayload,
+    );
   };
 
   public createNewChatMessage = async (payload: {
@@ -92,7 +162,7 @@ class CommunicationService {
       }),
       this.userDao.getUserByUserIds(
         [senderId, receiverId],
-        ["first_name", "last_name"]
+        ["first_name", "last_name"],
       ),
     ]);
     const userDetailsMapper = R.indexBy(R.prop<string>("_id"), usersDetails);
@@ -128,7 +198,7 @@ class CommunicationService {
         moment(message.createdAt)
           .add(330, "minutes")
           .startOf("date")
-          .format("DD MMM YYYY") as unknown as string
+          .format("DD MMM YYYY") as unknown as string,
     )(initialMessages);
 
     const formattedMessages = this.communicationFormatter.getFormattedMessages({
@@ -168,7 +238,9 @@ class CommunicationService {
     const [{ data: initialMessages, count }, groupMembersUsers] =
       await Promise.all([
         this.communicationDao.getGroupMessages(groupId),
-        this.userDao.getUserByUserIds(groupDetails.group_member_ids, ['first_name']),
+        this.userDao.getUserByUserIds(groupDetails.group_member_ids, [
+          "first_name",
+        ]),
       ]);
 
     // Create mapper for users
@@ -183,7 +255,7 @@ class CommunicationService {
         moment(message.createdAt)
           .add(330, "minutes")
           .startOf("date")
-          .format("DD MMM YYYY") as unknown as string
+          .format("DD MMM YYYY") as unknown as string,
     )(initialMessages);
 
     const formattedMessages = this.communicationFormatter.getFormattedMessages({
@@ -203,6 +275,56 @@ class CommunicationService {
       },
       entity_details: formattedEntityDetails,
       messages: formattedMessages,
+    };
+  };
+
+  /**
+   * Get Group Details for the user
+   */
+  public getGroupDetails = async (groupId: string) => {
+    const groupDetails =
+      await this.communicationGroupDao.getGroupDetailsByShortId(groupId, []);
+
+    const groupMemberShortIds = groupDetails.group_member_ids;
+    const groupAdminShortIds = groupDetails.admin_ids;
+    const groupMemberUsers = await this.userDao.getUserByUserIds(
+      [...groupMemberShortIds, ...groupAdminShortIds],
+      ["email", "_id"],
+    );
+
+    const groupMemberUsersMapper = R.indexBy(
+      R.prop<string>("_id"),
+      groupMemberUsers,
+    );
+
+    const adminList = groupDetails.admin_ids
+      .map((adminId) => {
+        const user = groupMemberUsersMapper[adminId];
+        if (!user) return null;
+        return {
+          label: user.email,
+          value: adminId,
+        };
+      })
+      .filter(Boolean);
+
+    const memberList = groupDetails.group_member_ids
+      .map((memberId) => {
+        const user = groupMemberUsersMapper[memberId];
+        if (!user) return null;
+        return {
+          label: user.email,
+          value: memberId,
+        };
+      })
+      .filter(Boolean);
+
+    return {
+      short_id: groupDetails.short_id,
+      name: groupDetails.name,
+      description: groupDetails.description,
+      admin: adminList,
+      group_members: memberList,
     };
   };
 
@@ -255,14 +377,14 @@ class CommunicationService {
         const friendDetails =
           tab === "friends"
             ? user.requested_friends.find(
-                (req_user) => req_user.user_id === verifiedUser._id.toString()
+                (req_user) => req_user.user_id === verifiedUser._id.toString(),
               )
             : null;
 
         const blockedDetails =
           tab === "blocked-users"
             ? user.blocked_user.find(
-                (req_user) => req_user.user_id === verifiedUser._id.toString()
+                (req_user) => req_user.user_id === verifiedUser._id.toString(),
               )
             : null;
 
@@ -295,12 +417,12 @@ class CommunicationService {
       this.userDao.addUserFriendRequest(
         user._id,
         friendsId,
-        RequestStatusType.SEND_REQUEST
+        RequestStatusType.SEND_REQUEST,
       ),
       this.userDao.addUserFriendRequest(
         friendsId,
         user._id,
-        RequestStatusType.RECEIVE_REQUEST
+        RequestStatusType.RECEIVE_REQUEST,
       ),
     ]);
   };
@@ -369,7 +491,11 @@ class CommunicationService {
    * Get list of groups
    * @param user
    */
-  public getGroupsList = async (user: IUser) => {
+  public getGroupsList = async (
+    user: IUser,
+    pageNo: number,
+    pageSize: number,
+  ) => {
     const [groupDetails, lastMessageOfGroups] = await Promise.all([
       this.communicationGroupDao.getGroupDetailsByShortIds(user.group_ids),
       this.communicationDao.getLastReceivedChatOfGroup(user.group_ids),
@@ -410,6 +536,8 @@ class CommunicationService {
       return {
         id: group.short_id,
         name: group.name,
+        description: group.description,
+        total_members: group.group_member_ids.length,
         time: group.updatedAt,
         profile_picture: group.group_profile_picture,
         last_message: lastMessage,

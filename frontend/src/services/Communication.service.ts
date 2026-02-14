@@ -29,7 +29,7 @@ export const getDirectMessages = async (userId: string) => {
   });
 
   return response.data;
-}
+};
 
 /**
  * @deprecated
@@ -64,4 +64,41 @@ export const getGroupMessages = async (groupId: string) => {
   });
 
   return response.data;
-}
+};
+
+// Group Services
+
+/**
+ * Create a new group in the system
+ */
+export const createGroup = async (payload: object) => {
+  const response = await axiosClient.post({
+    url: "/comm/group/new",
+    body: payload,
+  });
+
+  return response.data;
+};
+
+/**
+ * Update the group details from the short_id
+ */
+export const updateGroupDetails = async (shortId: string, payload: object) => {
+  const response = await axiosClient.put({
+    url: `/comm/group/${shortId}`,
+    body: payload,
+  });
+
+  return response.data;
+};
+
+/**
+ * Get all the initial chat details of group
+ */
+export const getGroupDetailsFromGroupId = async (groupId: string) => {
+  const response = await axiosClient.get({
+    url: `/comm/group/${groupId}`,
+  });
+
+  return response.data;
+};
