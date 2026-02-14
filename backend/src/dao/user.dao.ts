@@ -69,7 +69,7 @@ class UserDao {
   };
 
   /**
-   * Set the group id into the user group list
+   * Set the group id into the single user group list
    * @param userId
    * @param groupId
    */
@@ -77,6 +77,24 @@ class UserDao {
     return await this.userModel.updateOne(
       {
         _id: userId,
+      },
+      {
+        $addToSet: {
+          group_ids: groupId,
+        },
+      }
+    );
+  };
+
+  /**
+   * Set the group id into the multiple users group list
+   * @param userIds
+   * @param groupId
+   */
+  public setUsersGroupId = async (userIds: string[], groupId: string) => {
+    return await this.userModel.updateMany(
+      {
+        _id: { $in: userIds },
       },
       {
         $addToSet: {

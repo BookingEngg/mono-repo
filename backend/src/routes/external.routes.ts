@@ -93,7 +93,7 @@ class ExternalRoutes implements Routes {
       `${prefix}/remove`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.accessControlController.removeRolesAndPrivileges)
-    )
+    );
   }
 
   private initializeOtpRoutes(prefix: string) {
@@ -133,22 +133,34 @@ class ExternalRoutes implements Routes {
     );
 
     // Communication Groups Routes
-    this.router.post(
-      `${prefix}/group/new`,
-      this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communicationController.createGroup)
-    )
-
     this.router.get(
       `${prefix}/group/list`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communicationController.getGroupList)
-    )
+    );
 
     this.router.get(
       `${prefix}/group/chats`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.communicationController.getGroupMessages)
+    );
+
+    this.router.get(
+      `${prefix}/group/:group_id`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.communicationController.getGroupDetailsFromGroupId)
+    );
+
+    this.router.post(
+      `${prefix}/group/new`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.communicationController.createGroup)
+    );
+
+    this.router.put(
+      `${prefix}/group/:shortId`,
+      this.authMiddleware.getAuthUser,
+      asyncWrapper(this.communicationController.updateGroupDetails)
     );
   }
 

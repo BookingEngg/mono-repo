@@ -1,4 +1,4 @@
-import { ICommunicationGroup } from "@/interfaces/communication.interface";
+import { ICommunicationGroup, ICommunicationGroupOptional } from "@/interfaces/communication.interface";
 import CommunicationModel from "@/models/groups.model";
 
 class CommunicationGroupDao {
@@ -6,6 +6,15 @@ class CommunicationGroupDao {
 
   public createGroup = async (payload: ICommunicationGroup) => {
     return await this.communicationModel.create(payload);
+  };
+
+  public updateGroupByShortId = async (
+    shortId: string,
+    payload: ICommunicationGroupOptional
+  ) => {
+    return await this.communicationModel
+      .updateOne({ short_id: shortId }, payload)
+      .lean();
   };
 
   public getGroupDetailsByShortId = async (
