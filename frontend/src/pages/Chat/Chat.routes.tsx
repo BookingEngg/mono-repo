@@ -1,8 +1,13 @@
 // Organism
 import Communication from "@/organism/Communication";
-import {CommunicationV2, GroupCommunication} from "@/organism/CommunicationV2";
+import {
+  CommunicationV2,
+  GroupCommunication,
+} from "@/organism/CommunicationV2";
 // Icons
 import { MessageCircle, MessageCircleMore, MessagesSquare } from "lucide-react";
+// Constants
+import { ROLES } from "@/constants/common.constant";
 // Typings
 import { TRoutes } from "@/typings/common";
 
@@ -15,12 +20,13 @@ const getChatRoutes = () => {
       path: BASE_OLD_URL,
       element: <Communication />,
       icon: <MessageCircle />,
-      showOnSideNav: false, // Make the user not directly accessible
+      showOnSideNav: false, // Make the user not directly accessible_roles
       key: "communication",
       label: "Communication",
       handle: {
         identifier: "root",
       },
+      accessible_roles: [ROLES.USER, ROLES.ADMIN, ROLES.SUPER_ADMIN],
     },
     {
       path: BASE_URL,
@@ -32,17 +38,19 @@ const getChatRoutes = () => {
       handle: {
         identifier: "root",
       },
+      accessible_roles: [ROLES.USER, ROLES.ADMIN, ROLES.SUPER_ADMIN],
     },
     {
       path: `${BASE_URL}/groups`,
       element: <GroupCommunication />,
       icon: <MessagesSquare />,
-      showOnSideNav: true,
+      showOnSideNav: false,
       key: "communication-group-v2",
       label: "Groups",
       handle: {
         identifier: "root",
       },
+      accessible_roles: [ROLES.USER, ROLES.ADMIN, ROLES.SUPER_ADMIN],
     },
   ];
 

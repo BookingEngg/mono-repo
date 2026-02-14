@@ -1,0 +1,75 @@
+.card-container {
+  background-color: whitesmoke;
+}
+
+.group-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.group-card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+}
+
+.group-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  .label {
+    font-weight: 600;
+    color: #575757;
+    min-width: 80px;
+    font-size: 14px;
+  }
+
+  .value {
+    color: #272c36;
+    font-size: 14px;
+    word-break: break-word;
+    flex: 1;
+
+    &.user-id {
+      font-family: monospace;
+      font-size: 12px;
+      color: #666;
+    }
+  }
+}
+
+.group-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 8px;
+  border-top: 1px solid #f0f0f0;
+
+  .action-button {
+    min-width: 100px;
+  }
+}
