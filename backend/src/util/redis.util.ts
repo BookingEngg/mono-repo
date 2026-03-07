@@ -29,7 +29,10 @@ class RedisUtil {
   };
 
   public getKey = async function (key: string) {
-    return await this.redisWrapper(this.getClient().get(key));
+    const client = await this.getClient();
+    if (client) {
+      return await client.get(key);
+    }
   };
 
   public setKey = async (key: string, value: string | object) => {
