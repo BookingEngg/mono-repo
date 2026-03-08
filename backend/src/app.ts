@@ -4,6 +4,7 @@ import express from "express";
 import cors from "cors";
 import cookieSession from "cookie-session";
 import cookieParser from "cookie-parser";
+import { nanoid } from "nanoid";
 // Redis Module
 import { createClient } from "redis";
 // Socket Modules
@@ -37,6 +38,7 @@ class App {
   private socketEventHandler = new SocketEvents();
 
   constructor(routes: Routes[]) {
+    global.server_id = nanoid(10);
     this.routes = routes;
     this.port = PORT || 8080;
     this.env = env;
@@ -54,13 +56,13 @@ class App {
       "time",
       function getResponseTime(
         req: Request & { _startTime: number },
-        res: Response
+        _res: Response,
       ) {
         return Date.now() - req._startTime + "ms";
-      }
+      },
     );
 
-    this.app.use((req, res, next) => {
+    this.app.use((req, _res, next) => {
       req._startTime = Date.now();
       next();
     });
@@ -73,7 +75,7 @@ class App {
       cors({
         origin: true,
         credentials: true,
-      })
+      }),
     );
     this.app.use(cookieParser());
     this.app.use(express.json());
@@ -83,7 +85,7 @@ class App {
       cookieSession({
         name: "session",
         keys: [tokenDetails.secret_key],
-      })
+      }),
     );
 
     this.initilizeRoutes(this.routes);
@@ -92,18 +94,25 @@ class App {
 
   private initilizeRoutes(routes: Routes[]) {
     routes.forEach((route) =>
-      this.app.use(`/${serviceRoute || ""}`, route.router)
+      this.app.use(`/${serviceRoute || ""}`, route.router),
     );
   }
 
   public initilizeSocketEvents = async () => {
     const redisPubClient = createClient({ url: getRedisUrl() });
-    const redisSubClient = redisPubClient.duplicate();
+    const redisSubClient = createClient({ url: getRedisUrl() });
+
+    const serverId = global.server_id;
+    const channelName = `server:${serverId}`;
 
     // Connect the redis publisher and subscriber
     await Promise.all([redisPubClient.connect(), redisSubClient.connect()]);
 
     this.io.adapter(createAdapter(redisPubClient, redisSubClient));
+
+    redisSubClient.subscribe(channelName, (message) => {
+      this.socketEventHandler.handleIncomingChannelMessage(message);
+    });
 
     this.io.on("connection", (socket) => {
       SOCKET_EVENTS_NAMES.forEach((eventName) => {
@@ -113,7 +122,7 @@ class App {
             eventName,
             socket,
             io: this.io,
-          })
+          }),
         );
       });
     });
@@ -123,7 +132,7 @@ class App {
     this.server.listen(this.port, () => {
       console.log(
         ` 🔥🔥 ENV = ${this.env} 🔥🔥\n`,
-        `Service ${serviceName} started AT PORT NO ${this.port} ✔️`
+        `Service ${serviceName} started AT PORT NO ${this.port} ✔️`,
       );
     });
   }

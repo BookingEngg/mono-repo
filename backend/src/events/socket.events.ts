@@ -3,8 +3,12 @@ import { isProduction } from "@/config";
 // Modules
 import moment from "moment";
 import { Server, Socket } from "socket.io";
+import { createClient } from "redis";
 // Publisher
 import CommunicationPublisher from "@/queue/communication.publisher";
+// Utils
+import { getRedisUrl } from "@/util/utils.util";
+import RedisUtil from "@/util/redis.util";
 
 export interface ISocketEvent {
   eventName: string;
@@ -16,8 +20,28 @@ class SocketEvents {
   private io: Server;
   private socket: Socket;
   private communicationPublisher = new CommunicationPublisher();
+  private redisPubClient = createClient({ url: getRedisUrl() });
+  private redisUtil = new RedisUtil();
 
-  public initializeSocketEvents(payload: ISocketEvent) {
+  constructor() {
+    this.redisPubClient.connect();
+  }
+
+  public handleIncomingChannelMessage = async (data: string) => {
+    try {
+      const parsedPayload = JSON.parse(data);
+      const eventType = parsedPayload?.type;
+
+      switch (eventType) {
+        case "direct_message":
+          return await this.addNewChatMessage(data);
+      }
+    } catch (error) {
+      console.log("Error in handleIncomingChannelMessage>>>>>>>>>>> ", error);
+    }
+  };
+
+  public initializeSocketEvents = (payload: ISocketEvent) => {
     const { eventName, socket, io } = payload;
     this.io = io;
     this.socket = socket;
@@ -39,7 +63,7 @@ class SocketEvents {
       default:
         return () => {};
     }
-  }
+  };
 
   /**
    * Initialize and create the rooms while user is logged in
@@ -57,6 +81,14 @@ class SocketEvents {
       this.io.to(`room-${userId}`).emit("server-ack", {
         status: "acknowledged",
       });
+
+      // NOTE: not adding any ttl to this key
+      await this.redisUtil.setKey(
+        `user:${userId}`,
+        JSON.stringify({
+          server_id: global.server_id,
+        }),
+      );
     }
 
     if (groupIds?.length) {
@@ -96,6 +128,25 @@ class SocketEvents {
       ...parsedPayload,
       type: "direct_message",
     };
+
+    // Check if the receiver connected with the same server
+    const receiverDetails = await this.redisUtil.getKey(`user:${receiver_id}`);
+    const parsedReceiverDetails = JSON.parse(receiverDetails || null);
+    const receiverServerId = parsedReceiverDetails?.server_id;
+
+    if (!receiverServerId) {
+      return;
+    }
+
+    if (receiverServerId !== global.server_id) {
+      // If user connected with another server then raise the event to that server
+      await this.redisPubClient.publish(
+        `server:${receiverServerId}`,
+        JSON.stringify(eventPayload),
+      );
+      return;
+    }
+
     // Publish event for new message
     this.communicationPublisher.raiseEventForSendMessage(eventPayload);
 
