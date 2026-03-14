@@ -12,7 +12,10 @@ class RedisUtil {
     });
 
     this.redisClient.on("error", (_err) => {
-      console.log("=======Redis Connection Error========");
+      console.log(
+        "=======Redis Connection Error========",
+        JSON.stringify(_err),
+      );
     });
   }
 

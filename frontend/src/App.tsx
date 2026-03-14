@@ -76,16 +76,24 @@ function App() {
   const isAuthorized = useSelector(isUserAuthorized);
   const userRolesAndPrivileges = useSelector(getUserRolesAndPrivileges);
 
+  const [isFetchedUserDetails, setIsFetchedUserDetails] = React.useState(false);
+
   //User Authorized check
   React.useEffect(() => {
     const validateAuthorizedUser = async () => {
-      const userResponse = await getUser();
-      if (userResponse.status) {
-        dispatch(login({ user: userResponse.user, isAuthorized: true }));
-        if (!!userResponse?.user?._id) {
-          // If website refresh and user is authorized then navigate to same page
-          navigate(location.pathname);
+      try {
+        const userResponse = await getUser();
+        if (userResponse.status) {
+          dispatch(login({ user: userResponse.user, isAuthorized: true }));
+          if (!!userResponse?.user?._id) {
+            // If website refresh and user is authorized then navigate to same page
+            navigate(location.pathname);
+          }
         }
+      } catch (error) {
+        console.error("Error fetching user>>>>>> ", error);
+      } finally {
+        setIsFetchedUserDetails(true);
       }
     };
     validateAuthorizedUser();
@@ -118,7 +126,7 @@ function App() {
         // Is the matched route allowed to that role
         isRouteAccessible = isRolesAccessibleToUser(
           route.accessible_roles || [],
-          userRolesAndPrivileges.roles
+          userRolesAndPrivileges.roles,
         );
       }
       return route.path === location.pathname && isRouteAccessible;
@@ -129,7 +137,8 @@ function App() {
         ? flatternAuthRoutesTree[0]
         : flatternLoginRoutesTree[0];
 
-      navigate(defaultCurrentRoute.path);
+      // In case user details is not fetched yet, don't navigate to default route
+      isFetchedUserDetails && navigate(defaultCurrentRoute.path);
       return defaultCurrentRoute;
     }
 
@@ -141,12 +150,6 @@ function App() {
     userRolesAndPrivileges,
     location,
   ]);
-
-  React.useEffect(() => {
-    if (!isAuthorized) {
-      navigate("/login");
-    }
-  }, [isAuthorized]);
 
   return (
     <>

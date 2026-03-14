@@ -35,7 +35,7 @@ class App {
   private port: number;
   private server: http.Server;
   private io: Server;
-  private socketEventHandler = new SocketEvents();
+  private socketEventHandler: SocketEvents;
 
   constructor(routes: Routes[]) {
     global.server_id = nanoid(10);
@@ -47,6 +47,7 @@ class App {
 
     this.server = http.createServer(this.app); // http server for sockets IO
     this.io = new Server(this.server);
+    this.socketEventHandler = new SocketEvents(this.io);
 
     this.initilizeMiddlewares();
   }

@@ -18,12 +18,12 @@ export interface ISocketEvent {
 
 class SocketEvents {
   private io: Server;
-  private socket: Socket;
   private communicationPublisher = new CommunicationPublisher();
   private redisPubClient = createClient({ url: getRedisUrl() });
   private redisUtil = new RedisUtil();
 
-  constructor() {
+  constructor(io: Server) {
+    this.io = io;
     this.redisPubClient.connect();
   }
 
@@ -42,19 +42,18 @@ class SocketEvents {
   };
 
   public initializeSocketEvents = (payload: ISocketEvent) => {
-    const { eventName, socket, io } = payload;
-    this.io = io;
-    this.socket = socket;
+    const { eventName, socket } = payload;
 
     switch (eventName) {
       case "init":
-        return this.initialConfigurationOfSocketJoin;
+        return (data: string) =>
+          this.initialConfigurationOfSocketJoin(data, socket);
       case "client-connect":
-        return this.clientConnectAcknowledgement;
+        return (data: string) => this.clientConnectAcknowledgement(data);
       case "new-chat-message":
-        return this.addNewChatMessage;
+        return (data: string) => this.addNewChatMessage(data);
       case "new-group-message":
-        return this.addNewChatMessageToGroup;
+        return (data: string) => this.addNewChatMessageToGroup(data);
       case "disconnect":
         // Trigger if client refresh a tab several time then you can see it in action
         return () => {
@@ -69,14 +68,17 @@ class SocketEvents {
    * Initialize and create the rooms while user is logged in
    * @param {string} payload
    */
-  private initialConfigurationOfSocketJoin = async (payload: string) => {
+  private initialConfigurationOfSocketJoin = async (
+    payload: string,
+    socket: Socket,
+  ) => {
     const parsedPayload = JSON.parse(payload);
     const { user_id: userId, group_ids: groupIds } = parsedPayload || {};
 
     // Create a seperate room for (direct message)
     if (userId) {
-      this.socket.join(`room-${userId}`);
-      this.socket.data.userId = userId;
+      socket.join(`room-${userId}`);
+      socket.data.userId = userId;
 
       this.io.to(`room-${userId}`).emit("server-ack", {
         status: "acknowledged",
@@ -94,7 +96,7 @@ class SocketEvents {
     if (groupIds?.length) {
       // Join to the rooms while he is logged in
       groupIds.forEach((groupId) => {
-        this.socket.join(`group-${groupId}`);
+        socket.join(`group-${groupId}`);
       });
     }
   };
