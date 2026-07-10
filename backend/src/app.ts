@@ -99,33 +99,37 @@ class App {
   }
 
   public initilizeSocketEvents = async () => {
-    const redisPubClient = createClient({ url: getRedisUrl() });
-    const redisSubClient = createClient({ url: getRedisUrl() });
+    try {
+      const redisPubClient = createClient({ url: getRedisUrl() });
+      const redisSubClient = createClient({ url: getRedisUrl() });
 
-    const serverId = global.server_id;
-    const channelName = `server:${serverId}`;
+      const serverId = global.server_id;
+      const channelName = `server:${serverId}`;
 
-    // Connect the redis publisher and subscriber
-    await Promise.all([redisPubClient.connect(), redisSubClient.connect()]);
+      // Connect the redis publisher and subscriber
+      await Promise.all([redisPubClient.connect(), redisSubClient.connect()]);
 
-    this.io.adapter(createAdapter(redisPubClient, redisSubClient));
+      this.io.adapter(createAdapter(redisPubClient, redisSubClient));
 
-    redisSubClient.subscribe(channelName, (message) => {
-      this.socketEventHandler.handleIncomingChannelMessage(message);
-    });
-
-    this.io.on("connection", (socket) => {
-      SOCKET_EVENTS_NAMES.forEach((eventName) => {
-        socket.on(
-          eventName,
-          this.socketEventHandler.initializeSocketEvents({
-            eventName,
-            socket,
-            io: this.io,
-          }),
-        );
+      redisSubClient.subscribe(channelName, (message) => {
+        this.socketEventHandler.handleIncomingChannelMessage(message);
       });
-    });
+
+      this.io.on("connection", (socket) => {
+        SOCKET_EVENTS_NAMES.forEach((eventName) => {
+          socket.on(
+            eventName,
+            this.socketEventHandler.initializeSocketEvents({
+              eventName,
+              socket,
+              io: this.io,
+            }),
+          );
+        });
+      });
+    } catch (error) {
+      console.log("ERROR>>>>> ", JSON.stringify(error));
+    }
   };
 
   public listenServer() {
