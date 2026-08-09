@@ -14,30 +14,32 @@ const JobApplicationSchema: Schema<IJobApplication> = new Schema(
     job_type: { type: String, enum: JobTypeEnum, required: true },
 
     job_details: {
-      _id: false,
+      type: new Schema(
+        {
+          seller_id: { type: String, required: true },
+          product_id: { type: String, required: true },
+          brand_name: { type: String },
+          product_link: { type: String },
+          category: {
+            _id: false,
+            l1: { type: String },
+            l2: { type: String },
+            l3: { type: String },
+            l4: { type: String },
+          },
+          earning_model: {
+            _id: false,
+            bucket_a: { range: String, potential_earning: Number },
+            bucket_b: { range: String, potential_earning: Number },
+            bucket_c: { range: String, potential_earning: Number },
+            bucket_d: { range: String, potential_earning: Number },
+          },
+          due_date: { type: Number },
+        },
+        { _id: false },
+      ),
       required: true,
-      seller_id: { type: String, required: true },
-      product_id: { type: String, required: true },
-      sku_id: { type: String, required: true },
-      brand_name: { type: String },
-      product_link: { type: String },
-      category: {
-        _id: false,
-        l1: { type: String },
-        l2: { type: String },
-        l3: { type: String },
-        l4: { type: String },
-      },
-      earning_model: {
-        _id: false,
-        bucket_a: { range: String, potential_earning: Number },
-        bucket_b: { range: String, potential_earning: Number },
-        bucket_c: { range: String, potential_earning: Number },
-        bucket_d: { range: String, potential_earning: Number },
-      },
-      due_date: { type: Number },
     },
-
 
     // product_sourcing job fields
     order_id: { type: String },
@@ -45,7 +47,6 @@ const JobApplicationSchema: Schema<IJobApplication> = new Schema(
 
     // affiliate job fields
     link_short_id: { type: String },
-
 
     order_status: {
       type: String,
@@ -56,7 +57,7 @@ const JobApplicationSchema: Schema<IJobApplication> = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 JobApplicationSchema.pre("save", function (next) {
@@ -72,5 +73,8 @@ JobApplicationSchema.index({ user_id: 1 });
 JobApplicationSchema.index({ order_id: 1 });
 JobApplicationSchema.index({ createdAt: -1 });
 
-const JobApplicationModel = dbConnection.model("job_applications", JobApplicationSchema);
+const JobApplicationModel = dbConnection.model(
+  "job_applications",
+  JobApplicationSchema,
+);
 export default JobApplicationModel;

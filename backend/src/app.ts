@@ -99,8 +99,8 @@ class App {
   }
 
   public initilizeSocketEvents = async () => {
-    const redisPubClient = createClient({ url: getRedisUrl() });
-    const redisSubClient = createClient({ url: getRedisUrl() });
+    const redisPubClient = createClient(getRedisUrl());
+    const redisSubClient = createClient(getRedisUrl());
 
     const serverId = global.server_id;
     const channelName = `server:${serverId}`;

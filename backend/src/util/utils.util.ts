@@ -10,13 +10,13 @@ import {
 
 export const fetch = (
   url: RequestInfo,
-  init?: RequestInit
+  init?: RequestInit,
 ): Promise<Response> =>
   import("node-fetch").then(({ default: fetch }) => fetch(url, init));
 
-export const getRedisUrl = () => {
+export const getRedisUrl = (): object => {
   const { username, password, host, port } = redisConfig;
-  return `redis://${username}:${password}@${host}:${port}`;
+  return { url: `redis://${username}:${password}@${host}:${port}` };
 };
 
 export const getExternalDomain = () => {
