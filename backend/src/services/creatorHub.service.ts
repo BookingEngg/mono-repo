@@ -112,38 +112,28 @@ class CreatorHubService {
   };
 
   /**
-   * Resolve a redirection link's short_id to its destination URL. If the
-   * caller has no existing session (no cookie yet), logs an inhouse
-   * LINK_CLICK conversion and returns its short_id to be set as the session
-   * cookie — that short_id itself becomes the session id going forward, so
-   * a session already in progress never creates another conversion entry.
+   * Resolve a redirection link's short_id to its destination URL, and log an
+   * inhouse LINK_CLICK conversion for this session — upserted atomically, so
+   * if one already exists for this (job_application_short_id, sessionId)
+   * pair, no new entry is created.
    */
-  public resolveLinkClick = async (
-    shortId: string,
-    existingSessionId?: string,
-  ) => {
+  public resolveLinkClick = async (shortId: string, sessionId: string) => {
     const link = await this.linkDao.getLinkByShortId(shortId);
     if (!link || !link.is_active) {
       throw new Error("Link not found");
     }
 
-    let newSessionId: string = existingSessionId || '';
-
-    if (
-      !existingSessionId &&
-      link.entity_type === LinkEntityType.JOB_APPLICATION &&
-      link.entity_id
-    ) {
-      const conversion = await this.conversionDao.createConversion({
+    if (link.entity_type === LinkEntityType.JOB_APPLICATION && link.entity_id) {
+      await this.conversionDao.upsertConversionForVisitor({
         job_application_short_id: link.entity_id,
+        visitor_id: sessionId,
         trigger: ConversionTriggerEnum.LINK_CLICK,
         event_source: ConversionEventSourceEnum.INHOUSE,
         recorded_at: new Date(),
       });
-      newSessionId = conversion.short_id || '';
     }
 
-    return { destinationUrl: link.destination_url, sessionId: newSessionId };
+    return { destinationUrl: link.destination_url };
   };
 
   /**
@@ -151,10 +141,17 @@ class CreatorHubService {
    * brand against a job application
    */
   public recordConversion = async (payload: IRecordConversionPayload) => {
-    const { id, conversion_type, conversion_time, visitor_id, order_id, awb_no } =
-      payload;
+    const {
+      id,
+      conversion_type,
+      conversion_time,
+      visitor_id,
+      order_id,
+      awb_no,
+    } = payload;
 
-    const jobApplication = await this.jobApplicationDao.getApplicationByShortId(id);
+    const jobApplication =
+      await this.jobApplicationDao.getApplicationByShortId(id);
     if (!jobApplication) {
       throw new Error("Job application not found");
     }

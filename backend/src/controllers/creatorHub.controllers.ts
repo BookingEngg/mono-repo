@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import CreatorHubService from "@/services/creatorHub.service";
 import { appendUtmParams } from "@/helper/creatorHub.helper";
+import { nanoid } from "nanoid";
 
-const SESSION_ID_COOKIE = "chub_session_id";
+const SESSION_ID_COOKIE = "creator_session_id";
 
 class CreatorHubControllers {
   private creatorHubService = new CreatorHubService();
@@ -38,17 +39,11 @@ class CreatorHubControllers {
     res: Response,
   ): Promise<any> => {
     try {
-      const existingSessionId = req.cookies?.[SESSION_ID_COOKIE];
+      let sessionId = req.cookies?.[SESSION_ID_COOKIE];
+      console.log("IN THE CONTROLLER OF REDIRECT LINK", sessionId);
 
-      const { destinationUrl, sessionId } =
-        await this.creatorHubService.resolveLinkClick(
-          req.params.shortId,
-          existingSessionId,
-        );
-
-      // a new session id is only returned on the first click — set the
-      // cookie to it so subsequent clicks reuse this same session
-      if (sessionId) {
+      if (!sessionId) {
+        sessionId = nanoid(10);
         res.cookie(SESSION_ID_COOKIE, sessionId, {
           maxAge: 1000 * 60 * 60, // 1 hour
           secure: true,
@@ -56,10 +51,12 @@ class CreatorHubControllers {
         });
       }
 
-      return res.redirect(
-        302,
-        appendUtmParams(destinationUrl, sessionId),
+      const { destinationUrl } = await this.creatorHubService.resolveLinkClick(
+        req.params.shortId,
+        sessionId,
       );
+
+      return res.redirect(302, appendUtmParams(destinationUrl, sessionId));
     } catch (error) {
       return res
         .status(404)

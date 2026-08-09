@@ -5,15 +5,11 @@ import ConversionModel from "@/models/conversion.model";
 class ConversionDao {
   private conversionModel = ConversionModel;
 
-  // Plain insert — used for the first inhouse click of a session, where the
-  // caller needs the generated short_id back to set as the session cookie.
-  public createConversion = async (payload: Partial<IConversion>) => {
-    return await this.conversionModel.create(payload);
-  };
-
-  // Atomically records a BRAND-reported conversion only once per
+  // Atomically records a conversion only once per
   // (job_application_short_id, visitor_id, trigger) — a single upsert,
-  // not a separate find followed by a create.
+  // not a separate find followed by a create. Used for both BRAND events
+  // (visitor_id from the brand) and INHOUSE click tracking (visitor_id is
+  // the session id).
   public upsertConversionForVisitor = async (payload: Partial<IConversion>) => {
     const { job_application_short_id, trigger, visitor_id } = payload;
 
