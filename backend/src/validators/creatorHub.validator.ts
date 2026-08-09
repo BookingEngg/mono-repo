@@ -1,9 +1,15 @@
 import { z } from "zod";
-import { JobTypeEnum, GenderEnum, MediaTypeEnum } from "@/interfaces/enum";
+import {
+  JobTypeEnum,
+  GenderEnum,
+  MediaTypeEnum,
+  EarningModelTypeEnum,
+  ConversionTriggerEnum,
+} from "@/interfaces/enum";
 
 const jobMediaSchema = z.object({
-  type: z.nativeEnum(MediaTypeEnum),
-  url: z.string().url(),
+  type: z.enum(MediaTypeEnum),
+  url: z.string(),
 });
 
 const jobCategorySchema = z.object({
@@ -13,16 +19,10 @@ const jobCategorySchema = z.object({
   l4: z.string().optional(),
 });
 
-const earningBucketSchema = z.object({
-  range: z.string().optional(),
-  potential_earning: z.number().optional(),
-});
-
 const earningModelSchema = z.object({
-  bucket_a: earningBucketSchema.optional(),
-  bucket_b: earningBucketSchema.optional(),
-  bucket_c: earningBucketSchema.optional(),
-  bucket_d: earningBucketSchema.optional(),
+  type: z.enum(EarningModelTypeEnum),
+  value: z.number().min(0),
+  conversion_trigger: z.enum(ConversionTriggerEnum),
 });
 
 const ageLimitSchema = z.object({
@@ -55,3 +55,14 @@ export type IApplyForJobPayload = z.infer<typeof applyForJobSchema>;
 export const resolveLinkParamsSchema = z.object({
   shortId: z.string().min(1),
 });
+
+export const recordConversionSchema = z.object({
+  id: z.string().min(1), // job application short_id
+  conversion_type: z.enum(ConversionTriggerEnum),
+  conversion_time: z.coerce.date(),
+  visitor_id: z.string().min(1), // identifies the converting user/session, for dedupe
+  order_id: z.string().optional(),
+  awb_no: z.string().optional(),
+});
+
+export type IRecordConversionPayload = z.infer<typeof recordConversionSchema>;

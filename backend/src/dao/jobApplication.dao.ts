@@ -17,6 +17,10 @@ class JobApplicationDao {
       .lean();
   };
 
+  public getApplicationByShortId = async (shortId: string) => {
+    return await this.jobApplicationModel.findOne({ short_id: shortId }).lean();
+  };
+
   public updateApplicationByShortId = async (
     shortId: string,
     payload: Partial<IJobApplication>

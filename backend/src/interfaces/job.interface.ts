@@ -1,4 +1,4 @@
-import { GenderEnum, JobTypeEnum, MediaTypeEnum } from "./enum";
+import { GenderEnum, JobTypeEnum, MediaTypeEnum, EarningModelTypeEnum, ConversionTriggerEnum } from "./enum";
 
 export interface IJobCategory {
   l1?: string;
@@ -7,16 +7,10 @@ export interface IJobCategory {
   l4?: string;
 }
 
-export interface IEarningBucket {
-  range?: string;
-  potential_earning?: number;
-}
-
 export interface IEarningModel {
-  bucket_a?: IEarningBucket;
-  bucket_b?: IEarningBucket;
-  bucket_c?: IEarningBucket;
-  bucket_d?: IEarningBucket;
+  type: EarningModelTypeEnum;
+  value: number;
+  conversion_trigger: ConversionTriggerEnum;
 }
 
 export interface IJobMedia {

@@ -18,11 +18,11 @@ export const buildJobApplicationJobDetails = (
   due_date: job.due_date,
 });
 
-// tags the destination with utm_campaign=visitorId so repeat clicks from the
-// same visitor (tracked via cookie) attribute to a single visitor downstream
-export const appendUtmParams = (destinationUrl: string, visitorId: string): string => {
+// tags the destination with utm_campaign=sessionId so repeat clicks within
+// the same session (tracked via a 1hr cookie) attribute together downstream
+export const appendUtmParams = (destinationUrl: string, sessionId: string): string => {
   const url = new URL(destinationUrl);
   url.searchParams.set("utm_source", "CreatorHub");
-  url.searchParams.set("utm_campaign", visitorId);
+  url.searchParams.set("utm_campaign", sessionId);
   return url.toString();
 };

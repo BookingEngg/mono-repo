@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
-import { nanoid } from "nanoid";
 import CreatorHubService from "@/services/creatorHub.service";
 import { appendUtmParams } from "@/helper/creatorHub.helper";
 
-const VISITOR_ID_COOKIE = "visitor_id";
+const SESSION_ID_COOKIE = "chub_session_id";
 
 class CreatorHubControllers {
   private creatorHubService = new CreatorHubService();
@@ -26,7 +25,7 @@ class CreatorHubControllers {
 
     const application = await this.creatorHubService.applyForJob(
       req.user._id,
-      req.body
+      req.body,
     );
     return res.send({ status: "success", data: application });
   };
@@ -36,27 +35,47 @@ class CreatorHubControllers {
    */
   public redirectLink = async (
     req: Request<{ shortId: string }>,
-    res: Response
+    res: Response,
   ): Promise<any> => {
     try {
-      const destinationUrl = await this.creatorHubService.getLinkDestination(
-        req.params.shortId
-      );
+      const existingSessionId = req.cookies?.[SESSION_ID_COOKIE];
 
-      let visitorId = req.cookies?.[VISITOR_ID_COOKIE];
-      if (!visitorId) {
-        visitorId = nanoid(20);
-        res.cookie(VISITOR_ID_COOKIE, visitorId, {
-          maxAge: 1000 * 60 * 60 * 24 * 365, // 1 year, so repeat clicks resolve to the same visitor
+      const { destinationUrl, sessionId } =
+        await this.creatorHubService.resolveLinkClick(
+          req.params.shortId,
+          existingSessionId,
+        );
+
+      // a new session id is only returned on the first click — set the
+      // cookie to it so subsequent clicks reuse this same session
+      if (sessionId) {
+        res.cookie(SESSION_ID_COOKIE, sessionId, {
+          maxAge: 1000 * 60 * 60, // 1 hour
           secure: true,
           sameSite: "none",
         });
       }
 
-      return res.redirect(302, appendUtmParams(destinationUrl, visitorId));
+      return res.redirect(
+        302,
+        appendUtmParams(destinationUrl, sessionId),
+      );
     } catch (error) {
-      return res.status(404).json({ status: "error", message: "Link not found" });
+      return res
+        .status(404)
+        .json({ status: "error", message: "Link not found" });
     }
+  };
+
+  /**
+   * Brand reports a conversion event (PDP_VIEW, ORDER_PLACED, etc.) for a visitor
+   */
+  public recordConversion = async (
+    req: Request,
+    res: Response,
+  ): Promise<any> => {
+    const result = await this.creatorHubService.recordConversion(req.body);
+    return res.send({ status: "success" });
   };
 }
 

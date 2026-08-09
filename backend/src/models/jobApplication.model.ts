@@ -2,7 +2,12 @@ import { nanoid } from "nanoid";
 import { Schema } from "mongoose";
 import { MONGO_INSTANCES } from "@/database";
 import { IJobApplication } from "@/interfaces/jobApplication.interface";
-import { JobApplicationStatusEnum, JobTypeEnum } from "@/interfaces/enum";
+import {
+  JobApplicationStatusEnum,
+  JobTypeEnum,
+  EarningModelTypeEnum,
+  ConversionTriggerEnum,
+} from "@/interfaces/enum";
 
 const dbConnection = MONGO_INSTANCES.praman;
 
@@ -29,10 +34,13 @@ const JobApplicationSchema: Schema<IJobApplication> = new Schema(
           },
           earning_model: {
             _id: false,
-            bucket_a: { range: String, potential_earning: Number },
-            bucket_b: { range: String, potential_earning: Number },
-            bucket_c: { range: String, potential_earning: Number },
-            bucket_d: { range: String, potential_earning: Number },
+            type: { type: String, enum: EarningModelTypeEnum, required: true },
+            value: { type: Number, required: true, min: 0 },
+            conversion_trigger: {
+              type: String,
+              enum: ConversionTriggerEnum,
+              required: true,
+            },
           },
           due_date: { type: Number },
         },
@@ -53,6 +61,7 @@ const JobApplicationSchema: Schema<IJobApplication> = new Schema(
       enum: JobApplicationStatusEnum,
       required: true,
     },
+
     is_active: { type: Boolean, default: true },
   },
   {
@@ -71,6 +80,7 @@ JobApplicationSchema.index({ short_id: 1 });
 JobApplicationSchema.index({ job_short_id: 1 });
 JobApplicationSchema.index({ user_id: 1 });
 JobApplicationSchema.index({ order_id: 1 });
+JobApplicationSchema.index({ visitor_ids: 1 });
 JobApplicationSchema.index({ createdAt: -1 });
 
 const JobApplicationModel = dbConnection.model(

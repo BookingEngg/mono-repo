@@ -1,6 +1,7 @@
 import JobDao from "@/dao/job.dao";
 import JobApplicationDao from "@/dao/jobApplication.dao";
 import LinkDao from "@/dao/link.dao";
+import ConversionDao from "@/dao/conversion.dao";
 import {
   isJobOpenForApplication,
   buildJobApplicationJobDetails,
@@ -9,16 +10,20 @@ import {
   JobApplicationStatusEnum,
   JobTypeEnum,
   LinkEntityType,
+  ConversionEventSourceEnum,
+  ConversionTriggerEnum,
 } from "@/interfaces/enum";
 import {
   ICreateJobPayload,
   IApplyForJobPayload,
 } from "@/interfaces/creatorHub.interface";
+import { IRecordConversionPayload } from "@/validators/creatorHub.validator";
 
 class CreatorHubService {
   private jobDao = new JobDao();
   private jobApplicationDao = new JobApplicationDao();
   private linkDao = new LinkDao();
+  private conversionDao = new ConversionDao();
 
   // payload is already validated by ValidatorMiddleware.validateRequestBody(createJobSchema)
   public createJob = async (payload: ICreateJobPayload) => {
@@ -107,15 +112,62 @@ class CreatorHubService {
   };
 
   /**
-   * Resolve a redirection link's short_id to its destination URL
+   * Resolve a redirection link's short_id to its destination URL. If the
+   * caller has no existing session (no cookie yet), logs an inhouse
+   * LINK_CLICK conversion and returns its short_id to be set as the session
+   * cookie — that short_id itself becomes the session id going forward, so
+   * a session already in progress never creates another conversion entry.
    */
-  public getLinkDestination = async (shortId: string) => {
+  public resolveLinkClick = async (
+    shortId: string,
+    existingSessionId?: string,
+  ) => {
     const link = await this.linkDao.getLinkByShortId(shortId);
     if (!link || !link.is_active) {
       throw new Error("Link not found");
     }
 
-    return link.destination_url;
+    let newSessionId: string = existingSessionId || '';
+
+    if (
+      !existingSessionId &&
+      link.entity_type === LinkEntityType.JOB_APPLICATION &&
+      link.entity_id
+    ) {
+      const conversion = await this.conversionDao.createConversion({
+        job_application_short_id: link.entity_id,
+        trigger: ConversionTriggerEnum.LINK_CLICK,
+        event_source: ConversionEventSourceEnum.INHOUSE,
+        recorded_at: new Date(),
+      });
+      newSessionId = conversion.short_id || '';
+    }
+
+    return { destinationUrl: link.destination_url, sessionId: newSessionId };
+  };
+
+  /**
+   * Record a conversion event (PDP_VIEW, ORDER_PLACED, etc.) reported by the
+   * brand against a job application
+   */
+  public recordConversion = async (payload: IRecordConversionPayload) => {
+    const { id, conversion_type, conversion_time, visitor_id, order_id, awb_no } =
+      payload;
+
+    const jobApplication = await this.jobApplicationDao.getApplicationByShortId(id);
+    if (!jobApplication) {
+      throw new Error("Job application not found");
+    }
+
+    await this.conversionDao.upsertConversionForVisitor({
+      job_application_short_id: id,
+      trigger: conversion_type,
+      event_source: ConversionEventSourceEnum.BRAND,
+      visitor_id,
+      recorded_at: conversion_time,
+      order_id,
+      awb_no,
+    });
   };
 }
 

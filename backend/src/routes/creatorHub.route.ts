@@ -13,12 +13,14 @@ import {
   createJobSchema,
   applyForJobSchema,
   resolveLinkParamsSchema,
+  recordConversionSchema,
 } from "@/validators/creatorHub.validator";
 // Wrappers
 import { asyncWrapper } from "@/middleware/common.middleware";
 
 class CreatorHubRoutes implements Routes {
   public path = "/api/v1/platform/creator";
+  public internalPath = "/api/v1/internal/creator";
   public router = Router();
 
   private authMiddleware = new AuthMiddleware();
@@ -34,6 +36,7 @@ class CreatorHubRoutes implements Routes {
 
     this.initializeJobRoutes(`${this.path}/job`);
     this.initializeJobApplicationRoutes(`${this.path}/job-application`);
+    this.initializeConversionRoutes(`${this.internalPath}/conversion`);
   }
 
 
@@ -52,6 +55,14 @@ class CreatorHubRoutes implements Routes {
       this.authMiddleware.getAuthUser,
       this.validatorMiddleware.validateRequestBody(applyForJobSchema),
       asyncWrapper(this.creatorHubController.applyForJob)
+    );
+  }
+
+  private initializeConversionRoutes (prefix: string) {
+    this.router.post(
+      `${prefix}`,
+      this.validatorMiddleware.validateRequestBody(recordConversionSchema),
+      asyncWrapper(this.creatorHubController.recordConversion)
     );
   }
 }

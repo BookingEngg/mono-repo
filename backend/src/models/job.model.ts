@@ -2,7 +2,13 @@ import { nanoid } from "nanoid";
 import { Schema } from "mongoose";
 import { MONGO_INSTANCES } from "@/database";
 import { IJob } from "@/interfaces/job.interface";
-import { GenderEnum, JobTypeEnum, MediaTypeEnum } from "@/interfaces/enum";
+import {
+  GenderEnum,
+  JobTypeEnum,
+  MediaTypeEnum,
+  EarningModelTypeEnum,
+  ConversionTriggerEnum,
+} from "@/interfaces/enum";
 
 const dbConnection = MONGO_INSTANCES.praman;
 
@@ -36,12 +42,27 @@ const JobSchema: Schema<IJob> = new Schema(
       available: { type: Number, default: 3, min: 0 },
       completed: { type: Number, default: 0, min: 0 },
     },
+
     earning_model: {
       _id: false,
-      bucket_a: { range: String, potential_earning: Number },
-      bucket_b: { range: String, potential_earning: Number },
-      bucket_c: { range: String, potential_earning: Number },
-      bucket_d: { range: String, potential_earning: Number },
+
+      type: {
+        type: String,
+        enum: EarningModelTypeEnum,
+        required: true,
+      },
+
+      value: {
+        type: Number,
+        required: true,
+        min: 0,
+      },
+
+      conversion_trigger: {
+        type: String,
+        enum: ConversionTriggerEnum,
+        required: true,
+      },
     },
 
     due_date: { type: Number, default: 3 },
