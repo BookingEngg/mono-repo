@@ -133,7 +133,10 @@ class CreatorHubService {
       });
     }
 
-    return { destinationUrl: link.destination_url };
+    return {
+      destinationUrl: link.destination_url,
+      jobApplicationShortId: link.entity_id || "",
+    };
   };
 
   /**
@@ -141,26 +144,25 @@ class CreatorHubService {
    * brand against a job application
    */
   public recordConversion = async (payload: IRecordConversionPayload) => {
-    const {
-      id,
-      conversion_type,
-      conversion_time,
-      visitor_id,
-      order_id,
-      awb_no,
-    } = payload;
+    const { utm_params, event_datum } = payload;
 
-    const jobApplication =
-      await this.jobApplicationDao.getApplicationByShortId(id);
+    const jobApplicationShortId = utm_params.utm_campaign;
+    const visitorId = utm_params.utm_medium;
+
+    const { conversion_type, conversion_time, order_id, awb_no } = event_datum;
+
+    const jobApplication = await this.jobApplicationDao.getApplicationByShortId(
+      jobApplicationShortId,
+    );
     if (!jobApplication) {
-      throw new Error("Job application not found");
+      return { error: "Job Application not found" };
     }
 
     await this.conversionDao.upsertConversionForVisitor({
-      job_application_short_id: id,
+      job_application_short_id: jobApplicationShortId,
       trigger: conversion_type,
       event_source: ConversionEventSourceEnum.BRAND,
-      visitor_id,
+      visitor_id: visitorId,
       recorded_at: conversion_time,
       order_id,
       awb_no,

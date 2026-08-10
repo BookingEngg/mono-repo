@@ -56,13 +56,24 @@ export const resolveLinkParamsSchema = z.object({
   shortId: z.string().min(1),
 });
 
-export const recordConversionSchema = z.object({
-  id: z.string().min(1), // job application short_id
+// echoed back by the brand from the utm params we appended to the redirect —
+// utm_campaign carries the job application id, utm_medium the session id
+const utmParamsSchema = z.object({
+  utm_source: z.string(),
+  utm_campaign: z.string().min(1), // job application short_id
+  utm_medium: z.string().min(1), // session id, used as the dedupe identifier
+});
+
+const eventDatumSchema = z.object({
   conversion_type: z.enum(ConversionTriggerEnum),
   conversion_time: z.coerce.date(),
-  visitor_id: z.string().min(1), // identifies the converting user/session, for dedupe
   order_id: z.string().optional(),
   awb_no: z.string().optional(),
+});
+
+export const recordConversionSchema = z.object({
+  utm_params: utmParamsSchema,
+  event_datum: eventDatumSchema,
 });
 
 export type IRecordConversionPayload = z.infer<typeof recordConversionSchema>;

@@ -13,7 +13,7 @@ class ValidatorMiddleware {
         next();
       } catch (error) {
         if (error instanceof ZodError) {
-          res.status(400).json({ status: "error", errors: error.issues });
+          res.status(501).json({ status: "error", errors: error.issues });
           return;
         }
         next(error);
@@ -28,7 +28,7 @@ class ValidatorMiddleware {
         next();
       } catch (error) {
         if (error instanceof ZodError) {
-          res.status(400).json({ status: "error", errors: error.issues });
+          res.status(501).json({ status: "error", errors: error.issues });
           return;
         }
         next(error);
@@ -43,7 +43,7 @@ class ValidatorMiddleware {
         next();
       } catch (error) {
         if (error instanceof ZodError) {
-          res.status(400).json({ status: "error", errors: error.issues });
+          res.status(501).json({ status: "error", errors: error.issues });
           return;
         }
         next(error);

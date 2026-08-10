@@ -20,9 +20,14 @@ export const buildJobApplicationJobDetails = (
 
 // tags the destination with utm_campaign=sessionId so repeat clicks within
 // the same session (tracked via a 1hr cookie) attribute together downstream
-export const appendUtmParams = (destinationUrl: string, sessionId: string): string => {
+export const appendUtmParams = (
+  destinationUrl: string,
+  jobApplicationShortId: string,
+  sessionId: string,
+): string => {
   const url = new URL(destinationUrl);
   url.searchParams.set("utm_source", "CreatorHub");
-  url.searchParams.set("utm_campaign", sessionId);
+  url.searchParams.set("utm_campaign", jobApplicationShortId);
+  url.searchParams.set("utm_medium", sessionId);
   return url.toString();
 };

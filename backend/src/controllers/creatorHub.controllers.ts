@@ -40,7 +40,6 @@ class CreatorHubControllers {
   ): Promise<any> => {
     try {
       let sessionId = req.cookies?.[SESSION_ID_COOKIE];
-      console.log("IN THE CONTROLLER OF REDIRECT LINK", sessionId);
 
       if (!sessionId) {
         sessionId = nanoid(10);
@@ -51,12 +50,16 @@ class CreatorHubControllers {
         });
       }
 
-      const { destinationUrl } = await this.creatorHubService.resolveLinkClick(
-        req.params.shortId,
-        sessionId,
-      );
+      const { destinationUrl, jobApplicationShortId } =
+        await this.creatorHubService.resolveLinkClick(
+          req.params.shortId,
+          sessionId,
+        );
 
-      return res.redirect(302, appendUtmParams(destinationUrl, sessionId));
+      return res.redirect(
+        302,
+        appendUtmParams(destinationUrl, jobApplicationShortId, sessionId),
+      );
     } catch (error) {
       return res
         .status(404)
@@ -71,7 +74,7 @@ class CreatorHubControllers {
     req: Request,
     res: Response,
   ): Promise<any> => {
-    const result = await this.creatorHubService.recordConversion(req.body);
+    await this.creatorHubService.recordConversion(req.body);
     return res.send({ status: "success" });
   };
 }
