@@ -20,7 +20,11 @@ type TUserTypeToggleProps = {
  * Segmented Creator/Brand picker for Signup. The chosen value is only used
  * the moment a brand-new account gets created — it has no effect on login.
  */
-const UserTypeToggle = ({ value, onChange, disabled }: TUserTypeToggleProps) => {
+const UserTypeToggle = ({
+  value,
+  onChange,
+  disabled,
+}: TUserTypeToggleProps) => {
   return (
     <div
       role="radiogroup"
