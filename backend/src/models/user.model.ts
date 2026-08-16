@@ -1,6 +1,7 @@
 import { Schema } from "mongoose";
 import { MONGO_INSTANCES } from "@database";
 import { IUser } from "@/interfaces/user.interface";
+import { rolesEnum, UserTypeEnum } from "@/interfaces/enum";
 
 const dbConnection = MONGO_INSTANCES.praman;
 
@@ -21,7 +22,12 @@ export const IBlockedRequest = new Schema({
   block_origin: String, // from decline-friend-request or blocked
 });
 
-export const ROLES = ["roles/users", "roles/admin", "roles/super-admin"];
+// Derived from rolesEnum so the schema whitelist can't drift out of sync with
+// the roles the rest of the app actually assigns (this array was previously
+// hand-typed and missing "roles/brand").
+export const ROLES = Object.values(rolesEnum);
+
+export const USER_TYPES = Object.values(UserTypeEnum);
 
 const UserSchema = new Schema<IUser>(
   {
@@ -34,17 +40,20 @@ const UserSchema = new Schema<IUser>(
     origin: { type: IOrigin, default: undefined },
 
     // Access Control
-    roles: { type: Array(String), enum: ROLES, require: true }, // user, admin, super-admin, etc.
-    privileges: { type: Array(String), required: true}, // contain only the restricted priviledges of the roles.
-    
+    type: { type: String, enum: USER_TYPES, require: true },
+    roles: { type: Array(String), enum: ROLES, require: true }, // user, admin, brand, etc.
+    privileges: { type: Array(String), required: true }, // contain only the restricted priviledges of the roles.
+
     // Community Field
     friends_ids: { type: Array(String), default: [] }, // Contain all the friends user id
     requested_friends: { type: Array(IFriendsRequest), default: [] }, // Contain all the users who request to make friend
     blocked_user: { type: Array(IBlockedRequest), default: [] }, // Contain all the blocked users for the perticular user
     // Group Communication
     group_ids: { type: Array(String), default: [] },
+
+    is_active: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**

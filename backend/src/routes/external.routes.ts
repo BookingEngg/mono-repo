@@ -2,6 +2,7 @@
 import { Router } from "express";
 // Interface
 import { Routes } from "@interfaces/common.interface";
+import { rolesEnum, privilegesEnum } from "@/interfaces/enum";
 // Controllers
 import UserController from "@/controllers/user.controllers";
 import AccessControlController from "@/controllers/accessControl.controllers";
@@ -44,22 +45,22 @@ class ExternalRoutes implements Routes {
   private initializeOAuthAuthRoutes(prefix: string) {
     this.router.get(
       `${prefix}/client-details`,
-      asyncWrapper(this.oAuthController.getClientDetails)
+      asyncWrapper(this.oAuthController.getClientDetails),
     );
 
     this.router.get(
       `${prefix}/github_init`,
-      asyncWrapper(this.oAuthController.initGithubOAuth)
+      asyncWrapper(this.oAuthController.initGithubOAuth),
     );
 
     this.router.get(
       `${prefix}/github-user`,
-      asyncWrapper(this.oAuthController.getGithubOAuthUser)
+      asyncWrapper(this.oAuthController.getGithubOAuthUser),
     );
 
     this.router.post(
       `${prefix}/google-user`,
-      asyncWrapper(this.oAuthController.getGoogleOAuthUser)
+      asyncWrapper(this.oAuthController.getGoogleOAuthUser),
     );
   }
 
@@ -67,18 +68,26 @@ class ExternalRoutes implements Routes {
     this.router.get(
       `${prefix}/`,
       this.authMiddleware.getAuthUser,
-      // this.authMiddleware.checkRoles([Roles.DIRECTOR]),
-      asyncWrapper(this.userController.getUsers)
+      this.authMiddleware.checkRoles(
+        [rolesEnum.USER],
+        [privilegesEnum.DEFAULT, privilegesEnum.PROFILE],
+      ),
+      asyncWrapper(this.userController.getUsers),
     );
     this.router.post(
       `${prefix}/logout`,
-      asyncWrapper(this.userController.logoutAuthUser)
+      this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.USER],
+        [privilegesEnum.DEFAULT, privilegesEnum.PROFILE],
+      ),
+      asyncWrapper(this.userController.logoutAuthUser),
     );
 
     this.router.get(
       `${prefix}/summary`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.userController.getDashboardSummary)
+      asyncWrapper(this.userController.getDashboardSummary),
     );
   }
 
@@ -86,24 +95,24 @@ class ExternalRoutes implements Routes {
     this.router.post(
       `${prefix}/`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.accessControlController.assignNewRolesAndPrivileges)
+      asyncWrapper(this.accessControlController.assignNewRolesAndPrivileges),
     );
 
     this.router.post(
       `${prefix}/remove`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.accessControlController.removeRolesAndPrivileges)
+      asyncWrapper(this.accessControlController.removeRolesAndPrivileges),
     );
   }
 
   private initializeOtpRoutes(prefix: string) {
     this.router.post(
       `${prefix}/create`,
-      asyncWrapper(this.otpController.sendOtp)
+      asyncWrapper(this.otpController.sendOtp),
     );
     this.router.post(
       `${prefix}/verify`,
-      asyncWrapper(this.otpController.verifyOtp)
+      asyncWrapper(this.otpController.verifyOtp),
     );
   }
 
@@ -111,56 +120,56 @@ class ExternalRoutes implements Routes {
     this.router.get(
       `${prefix}/chat-users`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communicationController.getCommunicationChatUsers)
+      asyncWrapper(this.communicationController.getCommunicationChatUsers),
     );
 
     this.router.get(
       `${prefix}/chat`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communicationController.getUserChats)
+      asyncWrapper(this.communicationController.getUserChats),
     );
 
     this.router.get(
       `${prefix}/chat-v2`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communicationController.getMessages)
+      asyncWrapper(this.communicationController.getMessages),
     );
 
     this.router.post(
       `${prefix}/new-chat`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communicationController.addNewChat)
+      asyncWrapper(this.communicationController.addNewChat),
     );
 
     // Communication Groups Routes
     this.router.get(
       `${prefix}/group/list`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communicationController.getGroupList)
+      asyncWrapper(this.communicationController.getGroupList),
     );
 
     this.router.get(
       `${prefix}/group/chats`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communicationController.getGroupMessages)
+      asyncWrapper(this.communicationController.getGroupMessages),
     );
 
     this.router.get(
       `${prefix}/group/:group_id`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communicationController.getGroupDetailsFromGroupId)
+      asyncWrapper(this.communicationController.getGroupDetailsFromGroupId),
     );
 
     this.router.post(
       `${prefix}/group/new`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communicationController.createGroup)
+      asyncWrapper(this.communicationController.createGroup),
     );
 
     this.router.put(
       `${prefix}/group/:shortId`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communicationController.updateGroupDetails)
+      asyncWrapper(this.communicationController.updateGroupDetails),
     );
   }
 
@@ -168,32 +177,32 @@ class ExternalRoutes implements Routes {
     this.router.get(
       `${prefix}/:tab_name`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communityController.getCommunityUsers)
+      asyncWrapper(this.communityController.getCommunityUsers),
     );
 
     this.router.put(
       `${prefix}/friend/request`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communityController.makeFriendRequest)
+      asyncWrapper(this.communityController.makeFriendRequest),
     );
 
     this.router.put(
       `${prefix}/friend/request-status`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communityController.updateFriendRequestStatus)
+      asyncWrapper(this.communityController.updateFriendRequestStatus),
     );
 
     this.router.put(
       `${prefix}/friend/unblock`,
       this.authMiddleware.getAuthUser,
-      asyncWrapper(this.communityController.unblockUserStatus)
+      asyncWrapper(this.communityController.unblockUserStatus),
     );
   }
 
   private initializeRevplusRoutes(prefix: string) {
     this.router.post(
       `${prefix}/leads`,
-      asyncWrapper(this.revplusController.newLeadRequest)
+      asyncWrapper(this.revplusController.newLeadRequest),
     );
   }
 }

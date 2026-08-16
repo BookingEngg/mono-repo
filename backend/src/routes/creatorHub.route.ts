@@ -17,6 +17,7 @@ import {
 } from "@/validators/creatorHub.validator";
 // Wrappers
 import { asyncWrapper } from "@/middleware/common.middleware";
+import { privilegesEnum, rolesEnum } from "@/interfaces/enum";
 
 class CreatorHubRoutes implements Routes {
   public path = "/api/v1/platform/creator";
@@ -31,7 +32,7 @@ class CreatorHubRoutes implements Routes {
     this.router.get(
       `${this.path}/post/:shortId`,
       this.validatorMiddleware.validateRequestParams(resolveLinkParamsSchema),
-      this.creatorHubController.redirectLink
+      this.creatorHubController.redirectLink,
     );
 
     this.initializeJobRoutes(`${this.path}/job`);
@@ -39,30 +40,37 @@ class CreatorHubRoutes implements Routes {
     this.initializeConversionRoutes(`${this.internalPath}/conversion`);
   }
 
-
-  private initializeJobRoutes (prefix: string) {
+  private initializeJobRoutes(prefix: string) {
     this.router.post(
       `${prefix}`,
       this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.BRAND],
+        [privilegesEnum.CREATE_JOBS],
+      ),
       this.validatorMiddleware.validateRequestBody(createJobSchema),
-      asyncWrapper(this.creatorHubController.createJob)
+      asyncWrapper(this.creatorHubController.createJob),
     );
   }
 
-  private initializeJobApplicationRoutes (prefix: string) {
+  private initializeJobApplicationRoutes(prefix: string) {
     this.router.post(
       `${prefix}`,
       this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.BRAND],
+        [privilegesEnum.UPDATE_JOBS],
+      ),
       this.validatorMiddleware.validateRequestBody(applyForJobSchema),
-      asyncWrapper(this.creatorHubController.applyForJob)
+      asyncWrapper(this.creatorHubController.applyForJob),
     );
   }
 
-  private initializeConversionRoutes (prefix: string) {
+  private initializeConversionRoutes(prefix: string) {
     this.router.post(
       `${prefix}`,
       this.validatorMiddleware.validateRequestBody(recordConversionSchema),
-      asyncWrapper(this.creatorHubController.recordConversion)
+      asyncWrapper(this.creatorHubController.recordConversion),
     );
   }
 }

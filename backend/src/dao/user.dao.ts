@@ -16,28 +16,31 @@ class UserDao {
 
   public updateUserDetailsById = async (
     userId: string,
-    updatedPayload: object
+    updatedPayload: object,
   ) => {
     return await this.userModel.updateOne({ _id: userId }, updatedPayload);
   };
 
   // Get the user by email id
   public getUserByEmail = async (email: string): Promise<IUser> => {
-    return await this.userModel.findOne({ email }).lean();
+    return await this.userModel.findOne({ email, is_active: true }).lean();
   };
 
   // Get the users by userId
   public getUserByUserId = async (userId: string, fields: string[] = []) => {
-    return await this.userModel.findOne({ _id: userId }).select(fields).lean();
+    return await this.userModel
+      .findOne({ _id: userId, is_active: true })
+      .select(fields)
+      .lean();
   };
 
   // Get the users by userIds
   public getUserByUserIds = async (
     userIds: string[],
-    fields: string[] = []
+    fields: string[] = [],
   ) => {
     return await this.userModel
-      .find({ _id: { $in: userIds } })
+      .find({ _id: { $in: userIds }, is_active: true })
       .select(fields)
       .lean();
   };
@@ -45,24 +48,26 @@ class UserDao {
   // Get all the user expect from the source
   public getUsers = async (email: string, fields: string[] = []) => {
     return await this.userModel
-      .find({ email: { $ne: email } })
+      .find({ email: { $ne: email }, is_active: true })
       .select(fields)
       .lean();
   };
 
   // Get community paginated user list
   public getPaginatedNewUsers = async (payload: {
-    filter: object;
+    filter: Record<string, stirng | boolean>;
     pagination: { page: number; limit: number };
   }) => {
     const { page, limit: pageSize } = payload.pagination;
+    let filter = payload?.filter || {};
+    filter.is_active = true;
 
     const [response, count] = await Promise.all([
       this.userModel
-        .find(payload.filter)
+        .find(filter)
         .skip((page - 1) * pageSize)
         .limit(pageSize),
-      this.userModel.countDocuments(payload.filter),
+      this.userModel.countDocuments(filter),
     ]);
 
     return { response, count };
@@ -82,7 +87,7 @@ class UserDao {
         $addToSet: {
           group_ids: groupId,
         },
-      }
+      },
     );
   };
 
@@ -100,7 +105,7 @@ class UserDao {
         $addToSet: {
           group_ids: groupId,
         },
-      }
+      },
     );
   };
 
@@ -108,7 +113,7 @@ class UserDao {
   public addUserFriendRequest = async (
     userId: string,
     friendId: string,
-    requestStatus: RequestStatusType
+    requestStatus: RequestStatusType,
   ) => {
     return await this.userModel.updateOne(
       {
@@ -121,7 +126,7 @@ class UserDao {
             request_status: requestStatus,
           },
         },
-      }
+      },
     );
   };
 
@@ -140,7 +145,7 @@ class UserDao {
             user_id: friendId,
           },
         },
-      }
+      },
     );
   };
 
@@ -169,7 +174,7 @@ class UserDao {
           requested_friends: { user_id: friendId },
           friends_ids: friendId,
         },
-      }
+      },
     );
   };
 
@@ -187,7 +192,7 @@ class UserDao {
             user_id: friendId,
           },
         },
-      }
+      },
     );
   };
 
@@ -207,7 +212,7 @@ class UserDao {
           ...(roles.length ? { roles: { $each: roles } } : {}),
           ...(privileges.length ? { privileges: { $each: privileges } } : {}),
         },
-      }
+      },
     );
   };
 
@@ -226,7 +231,7 @@ class UserDao {
           ...(roles.length ? { roles: { $in: roles } } : {}),
           ...(privileges.length ? { privileges: { $in: privileges } } : {}),
         },
-      }
+      },
     );
   };
 }

@@ -21,17 +21,20 @@ export interface IUser {
   last_name: string;
   email: string;
   contact?: string;
-  privileges: string[];
   origin: IOrigin;
   email_verified: boolean;
   user_profile_picture?: string;
+
+  type: string;
   roles: string[];
+  privileges: string[];
 
   friends_ids: string[];
   blocked_user: IBlockedUser[];
   requested_friends: IRequestedUser[];
 
   group_ids: string[];
+  is_active: boolean;
 
   createdAt?: Date;
   updatedAt?: Date;

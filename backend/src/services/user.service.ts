@@ -6,17 +6,20 @@ import CommunicationDao from "@/dao/communication.dao";
 import UserDao from "@/dao/user.dao";
 // Interfaces
 import { ICommonAuthUser, IUser } from "@/interfaces/user.interface";
+import { UserTypeEnum } from "@/interfaces/enum";
 // Constants
-import {
-  defaultUserAssignedPrivilegeWhileSignup,
-  defaultUserAssignedRolesWhileSignup,
-} from "@/constants/roles.constants";
+import { getSignupRolesAndPrivileges } from "@/constants/roles.constants";
 
 class UserService {
   private userDao = new UserDao();
   private communicationDao = new CommunicationDao();
 
-  public createUser = async (payload: ICommonAuthUser) => {
+  public createUser = async (
+    payload: ICommonAuthUser,
+    userType: UserTypeEnum
+  ) => {
+    const { roles, privileges } = getSignupRolesAndPrivileges(userType);
+
     const formattedUser = {
       first_name: payload.first_name,
       last_name: payload.last_name,
@@ -24,8 +27,9 @@ class UserService {
       email_verified: payload.email_verified,
       user_profile_picture: payload.user_profile_picture,
 
-      roles: defaultUserAssignedRolesWhileSignup, // Default user roles while signup
-      privileges: defaultUserAssignedPrivilegeWhileSignup, // Default user privileges while signup
+      type: userType,
+      roles,
+      privileges,
       friends_ids: [],
       requested_friends: [],
       blocked_user: [],

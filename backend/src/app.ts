@@ -27,6 +27,8 @@ import {
 import { getRedisUrl } from "./util/utils.util";
 // Types
 import { Routes } from "@interfaces/common.interface";
+// Middleware
+import { errorHandler } from "@/middleware/common.middleware";
 
 class App {
   private app: express.Application;
@@ -96,6 +98,9 @@ class App {
     routes.forEach((route) =>
       this.app.use(`/${serviceRoute || ""}`, route.router),
     );
+
+    // Must be registered after every route so it catches whatever they forward.
+    this.app.use(errorHandler);
   }
 
   public initilizeSocketEvents = async () => {
