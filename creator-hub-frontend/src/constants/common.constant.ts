@@ -11,4 +11,5 @@ export const ROUTE_PATHS = {
   HOME: "/",
   EXPLORE: "/explore",
   PROFILE: "/profile",
+  CREATE_JOB: "/job/new",
 };

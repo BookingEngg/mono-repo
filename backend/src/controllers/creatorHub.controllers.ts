@@ -12,7 +12,12 @@ class CreatorHubControllers {
    * Brand lists a new job against a product
    */
   public createJob = async (req: Request, res: Response): Promise<any> => {
-    const job = await this.creatorHubService.createJob(req.body);
+    const brand = req.user;
+    if (!brand) {
+      throw new Error("User not found");
+    }
+
+    const job = await this.creatorHubService.createJob(brand, req.body);
     return res.send({ status: "success", data: job });
   };
 

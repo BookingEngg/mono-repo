@@ -32,10 +32,8 @@ const ageLimitSchema = z.object({
 
 export const createJobSchema = z.object({
   job_type: z.enum([JobTypeEnum.AFFILIATE]),
-  seller_id: z.string().min(1),
-  product_id: z.string().min(1),
+  product_id: z.string().min(1).max(50),
   product_link: z.string().url(),
-  brand_name: z.string().optional(),
   preview_urls: z.array(jobMediaSchema).optional(),
   category: jobCategorySchema.optional(),
   earning_model: earningModelSchema.optional(),

@@ -171,6 +171,7 @@ const Login = () => {
               id="email"
               label="Email"
               type="email"
+              required
               autoComplete="email"
               placeholder="you@example.com"
               value={loginPayload.email}

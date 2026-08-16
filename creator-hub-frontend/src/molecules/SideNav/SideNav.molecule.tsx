@@ -1,10 +1,23 @@
 // Modules
 import { Link, NavLink } from "react-router-dom";
+// Atoms
+import { RequireAccess } from "@/atoms/RequireAccess";
 // Utils
 import { cn } from "@/lib/utils";
 // Constants
 import { NAV_ITEMS } from "@/constants/navigation.constant";
 import { ROUTE_PATHS } from "@/constants/common.constant";
+import { PRIVILEGES } from "@/constants/access.constant";
+// Icons
+import { PlusIcon } from "lucide-react";
+
+const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
+  cn(
+    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+    isActive
+      ? "bg-muted text-foreground"
+      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+  );
 
 /**
  * Persistent left rail shown from the md breakpoint up, replacing BottomNav so
@@ -25,23 +38,19 @@ const SideNav = () => {
 
       <nav className="flex flex-col gap-1">
         {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={end}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                isActive
-                  ? "bg-muted text-foreground"
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground"
-              )
-            }
-          >
+          <NavLink key={to} to={to} end={end} className={navLinkClassName}>
             <Icon className="size-5" />
             {label}
           </NavLink>
         ))}
+
+        {/* Brand-only, so it stays invisible to a plain creator account */}
+        <RequireAccess privilege={PRIVILEGES.CREATE_JOBS}>
+          <NavLink to={ROUTE_PATHS.CREATE_JOB} className={navLinkClassName}>
+            <PlusIcon className="size-5" />
+            Post a job
+          </NavLink>
+        </RequireAccess>
       </nav>
     </aside>
   );

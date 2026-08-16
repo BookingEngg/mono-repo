@@ -18,6 +18,7 @@ import {
   IApplyForJobPayload,
 } from "@/interfaces/creatorHub.interface";
 import { IRecordConversionPayload } from "@/validators/creatorHub.validator";
+import { IUser } from "@/interfaces/user.interface";
 
 class CreatorHubService {
   private jobDao = new JobDao();
@@ -26,13 +27,11 @@ class CreatorHubService {
   private conversionDao = new ConversionDao();
 
   // payload is already validated by ValidatorMiddleware.validateRequestBody(createJobSchema)
-  public createJob = async (payload: ICreateJobPayload) => {
+  public createJob = async (brand: IUser, payload: ICreateJobPayload) => {
     const {
       job_type,
-      seller_id,
       product_id,
       product_link,
-      brand_name,
       preview_urls,
       category,
       earning_model,
@@ -43,10 +42,10 @@ class CreatorHubService {
 
     return await this.jobDao.createJob({
       job_type,
-      seller_id,
+      seller_id: brand._id,
       product_id,
       product_link,
-      brand_name,
+      brand_name: brand.first_name + " " + brand.last_name,
       preview_urls,
       category,
       earning_model,

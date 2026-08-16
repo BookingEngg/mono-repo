@@ -8,6 +8,7 @@ import OAuthCallbackPage from "@/pages/OAuthCallback";
 import HomePage from "@/pages/Home";
 import ExplorePage from "@/pages/Explore";
 import ProfilePage from "@/pages/Profile";
+import CreateJobPage from "@/pages/CreateJob";
 import NotFoundPage from "@/pages/NotFound";
 // Layout
 import AuthLayout from "@/layout/AuthLayout";
@@ -65,6 +66,10 @@ const App = () => {
               <Route path={ROUTE_PATHS.HOME} element={<HomePage />} />
               <Route path={ROUTE_PATHS.EXPLORE} element={<ExplorePage />} />
               <Route path={ROUTE_PATHS.PROFILE} element={<ProfilePage />} />
+              <Route
+                path={ROUTE_PATHS.CREATE_JOB}
+                element={<CreateJobPage />}
+              />
             </Route>
             {/* Any URL an authorized creator has no business on falls back here */}
             <Route path="*" element={<NotFoundPage />} />

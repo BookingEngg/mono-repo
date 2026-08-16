@@ -50,18 +50,19 @@ class AuthMiddleware {
         const assignedUserRoles = user.roles || [];
         const assignedUserPrivileges = user.privileges || [];
 
-        // Check the role assign and the level of the user
-        roles.forEach((role) => {
-          if (!assignedUserRoles.includes(role)) {
-            return res.status(403).json({ message: "Permission denied" });
-          }
-        });
+        const hasAllRoles = roles.every((role) =>
+          assignedUserRoles.includes(role),
+        );
+        if (!hasAllRoles) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
 
-        priviledges.forEach((priviledge) => {
-          if (!assignedUserPrivileges.includes(priviledge)) {
-            return res.status(403).json({ message: "Permission denied" });
-          }
-        });
+        const hasAllPrivileges = priviledges.every((priviledge) =>
+          assignedUserPrivileges.includes(priviledge),
+        );
+        if (!hasAllPrivileges) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
 
         next();
       } catch (err) {

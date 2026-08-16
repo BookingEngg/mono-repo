@@ -17,6 +17,9 @@ type TFormFieldProps = {
   disabled?: boolean;
   error?: string;
   hint?: string;
+  required?: boolean;
+  min?: string | number;
+  max?: string | number;
   onEnter?: () => void;
 };
 
@@ -35,6 +38,9 @@ const FormField = ({
   disabled,
   error,
   hint,
+  required,
+  min,
+  max,
   onEnter,
 }: TFormFieldProps) => {
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -45,13 +51,18 @@ const FormField = ({
 
   return (
     <div className="grid gap-2">
-      <Label htmlFor={id}>{label}</Label>
+      <Label htmlFor={id}>
+        {label}
+        {required && <span className="text-destructive"> *</span>}
+      </Label>
       <Input
         id={id}
         type={type}
         value={value}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        min={min}
+        max={max}
         disabled={disabled}
         aria-invalid={!!error}
         aria-describedby={error ? `${id}-error` : undefined}
