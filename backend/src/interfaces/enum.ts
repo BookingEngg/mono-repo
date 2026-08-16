@@ -61,25 +61,27 @@ export enum JobApplicationStatusEnum {
 
 export enum rolesEnum {
   USER = "roles/users",
+  INFLUENCER = "roles/influencer",
   BRAND = "roles/brand",
   ADMIN = "roles/admin",
 }
 
-// The account type a creator picks at signup; distinct from rolesEnum, which
-// is the internal access-control representation it maps to.
 export enum UserTypeEnum {
-  USER = "user",
+  INFLUENCER = "influencer",
   BRAND = "brand",
 }
 
 export enum privilegesEnum {
-  DEFAULT = "privilege/user/viewer",
-
+  // User Priviledges
+  DEFAULT_USER = "privilege/user/viewer",
   PROFILE = "privilege/user/profile/viewer",
   PROFILE_UPDATE = "privilege/user/profile/update",
 
-  EXPLORE_JOBS = "privilege/user/jobs/viewer",
+  // Influencer Priviledges
+  EXPLORE_JOBS = "privilege/influencer/jobs/viewer",
+  APPLY_JOBS = "privilege/influencer/job-application/create",
 
+  // Brand Priviledges
   CREATE_JOBS = "privilege/brand/jobs/create",
   UPDATE_JOBS = "privilege/brand/jobs/update",
 }

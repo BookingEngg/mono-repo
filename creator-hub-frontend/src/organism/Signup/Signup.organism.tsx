@@ -19,7 +19,7 @@ import { TUserType } from "@/typings/auth";
  * account gets created.
  */
 const Signup = () => {
-  const [userType, setUserType] = React.useState<TUserType>("user");
+  const [userType, setUserType] = React.useState<TUserType>("influencer");
 
   const {
     clientDetails,

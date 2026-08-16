@@ -70,7 +70,7 @@ class ExternalRoutes implements Routes {
       this.authMiddleware.getAuthUser,
       this.authMiddleware.checkRoles(
         [rolesEnum.USER],
-        [privilegesEnum.DEFAULT, privilegesEnum.PROFILE],
+        [privilegesEnum.DEFAULT_USER, privilegesEnum.PROFILE],
       ),
       asyncWrapper(this.userController.getUsers),
     );
@@ -79,7 +79,7 @@ class ExternalRoutes implements Routes {
       this.authMiddleware.getAuthUser,
       this.authMiddleware.checkRoles(
         [rolesEnum.USER],
-        [privilegesEnum.DEFAULT, privilegesEnum.PROFILE],
+        [privilegesEnum.DEFAULT_USER, privilegesEnum.PROFILE],
       ),
       asyncWrapper(this.userController.logoutAuthUser),
     );

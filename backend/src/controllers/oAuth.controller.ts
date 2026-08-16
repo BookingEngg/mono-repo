@@ -6,7 +6,7 @@ import { UserTypeEnum } from "@/interfaces/enum";
 // Anything other than the literal "brand" is treated as a regular user, so a
 // tampered query/body value can never request an elevated account type.
 const toUserType = (value: string): UserTypeEnum | undefined => {
-  return value === UserTypeEnum.BRAND ? UserTypeEnum.BRAND : UserTypeEnum.USER;
+  return value === UserTypeEnum.BRAND ? UserTypeEnum.BRAND : UserTypeEnum.INFLUENCER;
 };
 
 class OAuthController {
@@ -25,11 +25,8 @@ class OAuthController {
   };
 
   public getGithubOAuthUser = async (req: Request, res: Response) => {
-    const { code, state } = req.query;
-    // `state` round-trips as "<configured-secret>:<user_type>" when a
-    // user_type was chosen at the initGithubOAuth step; see navigateToGithubLogin.
-    const [, encodedUserType] = (state as string || "").split(":");
-    const userType = toUserType(encodedUserType);
+    const { code, user_type } = req.query;
+    const userType = toUserType(user_type as string);
 
     const response = await this.oAuthService.getGithubVerifiedUser(
       code as string,

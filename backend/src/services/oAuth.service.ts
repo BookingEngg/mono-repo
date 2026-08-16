@@ -41,8 +41,7 @@ class OAuthService {
     } = githubOAuthConfigs;
 
     const redirectURI = getExternalDomain() + redirectUrlEndpoint;
-    const stateParam = userType ? `${state}:${userType}` : state;
-    return `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectURI}&scope=${scope}&state=${stateParam}`;
+    return `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectURI}&scope=${scope}&state=${state}&user_type=${userType}`;
   };
 
   public getGithubVerifiedUser = async (
@@ -119,6 +118,13 @@ class OAuthService {
     const existingValidUser =
       await this.userService.getInhouseUserDetailsByEmail(authorizedEmail);
 
+    const isBrandProfile = (existingValidUser?.roles || []).includes(
+      UserTypeEnum.BRAND,
+    );
+    const isDuplicateProfileRequest = isBrandProfile
+      ? userType !== UserTypeEnum.BRAND
+      : userType !== UserTypeEnum.INFLUENCER;
+
     // Only a brand-new account respects the chosen user_type — an existing
     // creator's roles are never modified just because they logged in again.
     if (!existingValidUser) {
@@ -133,8 +139,7 @@ class OAuthService {
         formattedInhouseUserMapper[source],
         userType,
       );
-    } else if (existingValidUser.type !== userType) {
-      console.log(" IN THIS BLOCK >>>>>>>>");
+    } else if (isDuplicateProfileRequest) {
       // User with different role already exists
       throw new Error(
         "User with this email already exists with a different role",

@@ -27,7 +27,6 @@ class UserService {
       email_verified: payload.email_verified,
       user_profile_picture: payload.user_profile_picture,
 
-      type: userType,
       roles,
       privileges,
       friends_ids: [],

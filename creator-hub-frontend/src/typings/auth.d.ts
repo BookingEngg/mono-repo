@@ -4,7 +4,6 @@ export interface IUser {
   last_name: string;
   email?: string;
   user_profile_picture?: string;
-  role: string;
   roles: string[];
   privileges: string[];
 }
@@ -29,4 +28,4 @@ export interface IOAuthClientDetails {
  * it's actually creating a new account — an existing user's type never
  * changes just by logging in again.
  */
-export type TUserType = "user" | "brand";
+export type TUserType = "influencer" | "brand";

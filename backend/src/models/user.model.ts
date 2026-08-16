@@ -1,7 +1,7 @@
 import { Schema } from "mongoose";
 import { MONGO_INSTANCES } from "@database";
 import { IUser } from "@/interfaces/user.interface";
-import { rolesEnum, UserTypeEnum } from "@/interfaces/enum";
+import { rolesEnum } from "@/interfaces/enum";
 
 const dbConnection = MONGO_INSTANCES.praman;
 
@@ -27,8 +27,6 @@ export const IBlockedRequest = new Schema({
 // hand-typed and missing "roles/brand").
 export const ROLES = Object.values(rolesEnum);
 
-export const USER_TYPES = Object.values(UserTypeEnum);
-
 const UserSchema = new Schema<IUser>(
   {
     first_name: { type: String, require: true },
@@ -40,7 +38,6 @@ const UserSchema = new Schema<IUser>(
     origin: { type: IOrigin, default: undefined },
 
     // Access Control
-    type: { type: String, enum: USER_TYPES, require: true },
     roles: { type: Array(String), enum: ROLES, require: true }, // user, admin, brand, etc.
     privileges: { type: Array(String), required: true }, // contain only the restricted priviledges of the roles.
 

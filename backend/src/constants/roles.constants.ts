@@ -13,8 +13,8 @@ export interface IRole {
 }
 
 const PrivilegeDetails: Record<string, Iprivileges> = {
-  [privilegesEnum.DEFAULT]: {
-    description: "Default Privilege",
+  [privilegesEnum.DEFAULT_USER]: {
+    description: "Default Privilege of User",
     default: true,
   },
   [privilegesEnum.PROFILE]: {
@@ -29,29 +29,58 @@ const PrivilegeDetails: Record<string, Iprivileges> = {
     description: "Explore Jobs",
     default: false,
   },
+  [privilegesEnum.APPLY_JOBS]: {
+    description: "Apply For Jobs",
+    default: false,
+  },
+  [privilegesEnum.CREATE_JOBS]: {
+    description: "Create Jobs",
+    default: false,
+  },
+  [privilegesEnum.UPDATE_JOBS]: {
+    description: "Update Jobs Details",
+    default: false,
+  },
 };
 
 // Default roles and privileges while signup
-export const defaultUserAssignedRolesWhileSignup = [rolesEnum.USER];
-export const defaultUserAssignedPrivilegeWhileSignup = [
-  privilegesEnum.DEFAULT,
+export const defaultUserRolesWhileSignup = [
+  rolesEnum.USER,
+  rolesEnum.INFLUENCER,
+];
+export const defaultUserPrivilegeWhileSignup = [
+  privilegesEnum.DEFAULT_USER,
   privilegesEnum.PROFILE,
   privilegesEnum.PROFILE_UPDATE,
+
   privilegesEnum.EXPLORE_JOBS,
+];
+export const defaultBrandRolesWhileSignup = [rolesEnum.USER, rolesEnum.BRAND];
+export const defaultBrandPrivilegeWhileSignup = [
+  privilegesEnum.DEFAULT_USER,
+  privilegesEnum.PROFILE,
+  privilegesEnum.PROFILE_UPDATE,
+
+  privilegesEnum.CREATE_JOBS,
+  privilegesEnum.UPDATE_JOBS,
 ];
 
 const RolesDetails: IRole[] = [
   {
     role: rolesEnum.USER,
     parents: [],
-    children: [rolesEnum.ADMIN],
+    children: [rolesEnum.INFLUENCER, rolesEnum.BRAND, rolesEnum.ADMIN],
     privileges: [
-      privilegesEnum.DEFAULT,
+      privilegesEnum.DEFAULT_USER,
       privilegesEnum.PROFILE,
       privilegesEnum.PROFILE_UPDATE,
-
-      privilegesEnum.EXPLORE_JOBS,
     ],
+  },
+  {
+    role: rolesEnum.INFLUENCER,
+    parents: [rolesEnum.USER],
+    children: [],
+    privileges: [privilegesEnum.EXPLORE_JOBS, privilegesEnum.APPLY_JOBS],
   },
   {
     role: rolesEnum.BRAND,
@@ -76,16 +105,12 @@ const RolesDetails: IRole[] = [
 export const getSignupRolesAndPrivileges = (
   userType: UserTypeEnum,
 ): { roles: rolesEnum[]; privileges: privilegesEnum[] } => {
-  let defaultRoles = defaultUserAssignedRolesWhileSignup;
-  let defaultPrivledges = defaultUserAssignedPrivilegeWhileSignup;
+  let defaultRoles = defaultUserRolesWhileSignup;
+  let defaultPrivledges = defaultUserPrivilegeWhileSignup;
 
   if (userType === UserTypeEnum.BRAND) {
-    defaultRoles = [rolesEnum.USER, rolesEnum.BRAND];
-    defaultPrivledges = [
-      ...defaultUserAssignedPrivilegeWhileSignup,
-      privilegesEnum.CREATE_JOBS,
-      privilegesEnum.UPDATE_JOBS,
-    ];
+    defaultRoles = defaultBrandRolesWhileSignup;
+    defaultPrivledges = defaultBrandPrivilegeWhileSignup;
   }
 
   return {

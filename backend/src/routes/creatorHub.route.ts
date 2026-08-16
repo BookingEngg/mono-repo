@@ -58,8 +58,8 @@ class CreatorHubRoutes implements Routes {
       `${prefix}`,
       this.authMiddleware.getAuthUser,
       this.authMiddleware.checkRoles(
-        [rolesEnum.BRAND],
-        [privilegesEnum.UPDATE_JOBS],
+        [rolesEnum.INFLUENCER],
+        [privilegesEnum.APPLY_JOBS],
       ),
       this.validatorMiddleware.validateRequestBody(applyForJobSchema),
       asyncWrapper(this.creatorHubController.applyForJob),

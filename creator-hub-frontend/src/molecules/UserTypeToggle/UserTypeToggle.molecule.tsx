@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { TUserType } from "@/typings/auth";
 
 const OPTIONS: { value: TUserType; label: string }[] = [
-  { value: "user", label: "Creator" },
+  { value: "influencer", label: "Influencer" },
   { value: "brand", label: "Brand" },
 ];
 

@@ -25,7 +25,6 @@ export interface IUser {
   email_verified: boolean;
   user_profile_picture?: string;
 
-  type: string;
   roles: string[];
   privileges: string[];
 

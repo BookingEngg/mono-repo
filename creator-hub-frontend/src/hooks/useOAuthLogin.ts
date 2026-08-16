@@ -29,7 +29,7 @@ import { getErrorMessage } from "@/utils/util";
  * Login calls this with no argument (defaults to "user"); Signup passes its
  * selected toggle value.
  */
-const useOAuthLogin = (userType: TUserType = "user") => {
+const useOAuthLogin = (userType: TUserType = "influencer") => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
