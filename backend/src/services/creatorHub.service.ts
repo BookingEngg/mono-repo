@@ -212,7 +212,7 @@ class CreatorHubService {
       jobApplication.link_short_id = link.short_id;
     }
 
-    await this.jobDao.decrementAvailableJobCount(job_short_id);
+    await this.jobDao.incrementCompletedJobCount(job_short_id);
 
     return jobApplication;
   };

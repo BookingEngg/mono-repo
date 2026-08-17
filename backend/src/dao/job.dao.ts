@@ -15,10 +15,10 @@ class JobDao {
       .lean();
   };
 
-  public decrementAvailableJobCount = async (shortId: string) => {
+  public incrementCompletedJobCount = async (shortId: string) => {
     return await this.jobModel.updateOne(
-      { short_id: shortId, "job_count.available": { $gt: 0 } },
-      { $inc: { "job_count.available": -1 } }
+      { short_id: shortId },
+      { $inc: { "job_count.completed": 1 } }
     );
   };
 

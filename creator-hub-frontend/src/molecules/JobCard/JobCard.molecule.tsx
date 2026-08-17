@@ -15,10 +15,10 @@ type TJobCardProps = {
 
 const JobCard = ({ job, applyHref }: TJobCardProps) => {
   const previewImage = getJobPreviewImage(job);
-  const available = job.job_count?.available ?? 0;
+  const totalJobs = job.job_count?.available ?? 0;
   const completed = job.job_count?.completed ?? 0;
-  const totalJobs = available + completed;
-  const isLastJob = available === 1;
+  const remaining = Math.max(totalJobs - completed, 0);
+  const isLastJob = remaining === 1;
   const usedRatio = totalJobs > 0 ? completed / totalJobs : 0;
 
   return (
@@ -61,7 +61,7 @@ const JobCard = ({ job, applyHref }: TJobCardProps) => {
         >
           {isLastJob
             ? "Last Job Left!"
-            : `${available}/${totalJobs} jobs remaining`}
+            : `${remaining}/${totalJobs} jobs remaining`}
         </p>
         <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
           <div

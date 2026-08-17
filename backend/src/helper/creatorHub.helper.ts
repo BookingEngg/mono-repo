@@ -2,7 +2,9 @@ import { IJob, IJobCheckoutDetails, IJobListItem } from "@/interfaces/job.interf
 import { IJobApplicationJobDetails } from "@/interfaces/jobApplication.interface";
 
 export const isJobOpenForApplication = (job: IJob): boolean =>
-  job.is_active && job.is_visible && job.job_count.available > 0;
+  job.is_active &&
+  job.is_visible &&
+  job.job_count.completed < job.job_count.available;
 
 // Field names to project at the DB level for GET /creator/job — keep this in
 // sync with IJobListItem below so we never fetch more than the listing needs.
