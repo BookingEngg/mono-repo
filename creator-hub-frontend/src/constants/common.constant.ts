@@ -12,4 +12,10 @@ export const ROUTE_PATHS = {
   EXPLORE: "/explore",
   PROFILE: "/profile",
   CREATE_JOB: "/job/new",
+  // Route pattern for React Router registration — use getJobCheckoutPath()
+  // to build an actual link with a real short_id.
+  JOB_CHECKOUT: "/jobs/:shortId/checkout",
 };
+
+export const getJobCheckoutPath = (shortId: string): string =>
+  `/jobs/${shortId}/checkout`;

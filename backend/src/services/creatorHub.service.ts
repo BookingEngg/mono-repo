@@ -2,9 +2,14 @@ import JobDao from "@/dao/job.dao";
 import JobApplicationDao from "@/dao/jobApplication.dao";
 import LinkDao from "@/dao/link.dao";
 import ConversionDao from "@/dao/conversion.dao";
+import UserDao from "@/dao/user.dao";
 import {
   isJobOpenForApplication,
   buildJobApplicationJobDetails,
+  buildJobListItem,
+  buildJobCheckoutDetails,
+  JOB_LIST_PROJECTION,
+  JOB_CHECKOUT_PROJECTION,
 } from "@/helper/creatorHub.helper";
 import {
   JobApplicationStatusEnum,
@@ -25,12 +30,14 @@ class CreatorHubService {
   private jobApplicationDao = new JobApplicationDao();
   private linkDao = new LinkDao();
   private conversionDao = new ConversionDao();
+  private userDao = new UserDao();
 
   // payload is already validated by ValidatorMiddleware.validateRequestBody(createJobSchema)
   public createJob = async (brand: IUser, payload: ICreateJobPayload) => {
     const {
       job_type,
       product_id,
+      product_name,
       product_link,
       preview_urls,
       category,
@@ -44,8 +51,8 @@ class CreatorHubService {
       job_type,
       seller_id: brand._id,
       product_id,
+      product_name,
       product_link,
-      brand_name: brand.first_name + " " + brand.last_name,
       preview_urls,
       category,
       earning_model,
@@ -56,6 +63,97 @@ class CreatorHubService {
       },
       gender,
     });
+  };
+
+  // brand's display name is not stored on the job — resolved on read from
+  // the seller's user record (first_name + last_name)
+  private getBrandName = (user?: IUser | null): string | undefined =>
+    user ? `${user.first_name} ${user.last_name}` : undefined;
+
+  /**
+   * Shared by listJobsForInfluencer/listJobsForBrand — runs the paginated
+   * query against the given filter and shapes the response identically.
+   */
+  private buildPaginatedJobsResponse = async (
+    filter: Record<string, unknown>,
+    pagination: { page: number; limit: number },
+  ) => {
+    const { response, count } = await this.jobDao.getPaginatedJobs({
+      filter,
+      pagination,
+      projection: JOB_LIST_PROJECTION,
+    });
+
+    const sellerIds = [...new Set(response.map((job) => job.seller_id))];
+    const sellers = await this.userDao.getUserByUserIds(sellerIds, [
+      "first_name",
+      "last_name",
+    ]);
+    const brandNameById = new Map(
+      sellers.map((seller) => [String(seller._id), this.getBrandName(seller)]),
+    );
+
+    return {
+      jobs: response.map((job) =>
+        buildJobListItem(job, brandNameById.get(String(job.seller_id))),
+      ),
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        total: count,
+        total_pages: Math.ceil(count / pagination.limit),
+      },
+    };
+  };
+
+  /**
+   * Influencer's explore feed — every currently active/visible job across
+   * all brands.
+   */
+  public listJobsForInfluencer = async (pagination: {
+    page: number;
+    limit: number;
+  }) => {
+    return this.buildPaginatedJobsResponse(
+      { is_active: true, is_visible: true },
+      pagination,
+    );
+  };
+
+  /**
+   * A brand's own posted jobs only — regardless of active/visible state, so
+   * a brand can still see jobs it has paused or that have run out.
+   */
+  public listJobsForBrand = async (
+    brandUserId: string,
+    pagination: { page: number; limit: number },
+  ) => {
+    return this.buildPaginatedJobsResponse(
+      { seller_id: brandUserId },
+      pagination,
+    );
+  };
+
+  /**
+   * Job detail for the influencer's checkout/apply-summary screen. Brand
+   * accounts never reach this — gated at the route by role, not here.
+   */
+  public getJobCheckoutDetails = async (shortId: string) => {
+    const job = await this.jobDao.getJobByShortId(
+      shortId,
+      JOB_CHECKOUT_PROJECTION,
+    );
+
+    if (!job || !isJobOpenForApplication(job)) {
+      throw new Error("Job not found");
+    }
+
+    const seller = await this.userDao.getUserByUserId(job.seller_id, [
+      "first_name",
+      "last_name",
+    ]);
+
+    return buildJobCheckoutDetails(job, this.getBrandName(seller));
   };
 
   /**
@@ -74,12 +172,21 @@ class CreatorHubService {
       throw new Error("Invalid job application");
     }
 
-    const existingJobApplication =
-      await this.jobApplicationDao.getApplicationByUserAndJob(
-        userId,
-        job_short_id,
+    const existingJobApplications =
+      await this.jobApplicationDao.getJobApplicationByUserIds(
+        [userId],
+        [JobApplicationStatusEnum.APPLIED],
+        [],
       );
-    if (existingJobApplication) {
+
+    if (existingJobApplications.length >= 3) {
+      throw new Error("You can apply for a maximum of 3 jobs at a time");
+    }
+
+    const existingApplicationForJob = existingJobApplications.find(
+      (jobApplication) => jobApplication.job_short_id === job_short_id,
+    );
+    if (existingApplicationForJob) {
       throw new Error("You have already applied for this job");
     }
 

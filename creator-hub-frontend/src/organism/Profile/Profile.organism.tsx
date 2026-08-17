@@ -34,7 +34,7 @@ const Profile = () => {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex w-full flex-col gap-6">
       <div className="flex items-center gap-4">
         <Avatar className="size-16">
           {/*
@@ -60,7 +60,7 @@ const Profile = () => {
         </div>
       </div>
 
-      <Card>
+      <Card className="max-w-md">
         <CardHeader>
           <CardTitle className="text-base">Account</CardTitle>
           <CardDescription>Signed in to Creator Hub.</CardDescription>

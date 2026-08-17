@@ -61,6 +61,9 @@ export const defaultBrandPrivilegeWhileSignup = [
   privilegesEnum.PROFILE,
   privilegesEnum.PROFILE_UPDATE,
 
+  // A brand also needs to list its own jobs, so it shares this privilege
+  // with influencers rather than having its own separate "view jobs" grant.
+  privilegesEnum.EXPLORE_JOBS,
   privilegesEnum.CREATE_JOBS,
   privilegesEnum.UPDATE_JOBS,
 ];
@@ -86,7 +89,11 @@ const RolesDetails: IRole[] = [
     role: rolesEnum.BRAND,
     parents: [rolesEnum.USER],
     children: [],
-    privileges: [privilegesEnum.CREATE_JOBS, privilegesEnum.UPDATE_JOBS],
+    privileges: [
+      privilegesEnum.EXPLORE_JOBS,
+      privilegesEnum.CREATE_JOBS,
+      privilegesEnum.UPDATE_JOBS,
+    ],
   },
   {
     role: rolesEnum.ADMIN,

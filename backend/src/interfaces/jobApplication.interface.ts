@@ -6,7 +6,6 @@ import { IJobCategory, IEarningModel } from "./job.interface";
 export interface IJobApplicationJobDetails {
   seller_id: string;
   product_id: string;
-  brand_name?: string;
   product_link?: string;
   category?: IJobCategory;
   earning_model?: IEarningModel;

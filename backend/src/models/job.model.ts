@@ -17,8 +17,8 @@ const JobSchema: Schema<IJob> = new Schema(
     short_id: { type: String }, // identifier
     job_type: { type: String, enum: JobTypeEnum, required: true },
 
-    brand_name: { type: String },
     product_link: { type: String, required: true },
+    product_name: { type: String, required: true },
     preview_urls: [
       {
         _id: false,

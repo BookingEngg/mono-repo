@@ -9,6 +9,7 @@ import HomePage from "@/pages/Home";
 import ExplorePage from "@/pages/Explore";
 import ProfilePage from "@/pages/Profile";
 import CreateJobPage from "@/pages/CreateJob";
+import CheckoutPage from "@/pages/Checkout";
 import NotFoundPage from "@/pages/NotFound";
 // Layout
 import AuthLayout from "@/layout/AuthLayout";
@@ -71,6 +72,13 @@ const App = () => {
                 element={<CreateJobPage />}
               />
             </Route>
+
+            {/*
+              Rendered outside MainLayout: a focused, single-purpose flow with
+              its own header, not the SideNav/BottomNav chrome.
+            */}
+            <Route path={ROUTE_PATHS.JOB_CHECKOUT} element={<CheckoutPage />} />
+
             {/* Any URL an authorized creator has no business on falls back here */}
             <Route path="*" element={<NotFoundPage />} />
           </>

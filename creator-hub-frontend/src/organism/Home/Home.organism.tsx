@@ -27,7 +27,7 @@ const Home = () => {
   const { user } = useAppSelector(getAuthUser);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex w-full flex-col gap-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold">
           Welcome{user?.first_name ? `, ${user.first_name}` : ""}
@@ -42,7 +42,7 @@ const Home = () => {
         account rather than a dead link they can't use.
       */}
       <RequireAccess privilege={PRIVILEGES.CREATE_JOBS}>
-        <Card>
+        <Card className="max-w-md">
           <CardHeader>
             <CardTitle className="text-base">Post a job</CardTitle>
             <CardDescription>

@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import CreatorHubService from "@/services/creatorHub.service";
 import { appendUtmParams } from "@/helper/creatorHub.helper";
 import { nanoid } from "nanoid";
+import { IListJobsQuery } from "@/validators/creatorHub.validator";
 
 const SESSION_ID_COOKIE = "creator_session_id";
 
@@ -19,6 +20,55 @@ class CreatorHubControllers {
 
     const job = await this.creatorHubService.createJob(brand, req.body);
     return res.send({ status: "success", data: job });
+  };
+
+  /**
+   * Influencer's explore feed — every active job across all brands.
+   */
+  public listJobsForInfluencer = async (
+    req: Request,
+    res: Response,
+  ): Promise<any> => {
+    const { page, limit } = req.query as unknown as IListJobsQuery;
+    const result = await this.creatorHubService.listJobsForInfluencer({
+      page,
+      limit,
+    });
+
+    return res.send({ status: "success", ...result });
+  };
+
+  /**
+   * A brand's own posted jobs only.
+   */
+  public listJobsForBrand = async (
+    req: Request,
+    res: Response,
+  ): Promise<any> => {
+    if (!req.user?._id) {
+      throw new Error("User not found");
+    }
+
+    const { page, limit } = req.query as unknown as IListJobsQuery;
+    const result = await this.creatorHubService.listJobsForBrand(req.user._id, {
+      page,
+      limit,
+    });
+
+    return res.send({ status: "success", ...result });
+  };
+
+  /**
+   * Job detail for the influencer's checkout/apply-summary screen.
+   */
+  public getJobCheckoutDetails = async (
+    req: Request,
+    res: Response,
+  ): Promise<any> => {
+    const details = await this.creatorHubService.getJobCheckoutDetails(
+      req.params.shortId,
+    );
+    return res.send({ status: "success", data: details });
   };
 
   /**

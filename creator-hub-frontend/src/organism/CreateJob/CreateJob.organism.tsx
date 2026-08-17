@@ -64,6 +64,7 @@ const GENDERS: { value: TGender; label: string }[] = [
 
 const defaultFormValue = {
   product_id: "",
+  product_name: "",
   product_link: "",
   category_l1: "",
   category_l2: "",
@@ -101,6 +102,7 @@ const buildPayload = (form: TFormValue): ICreateJobPayload => {
   const payload: ICreateJobPayload = {
     job_type: "affiliate",
     product_id: form.product_id.trim(),
+    product_name: form.product_name.trim(),
     product_link: form.product_link.trim(),
   };
 
@@ -150,6 +152,9 @@ const validate = (form: TFormValue): TFieldErrors => {
 
   if (!form.product_id.trim()) {
     errors.product_id = "Product ID is required";
+  }
+  if (!form.product_name.trim()) {
+    errors.product_name = "Product name is required";
   }
   if (!form.product_link.trim()) {
     errors.product_link = "Product link is required";
@@ -224,7 +229,7 @@ const CreateJob = () => {
   }, [form, navigate]);
 
   return (
-    <Card className="w-full">
+    <Card className="mx-auto w-full max-w-2xl">
       <CardHeader>
         <CardTitle className="text-2xl">Post a job</CardTitle>
         <CardDescription>
@@ -249,6 +254,16 @@ const CreateJob = () => {
             disabled={loading}
             error={fieldErrors.product_id}
             onChange={(value) => handleFieldChange(value, "product_id")}
+          />
+
+          <FormField
+            id="product_name"
+            label="Product name"
+            required
+            value={form.product_name}
+            disabled={loading}
+            error={fieldErrors.product_name}
+            onChange={(value) => handleFieldChange(value, "product_name")}
           />
 
           <FormField

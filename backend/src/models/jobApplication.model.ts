@@ -23,7 +23,6 @@ const JobApplicationSchema: Schema<IJobApplication> = new Schema(
         {
           seller_id: { type: String, required: true },
           product_id: { type: String, required: true },
-          brand_name: { type: String },
           product_link: { type: String },
           category: {
             _id: false,

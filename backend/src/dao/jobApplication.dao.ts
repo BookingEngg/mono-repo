@@ -10,7 +10,7 @@ class JobApplicationDao {
 
   public getApplicationByUserAndJob = async (
     userId: string,
-    jobShortId: string
+    jobShortId: string,
   ) => {
     return await this.jobApplicationModel
       .findOne({ user_id: userId, job_short_id: jobShortId })
@@ -21,13 +21,28 @@ class JobApplicationDao {
     return await this.jobApplicationModel.findOne({ short_id: shortId }).lean();
   };
 
+  public getJobApplicationByUserIds = async (
+    userIds: string[],
+    orderStatus: string[] = [],
+    fields: string[] = [],
+  ) => {
+    return await this.jobApplicationModel
+      .find({
+        user_id: { $in: userIds },
+        ...(orderStatus.length ? { order_status: { $in: orderStatus } } : {}),
+        is_active: true,
+      })
+      .select(fields)
+      .lean();
+  };
+
   public updateApplicationByShortId = async (
     shortId: string,
-    payload: Partial<IJobApplication>
+    payload: Partial<IJobApplication>,
   ) => {
     return await this.jobApplicationModel.updateOne(
       { short_id: shortId },
-      payload
+      payload,
     );
   };
 }

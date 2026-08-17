@@ -11,6 +11,7 @@ import ValidatorMiddleware from "@/middleware/validator.middleware";
 // Validators
 import {
   createJobSchema,
+  listJobsQuerySchema,
   applyForJobSchema,
   resolveLinkParamsSchema,
   recordConversionSchema,
@@ -35,12 +36,48 @@ class CreatorHubRoutes implements Routes {
       this.creatorHubController.redirectLink,
     );
 
+    this.router.get(
+      `${this.path}/checkout/:shortId`,
+      this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.INFLUENCER],
+        [privilegesEnum.EXPLORE_JOBS],
+      ),
+      this.validatorMiddleware.validateRequestParams(resolveLinkParamsSchema),
+      asyncWrapper(this.creatorHubController.getJobCheckoutDetails),
+    );
+
     this.initializeJobRoutes(`${this.path}/job`);
     this.initializeJobApplicationRoutes(`${this.path}/job-application`);
     this.initializeConversionRoutes(`${this.internalPath}/conversion`);
   }
 
   private initializeJobRoutes(prefix: string) {
+    // Split in two rather than one `[BRAND, INFLUENCER]` role check —
+    // checkRoles requires ALL listed roles on the user (AND, not OR), so a
+    // single endpoint accepting either role isn't expressible there.
+    this.router.get(
+      `${prefix}`,
+      this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.INFLUENCER],
+        [privilegesEnum.EXPLORE_JOBS],
+      ),
+      this.validatorMiddleware.validateRequestQuery(listJobsQuerySchema),
+      asyncWrapper(this.creatorHubController.listJobsForInfluencer),
+    );
+
+    this.router.get(
+      `${prefix}/brand`,
+      this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.BRAND],
+        [privilegesEnum.EXPLORE_JOBS],
+      ),
+      this.validatorMiddleware.validateRequestQuery(listJobsQuerySchema),
+      asyncWrapper(this.creatorHubController.listJobsForBrand),
+    );
+
     this.router.post(
       `${prefix}`,
       this.authMiddleware.getAuthUser,

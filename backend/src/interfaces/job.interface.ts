@@ -25,8 +25,8 @@ export interface IJob {
   seller_id: string; // brand placing the job
   product_id: string;
   product_link: string;
+  product_name: string;
   preview_urls?: IJobMedia[]; // media links (images/videos) for the job preview
-  brand_name?: string;
 
   category?: IJobCategory;
 
@@ -49,4 +49,27 @@ export interface IJob {
 
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+// Shape returned by GET /creator/job — only what the listing card needs, not
+// the full job document (seller_id, product_link, earning_model, etc.)
+export interface IJobListItem {
+  short_id?: string;
+  job_type: JobTypeEnum;
+  brand_name?: string; // resolved from the seller's user record, not stored on the job
+  product_name: string;
+  category?: IJobCategory;
+  preview_urls?: IJobMedia[];
+  job_count: {
+    available: number;
+    completed: number;
+  };
+}
+
+// Shape returned by GET /creator/job/checkout/:shortId — everything the
+// checkout summary screen needs on top of the listing shape: what the
+// influencer earns and the due date, but still nothing seller_id/internal.
+export interface IJobCheckoutDetails extends IJobListItem {
+  earning_model?: IEarningModel;
+  due_date?: number;
 }

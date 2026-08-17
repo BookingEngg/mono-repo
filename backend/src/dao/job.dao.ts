@@ -21,6 +21,28 @@ class JobDao {
       { $inc: { "job_count.available": -1 } }
     );
   };
+
+  public getPaginatedJobs = async (payload: {
+    filter: Record<string, unknown>;
+    pagination: { page: number; limit: number };
+    projection?: string[];
+  }) => {
+    const { page, limit: pageSize } = payload.pagination;
+    const filter = payload.filter || {};
+
+    const [response, count] = await Promise.all([
+      this.jobModel
+        .find(filter)
+        .select(payload.projection || [])
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .lean(),
+      this.jobModel.countDocuments(filter),
+    ]);
+
+    return { response, count };
+  };
 }
 
 export default JobDao;

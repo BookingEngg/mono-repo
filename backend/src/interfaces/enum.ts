@@ -57,6 +57,7 @@ export enum JobApplicationStatusEnum {
   PENDING = "pending",
   APPLIED = "applied",
   CANCELLED = "cancelled",
+  CLOSED = "closed",
 }
 
 export enum rolesEnum {

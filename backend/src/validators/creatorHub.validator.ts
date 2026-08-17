@@ -33,6 +33,7 @@ const ageLimitSchema = z.object({
 export const createJobSchema = z.object({
   job_type: z.enum([JobTypeEnum.AFFILIATE]),
   product_id: z.string().min(1).max(50),
+  product_name: z.string().min(1).max(200),
   product_link: z.string().url(),
   preview_urls: z.array(jobMediaSchema).optional(),
   category: jobCategorySchema.optional(),
@@ -43,6 +44,13 @@ export const createJobSchema = z.object({
 });
 
 export type ICreateJobPayload = z.infer<typeof createJobSchema>;
+
+export const listJobsQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(50).default(10),
+});
+
+export type IListJobsQuery = z.infer<typeof listJobsQuerySchema>;
 
 export const applyForJobSchema = z.object({
   job_short_id: z.string().min(1),
