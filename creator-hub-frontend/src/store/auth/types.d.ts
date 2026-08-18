@@ -1,1 +1,1 @@
-export type { IAuth, IUser } from "@/typings/auth";
+export type { IAuth, IUser, IUpdateOnboardingPayload } from "@/typings/auth";

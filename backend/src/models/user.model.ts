@@ -1,7 +1,7 @@
 import { Schema } from "mongoose";
 import { MONGO_INSTANCES } from "@database";
 import { IUser } from "@/interfaces/user.interface";
-import { rolesEnum } from "@/interfaces/enum";
+import { GenderEnum, rolesEnum } from "@/interfaces/enum";
 
 const dbConnection = MONGO_INSTANCES.praman;
 
@@ -10,6 +10,17 @@ export const IOrigin = new Schema({
   state: String,
   zipcode: Number,
 });
+
+// Influencer onboarding — instagram/facebook/youtube only for now, each
+// defaulting to null until the creator fills the onboarding form.
+export const ISocialMediaLinks = new Schema(
+  {
+    instagram: { type: String, default: null },
+    facebook: { type: String, default: null },
+    youtube: { type: String, default: null },
+  },
+  { _id: false },
+);
 
 export const IFriendsRequest = new Schema({
   user_id: String, // Sender or receiver user id
@@ -36,6 +47,11 @@ const UserSchema = new Schema<IUser>(
     email_verified: { type: Boolean, default: false },
     contact: { type: String }, // Still @depricated
     origin: { type: IOrigin, default: undefined },
+
+    // Influencer onboarding
+    dob: { type: Date, default: null },
+    gender: { type: String, enum: GenderEnum, default: null },
+    social_media_links: { type: ISocialMediaLinks, default: () => ({}) },
 
     // Access Control
     roles: { type: Array(String), enum: ROLES, require: true }, // user, admin, brand, etc.

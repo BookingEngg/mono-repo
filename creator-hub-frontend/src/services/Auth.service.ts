@@ -1,7 +1,11 @@
 // Client
 import axiosClient from "@/services/http";
 // Typings
-import { IOAuthClientDetails, TUserType } from "@/typings/auth";
+import {
+  IOAuthClientDetails,
+  IUpdateOnboardingPayload,
+  TUserType,
+} from "@/typings/auth";
 
 // Service to send otp via email
 export const sendOtp = async (payload: { email: string }) => {
@@ -36,6 +40,19 @@ export const getUser = async () => {
 export const logoutAuthUser = async () => {
   const response = await axiosClient.post({
     url: "/user/logout",
+  });
+
+  return response.data;
+};
+
+// Influencer onboarding — date of birth, gender, social media links. Every
+// field is independently optional; omit what you don't want to change.
+export const updateOnboardingDetails = async (
+  payload: IUpdateOnboardingPayload
+) => {
+  const response = await axiosClient.put({
+    url: "/user/onboarding",
+    body: payload,
   });
 
   return response.data;

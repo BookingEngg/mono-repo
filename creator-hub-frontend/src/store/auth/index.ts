@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IAuth } from "./types";
+import { IAuth, IUser } from "./types";
 
 const initialState: IAuth = {
   user: null,
@@ -24,6 +24,14 @@ const authSlice = createSlice({
         isAuthorized: false,
       };
     },
+    // Merges a partial update (e.g. after saving the onboarding form) into
+    // the current user rather than requiring a full re-login/re-fetch.
+    updateUser: (state: IAuth, action: PayloadAction<Partial<IUser>>) => {
+      return {
+        ...state,
+        user: state.user ? { ...state.user, ...action.payload } : state.user,
+      };
+    },
   },
 });
 
@@ -35,5 +43,5 @@ export const isUserAuthorized = (state: { auth: IAuth }): boolean => {
   return state.auth.isAuthorized;
 };
 
-export const { login, logout } = authSlice.actions;
+export const { login, logout, updateUser } = authSlice.actions;
 export default authSlice.reducer;

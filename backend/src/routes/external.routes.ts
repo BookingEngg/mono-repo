@@ -13,6 +13,9 @@ import OAuthController from "@/controllers/oAuth.controller";
 import RevplusController from "@/controllers/revplus.controller";
 // Middlewares
 import AuthMiddleware from "@/middleware/auth.middleware";
+import ValidatorMiddleware from "@/middleware/validator.middleware";
+// Validators
+import { updateOnboardingSchema } from "@/validators/user.validator";
 // Wrappers
 import { asyncWrapper } from "@/middleware/common.middleware";
 
@@ -21,6 +24,7 @@ class ExternalRoutes implements Routes {
   public router = Router();
 
   private authMiddleware = new AuthMiddleware();
+  private validatorMiddleware = new ValidatorMiddleware();
 
   // Controllers
   private userController = new UserController();
@@ -88,6 +92,17 @@ class ExternalRoutes implements Routes {
       `${prefix}/summary`,
       this.authMiddleware.getAuthUser,
       asyncWrapper(this.userController.getDashboardSummary),
+    );
+
+    this.router.put(
+      `${prefix}/onboarding`,
+      this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.USER],
+        [privilegesEnum.PROFILE_UPDATE],
+      ),
+      this.validatorMiddleware.validateRequestBody(updateOnboardingSchema),
+      asyncWrapper(this.userController.updateOnboardingDetails),
     );
   }
 

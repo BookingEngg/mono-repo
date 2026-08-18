@@ -3,6 +3,7 @@ import {
   RequestStatusType,
   BlockedType,
 } from "@/constants/common.constants";
+import { GenderEnum } from "./enum";
 
 export interface IBlockedUser {
   user_id: string;
@@ -15,6 +16,14 @@ export interface IRequestedUser {
   request_status: RequestStatusType;
 }
 
+// Influencer onboarding — social handles/links, kept flat (not a dynamic
+// list) since only these three platforms are supported for now.
+export interface ISocialMediaLinks {
+  instagram: string | null;
+  facebook: string | null;
+  youtube: string | null;
+}
+
 export interface IUser {
   _id: string;
   first_name: string;
@@ -24,6 +33,12 @@ export interface IUser {
   origin: IOrigin;
   email_verified: boolean;
   user_profile_picture?: string;
+
+  // Influencer onboarding fields — absent until the creator fills the
+  // onboarding form, so every field defaults to null rather than undefined.
+  dob: Date | null;
+  gender: GenderEnum | null;
+  social_media_links: ISocialMediaLinks;
 
   roles: string[];
   privileges: string[];

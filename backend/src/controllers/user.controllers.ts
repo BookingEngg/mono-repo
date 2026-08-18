@@ -35,6 +35,26 @@ class UserController {
 
     return res.send({ data: response });
   };
+
+  /**
+   * Influencer onboarding — sets age/gender/social media links on the
+   * authenticated user's own account.
+   */
+  public updateOnboardingDetails = async (
+    req: Request,
+    res: Response,
+  ): Promise<any> => {
+    if (!req.user?._id) {
+      return res.status(401);
+    }
+
+    const user = await this.userService.updateOnboardingDetails(
+      req.user._id,
+      req.body,
+    );
+
+    return res.send({ status: "success", data: user });
+  };
 }
 
 export default UserController;

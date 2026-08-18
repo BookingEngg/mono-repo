@@ -1,3 +1,11 @@
+export type TGender = "male" | "female";
+
+export interface ISocialMediaLinks {
+  instagram?: string | null;
+  facebook?: string | null;
+  youtube?: string | null;
+}
+
 export interface IUser {
   _id: string;
   first_name: string;
@@ -6,6 +14,20 @@ export interface IUser {
   user_profile_picture?: string;
   roles: string[];
   privileges: string[];
+
+  // Influencer onboarding — absent until the creator fills the onboarding
+  // form, so these are null rather than just missing.
+  dob?: string | null;
+  gender?: TGender | null;
+  social_media_links?: ISocialMediaLinks | null;
+}
+
+// Every field is independently optional — PUT /user/onboarding only touches
+// what's sent, so a partially-filled form never clobbers other fields.
+export interface IUpdateOnboardingPayload {
+  dob?: string | null;
+  gender?: TGender | null;
+  social_media_links?: ISocialMediaLinks;
 }
 
 export interface IAuth {
