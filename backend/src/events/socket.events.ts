@@ -24,7 +24,7 @@ class SocketEvents {
   private redisUtil = new RedisUtil();
 
   constructor() {
-    this.redisPubClient.connect();
+    // this.redisPubClient.connect();  // TODO:: Need to fix this (Chat Will not work)
   }
 
   public handleIncomingChannelMessage = async (data: string) => {

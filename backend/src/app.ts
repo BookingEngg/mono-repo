@@ -91,7 +91,7 @@ class App {
     );
 
     this.initilizeRoutes(this.routes);
-    this.initilizeSocketEvents();
+    // this.initilizeSocketEvents();  // TODO:: Need to fix this (Chat Will not work)
   }
 
   private initilizeRoutes(routes: Routes[]) {
