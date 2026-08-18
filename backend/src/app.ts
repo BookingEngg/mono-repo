@@ -27,6 +27,8 @@ import {
 import { getRedisUrl } from "./util/utils.util";
 // Types
 import { Routes } from "@interfaces/common.interface";
+// Middleware
+import { errorHandler } from "@/middleware/common.middleware";
 
 class App {
   private app: express.Application;
@@ -89,18 +91,21 @@ class App {
     );
 
     this.initilizeRoutes(this.routes);
-    this.initilizeSocketEvents();
+    // this.initilizeSocketEvents();  // TODO:: Need to fix this (Chat Will not work)
   }
 
   private initilizeRoutes(routes: Routes[]) {
     routes.forEach((route) =>
       this.app.use(`/${serviceRoute || ""}`, route.router),
     );
+
+    // Must be registered after every route so it catches whatever they forward.
+    this.app.use(errorHandler);
   }
 
   public initilizeSocketEvents = async () => {
-    const redisPubClient = createClient({ url: getRedisUrl() });
-    const redisSubClient = createClient({ url: getRedisUrl() });
+    const redisPubClient = createClient(getRedisUrl());
+    const redisSubClient = createClient(getRedisUrl());
 
     const serverId = global.server_id;
     const channelName = `server:${serverId}`;

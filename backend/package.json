@@ -7,7 +7,7 @@
     "build": "swc src -d dist --source-maps --copy-files",
     "dev": "cross-env NODE_ENV=development nodemon",
     "prod": "cross-env NODE_ENV=prod nodemon",
-    "script": "npm run build && cross-env NODE_ENV=prod ts-node -r tsconfig-paths/register --transpile-only ./dist/src/evolution/createGroup.js"
+    "script": "npm run build && cross-env NODE_ENV=prod ts-node -r tsconfig-paths/register --transpile-only ./dist/src/evolution/backFillDefaultRoles.js"
   },
   "keywords": [
     "node-js"
@@ -27,14 +27,15 @@
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
     "mongoose": "^8.8.1",
-    "nanoid": "^5.1.5",
     "morgan": "^1.10.1",
+    "nanoid": "^3.3.8",
     "nconf": "^0.12.1",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.16",
     "otp-generator": "^4.0.1",
     "ramda": "^0.30.1",
-    "socket.io": "^4.8.1"
+    "socket.io": "^4.8.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@swc/cli": "^0.6.0",

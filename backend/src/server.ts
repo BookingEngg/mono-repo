@@ -3,11 +3,13 @@ import App from "./app";
 import ExternalRoutes from "@routes/external.routes";
 import InternalRoutes from "@/routes/internal.routes";
 import IndexRoutes from "@routes/index.routes";
+import CreatorHubRoutes from "@/routes/creatorHub.route";
 
 const app = new App([
   new ExternalRoutes(),
   new InternalRoutes(),
   new IndexRoutes(),
+  new CreatorHubRoutes(),
 ]);
 
 app.listenServer();

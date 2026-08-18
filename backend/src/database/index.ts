@@ -5,15 +5,16 @@ import { IDataBase } from "@/typings/config";
 const mongoConnectionInstance: Record<string, mongoose.Connection> = {};
 // mongoose.set("debug", isProduction);
 
-const getConnectionUrl = (config) => {
-  const url = [
-    "mongodb",
-    isProduction ? `+srv://${config.username}:${config.password}` : "://",
-    `${config.url}`,
-    `${!isProduction ? "/" : ""}${config.name}`,
-    config.post_url,
-  ].join("");
-  return url;
+const getConnectionUrl = (config: IDataBase) => {
+  const hasCredentials = Boolean(config.username && config.password);
+
+  if (hasCredentials) {
+    // Atlas/SRV-style cluster — port is resolved via DNS SRV records, not specified here
+    return `mongodb+srv://${config.username}:${config.password}${config.url}${config.name}${config.post_url}`;
+  }
+
+  // Local/standard connection — needs an explicit host:port
+  return `mongodb://${config.url}:${config.port}/${config.name}${config.post_url}`;
 };
 
 const getDataBaseConnection = (config: IDataBase) => {
