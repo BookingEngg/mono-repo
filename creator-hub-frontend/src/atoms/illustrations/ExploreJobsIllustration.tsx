@@ -71,27 +71,27 @@ const ExploreJobsIllustration = ({
       <rect x="176" y="184" width="32" height="6" rx="3" className="text-muted-foreground/60" fill="currentColor" />
 
       {/* Liked heart overlay, bottom-right of the screen */}
-      <g transform="translate(216 196)">
-        <path
-          d="M0 6 C-8 0 -9 -8 -3 -9 C0 -10 0 -6 0 -4 C0 -6 0 -10 3 -9 C9 -8 8 0 0 6 Z"
-          className="text-destructive"
-          fill="currentColor"
-        />
+      <g transform="translate(216 196) scale(0.7)">
+        <path d={HEART_PATH} className="text-destructive" fill="currentColor" />
       </g>
 
       {/* Marketing/megaphone badge pinned to the phone's top-left corner */}
       <g transform="translate(150 78) rotate(-14)">
         <circle r="22" className="text-primary" fill="currentColor" />
+        <g className="text-primary-foreground" fill="currentColor">
+          {/* Horn: narrow mouthpiece flaring to a wide bell */}
+          <path d="M-9 -5 L8 -14 C9.5 -14.7 11 -13.6 11 -12 L11 12 C11 13.6 9.5 14.7 8 14 L-9 5 Z" />
+          {/* Grip at the mouthpiece end */}
+          <rect x="-13" y="-3" width="4.5" height="6" rx="1.5" />
+        </g>
+        {/* Sound wave broadcasting from the bell */}
         <path
-          d="M-9 -7 L4 -12 L4 12 L-9 7 Z"
+          d="M14 -7 C17 -4 17 4 14 7"
           className="text-primary-foreground"
-          fill="currentColor"
-        />
-        <rect x="-13" y="-4" width="4" height="8" rx="1" className="text-primary-foreground" fill="currentColor" />
-        <path
-          d="M-4 9 L-6 16 C-6 18 -3 19 -2 17 L1 10 Z"
-          className="text-primary-foreground"
-          fill="currentColor"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          fill="none"
         />
       </g>
 
@@ -99,11 +99,9 @@ const ExploreJobsIllustration = ({
       <g transform="translate(84 108)">
         <circle r="19" className="text-background" fill="currentColor" />
         <circle r="19" className="text-border" stroke="currentColor" strokeWidth="2" />
-        <path
-          d="M0 8 C-10 0 -12 -10 -4 -12 C0 -13 0 -8 0 -6 C0 -8 0 -13 4 -12 C12 -10 10 0 0 8 Z"
-          className="text-destructive"
-          fill="currentColor"
-        />
+        <g transform="scale(1.05)">
+          <path d={HEART_PATH} className="text-destructive" fill="currentColor" />
+        </g>
       </g>
 
       <g transform="translate(316 130)">
@@ -131,11 +129,10 @@ const ExploreJobsIllustration = ({
       <g transform="translate(288 216)">
         <circle r="16" className="text-background" fill="currentColor" />
         <circle r="16" className="text-border" stroke="currentColor" strokeWidth="2" />
-        <path
-          d="M-6 -1 C-6 -5 -1 -5 0 -1 C1 -5 6 -5 6 -1 C6 3 0 7 0 7 C0 7 -6 3 -6 -1 Z"
-          className="text-destructive"
-          fill="currentColor"
-        />
+        <g className="text-primary" fill="currentColor">
+          <rect x="-9" y="-9" width="18" height="12" rx="3" />
+          <path d="M-4 3 L-7 9 L1 3 Z" />
+        </g>
       </g>
 
       {/* Scattered sparkles */}
