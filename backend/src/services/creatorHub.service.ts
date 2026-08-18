@@ -6,10 +6,12 @@ import UserDao from "@/dao/user.dao";
 import {
   isJobOpenForApplication,
   buildJobApplicationJobDetails,
+  buildJobApplicationListItem,
   buildJobListItem,
   buildJobCheckoutDetails,
   JOB_LIST_PROJECTION,
   JOB_CHECKOUT_PROJECTION,
+  JOB_APPLICATION_LIST_PROJECTION,
 } from "@/helper/creatorHub.helper";
 import {
   JobApplicationStatusEnum,
@@ -70,6 +72,17 @@ class CreatorHubService {
   private getBrandName = (user?: IUser | null): string | undefined =>
     user ? `${user.first_name} ${user.last_name}` : undefined;
 
+  // Batch-resolves seller_id -> seller (only the fields a brand name needs),
+  // shared by every listing that needs to show a brand name without storing
+  // it redundantly.
+  private resolveSellersBySellerId = async (sellerIds: string[]) => {
+    const sellers = await this.userDao.getUserByUserIds(
+      [...new Set(sellerIds)],
+      ["first_name", "last_name"],
+    );
+    return new Map(sellers.map((seller) => [String(seller._id), seller]));
+  };
+
   /**
    * Shared by listJobsForInfluencer/listJobsForBrand — runs the paginated
    * query against the given filter and shapes the response identically.
@@ -84,18 +97,16 @@ class CreatorHubService {
       projection: JOB_LIST_PROJECTION,
     });
 
-    const sellerIds = [...new Set(response.map((job) => job.seller_id))];
-    const sellers = await this.userDao.getUserByUserIds(sellerIds, [
-      "first_name",
-      "last_name",
-    ]);
-    const brandNameById = new Map(
-      sellers.map((seller) => [String(seller._id), this.getBrandName(seller)]),
+    const sellerById = await this.resolveSellersBySellerId(
+      response.map((job) => job.seller_id),
     );
 
     return {
       jobs: response.map((job) =>
-        buildJobListItem(job, brandNameById.get(String(job.seller_id))),
+        buildJobListItem(
+          job,
+          this.getBrandName(sellerById.get(String(job.seller_id))),
+        ),
       ),
       pagination: {
         page: pagination.page,
@@ -215,6 +226,53 @@ class CreatorHubService {
     await this.jobDao.incrementCompletedJobCount(job_short_id);
 
     return jobApplication;
+  };
+
+  /**
+   * Every job application the influencer has made, most recent first.
+   */
+  public listJobApplicationsForInfluencer = async (
+    userId: string,
+    pagination: { page: number; limit: number },
+  ) => {
+    const { response, count } =
+      await this.jobApplicationDao.getPaginatedJobApplicationsByUserId({
+        userId,
+        pagination,
+        projection: JOB_APPLICATION_LIST_PROJECTION,
+      });
+
+    const sellerById = await this.resolveSellersBySellerId(
+      response.map((application) => application.job_details.seller_id),
+    );
+
+    const jobShortIds = [
+      ...new Set(response.map((application) => application.job_short_id)),
+    ];
+    const jobs = await this.jobDao.getJobsByShortIds(jobShortIds, [
+      "short_id",
+      "product_name",
+      "preview_urls",
+    ]);
+    const jobByShortId = new Map(jobs.map((job) => [job.short_id, job]));
+
+    return {
+      applications: response.map((application) =>
+        buildJobApplicationListItem(
+          application,
+          this.getBrandName(
+            sellerById.get(String(application.job_details.seller_id)),
+          ),
+          jobByShortId.get(application.job_short_id),
+        ),
+      ),
+      pagination: {
+        page: pagination.page,
+        limit: pagination.limit,
+        total: count,
+        total_pages: Math.ceil(count / pagination.limit),
+      },
+    };
   };
 
   /**

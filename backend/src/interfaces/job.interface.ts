@@ -70,6 +70,8 @@ export interface IJobListItem {
 // checkout summary screen needs on top of the listing shape: what the
 // influencer earns and the due date, but still nothing seller_id/internal.
 export interface IJobCheckoutDetails extends IJobListItem {
-  earning_model?: IEarningModel;
+  // fully-formatted earning text (e.g. "Earn 10% of order value") — see
+  // buildEarningModelDisplay in creatorHub.helper.ts
+  earning_display?: string;
   due_date?: number;
 }

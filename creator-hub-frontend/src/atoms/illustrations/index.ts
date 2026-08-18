@@ -1,2 +1,3 @@
 import NotFoundIllustration from "./NotFoundIllustration";
-export { NotFoundIllustration };
+import ExploreJobsIllustration from "./ExploreJobsIllustration";
+export { NotFoundIllustration, ExploreJobsIllustration };

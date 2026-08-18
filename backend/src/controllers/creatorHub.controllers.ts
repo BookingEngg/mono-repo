@@ -87,6 +87,26 @@ class CreatorHubControllers {
   };
 
   /**
+   * Every job application the influencer has made.
+   */
+  public listJobApplicationsForInfluencer = async (
+    req: Request,
+    res: Response,
+  ): Promise<any> => {
+    if (!req.user?._id) {
+      throw new Error("User not found");
+    }
+
+    const { page, limit } = req.query as unknown as IListJobsQuery;
+    const result = await this.creatorHubService.listJobApplicationsForInfluencer(
+      req.user._id,
+      { page, limit },
+    );
+
+    return res.send({ status: "success", ...result });
+  };
+
+  /**
    * Resolve a redirection link's short_id and redirect to its destination
    */
   public redirectLink = async (

@@ -77,7 +77,9 @@ export interface IJobListItem {
  * screen needs on top of the listing shape.
  */
 export interface IJobCheckoutDetails extends IJobListItem {
-  earning_model?: IEarningModel;
+  // fully-formatted earning text (e.g. "Earn 10% of order value") built by
+  // the backend — render as-is, don't reconstruct it from a raw value/type.
+  earning_display?: string;
   due_date?: number;
 }
 
@@ -91,5 +93,31 @@ export interface IJobListPagination {
 export interface IJobListResponse {
   status: string;
   jobs: IJobListItem[];
+  pagination: IJobListPagination;
+}
+
+/**
+ * Mirrors backend's IJobApplicationListItem — GET /creator/job-application.
+ * product_name/preview_urls are resolved fresh from the Job document, not
+ * snapshotted on the application. link_short_id is only present for
+ * affiliate applications; the shareable URL is built client-side from it
+ * (see getJobApplicationLink in job.util).
+ */
+export interface IJobApplicationListItem {
+  short_id: string;
+  job_short_id: string;
+  job_type: string;
+  brand_name?: string;
+  product_name?: string;
+  preview_urls?: IJobMedia[];
+  earning_display?: string;
+  due_date?: number;
+  link_short_id?: string;
+  createdAt?: string;
+}
+
+export interface IJobApplicationListResponse {
+  status: string;
+  applications: IJobApplicationListItem[];
   pagination: IJobListPagination;
 }

@@ -91,6 +91,17 @@ class CreatorHubRoutes implements Routes {
   }
 
   private initializeJobApplicationRoutes(prefix: string) {
+    this.router.get(
+      `${prefix}`,
+      this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.INFLUENCER],
+        [privilegesEnum.EXPLORE_JOBS, privilegesEnum.APPLY_JOBS],
+      ),
+      this.validatorMiddleware.validateRequestQuery(listJobsQuerySchema),
+      asyncWrapper(this.creatorHubController.listJobApplicationsForInfluencer),
+    );
+
     this.router.post(
       `${prefix}`,
       this.authMiddleware.getAuthUser,

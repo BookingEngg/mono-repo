@@ -1,38 +1,27 @@
 // Modules
 import React from "react";
-import { Loader2Icon, PackageSearchIcon } from "lucide-react";
+import { Loader2Icon, ClipboardListIcon } from "lucide-react";
 // Atoms
 import { Button } from "@/atoms/ui/button";
 // Molecules
-import { JobCard } from "@/molecules/JobCard";
-// Hooks
-import useAccess from "@/hooks/useAccess";
+import { JobApplicationRow } from "@/molecules/JobApplicationRow";
 // Services
-import {
-  listBrandJobs,
-  listInfluencerJobs,
-} from "@/services/CreatorHub.service";
-// Constants
-import { ROLES } from "@/constants/access.constant";
-import { getJobCheckoutPath } from "@/constants/common.constant";
+import { listJobApplications } from "@/services/CreatorHub.service";
 // Typings
-import { IJobListItem } from "@/typings/creatorHub";
+import { IJobApplicationListItem } from "@/typings/creatorHub";
 // Utils
 import { getErrorMessage } from "@/utils/util";
 
 const PAGE_SIZE = 10;
 
 /**
- * Two distinct endpoints, one per role: a brand only ever sees its own
- * jobs (GET /creator/job/brand), an influencer sees every active job across
- * brands (GET /creator/job).
+ * Influencer's own job applications (GET /creator/job-application), most
+ * recent first. Mirrors Explore's load-first-page/load-more pattern.
  */
-const Explore = () => {
-  const { hasRole } = useAccess();
-  const isBrand = hasRole(ROLES.BRAND);
-  const fetchJobs = isBrand ? listBrandJobs : listInfluencerJobs;
-
-  const [jobs, setJobs] = React.useState<IJobListItem[]>([]);
+const Applications = () => {
+  const [applications, setApplications] = React.useState<
+    IJobApplicationListItem[]
+  >([]);
   const [page, setPage] = React.useState(1);
   const [totalPages, setTotalPages] = React.useState(1);
   const [loading, setLoading] = React.useState(true);
@@ -46,14 +35,19 @@ const Explore = () => {
       setLoading(true);
       setError("");
       try {
-        const response = await fetchJobs({ page: 1, limit: PAGE_SIZE });
+        const response = await listJobApplications({
+          page: 1,
+          limit: PAGE_SIZE,
+        });
         if (!isActive) return;
-        setJobs(response.jobs);
+        setApplications(response.applications);
         setPage(response.pagination.page);
         setTotalPages(response.pagination.total_pages);
       } catch (caughtError) {
         if (isActive) {
-          setError(getErrorMessage(caughtError, "We could not load jobs."));
+          setError(
+            getErrorMessage(caughtError, "We could not load your applications.")
+          );
         }
       } finally {
         if (isActive) setLoading(false);
@@ -65,34 +59,40 @@ const Explore = () => {
     return () => {
       isActive = false;
     };
-  }, [fetchJobs]);
+  }, []);
 
   const handleLoadMore = React.useCallback(async () => {
     setLoadingMore(true);
     setError("");
     try {
-      const response = await fetchJobs({ page: page + 1, limit: PAGE_SIZE });
-      setJobs((previousJobs) => [...previousJobs, ...response.jobs]);
+      const response = await listJobApplications({
+        page: page + 1,
+        limit: PAGE_SIZE,
+      });
+      setApplications((previousApplications) => [
+        ...previousApplications,
+        ...response.applications,
+      ]);
       setPage(response.pagination.page);
       setTotalPages(response.pagination.total_pages);
     } catch (caughtError) {
-      setError(getErrorMessage(caughtError, "We could not load more jobs."));
+      setError(
+        getErrorMessage(caughtError, "We could not load more applications.")
+      );
     } finally {
       setLoadingMore(false);
     }
-  }, [fetchJobs, page]);
+  }, [page]);
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
         {/* MobileHeader already shows this tab's name below md */}
         <h1 className="hidden text-2xl font-semibold md:block">
-          {isBrand ? "Your jobs" : "Explore Jobs"}
+          Applications
         </h1>
         <p className="text-muted-foreground text-sm">
-          {isBrand
-            ? "Jobs you've posted for creators to apply to."
-            : "Discover brands and campaigns looking for creators like you."}
+          Jobs you've applied to, and their affiliate links.
         </p>
       </div>
 
@@ -102,19 +102,13 @@ const Explore = () => {
         <div className="text-muted-foreground flex items-center justify-center py-12">
           <Loader2Icon className="animate-spin" />
         </div>
-      ) : jobs.length ? (
+      ) : applications.length ? (
         <>
-          {/* Full-width single column on mobile — grid-cols-2 there just left a job card half as wide as it needed to be */}
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4 xl:grid-cols-5">
-            {jobs.map((job) => (
-              <JobCard
-                key={job.short_id}
-                job={job}
-                applyHref={
-                  !isBrand && job.short_id
-                    ? getJobCheckoutPath(job.short_id)
-                    : undefined
-                }
+          <div className="grid gap-3">
+            {applications.map((application) => (
+              <JobApplicationRow
+                key={application.short_id}
+                application={application}
               />
             ))}
           </div>
@@ -133,14 +127,12 @@ const Explore = () => {
         </>
       ) : (
         <div className="text-muted-foreground flex flex-col items-center gap-2 py-12 text-center text-sm">
-          <PackageSearchIcon className="size-8" />
-          {isBrand
-            ? "You haven't posted any jobs yet."
-            : "No jobs available right now — check back soon."}
+          <ClipboardListIcon className="size-8" />
+          You haven't applied to any jobs yet.
         </div>
       )}
     </div>
   );
 };
 
-export default Explore;
+export default Applications;

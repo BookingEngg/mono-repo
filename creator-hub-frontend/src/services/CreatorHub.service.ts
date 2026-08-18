@@ -3,6 +3,7 @@ import axiosClient from "@/services/http";
 // Typings
 import {
   ICreateJobPayload,
+  IJobApplicationListResponse,
   IJobCheckoutDetails,
   IJobListResponse,
 } from "@/typings/creatorHub";
@@ -62,6 +63,19 @@ export const applyForJob = async (jobShortId: string) => {
   const response = await axiosClient.post({
     url: "/creator/job-application",
     body: { job_short_id: jobShortId },
+  });
+
+  return response.data;
+};
+
+// Every job application the influencer has made, most recent first.
+export const listJobApplications = async (params: {
+  page: number;
+  limit: number;
+}): Promise<IJobApplicationListResponse> => {
+  const response = await axiosClient.get({
+    url: "/creator/job-application",
+    params,
   });
 
   return response.data;

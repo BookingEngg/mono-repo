@@ -9,6 +9,7 @@ import HomePage from "@/pages/Home";
 import ExplorePage from "@/pages/Explore";
 import ProfilePage from "@/pages/Profile";
 import CreateJobPage from "@/pages/CreateJob";
+import ApplicationsPage from "@/pages/Applications";
 import CheckoutPage from "@/pages/Checkout";
 import NotFoundPage from "@/pages/NotFound";
 // Layout
@@ -70,6 +71,10 @@ const App = () => {
               <Route
                 path={ROUTE_PATHS.CREATE_JOB}
                 element={<CreateJobPage />}
+              />
+              <Route
+                path={ROUTE_PATHS.MY_APPLICATIONS}
+                element={<ApplicationsPage />}
               />
             </Route>
 

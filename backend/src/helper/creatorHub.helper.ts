@@ -1,5 +1,15 @@
-import { IJob, IJobCheckoutDetails, IJobListItem } from "@/interfaces/job.interface";
-import { IJobApplicationJobDetails } from "@/interfaces/jobApplication.interface";
+import {
+  IEarningModel,
+  IJob,
+  IJobCheckoutDetails,
+  IJobListItem,
+} from "@/interfaces/job.interface";
+import {
+  IJobApplication,
+  IJobApplicationJobDetails,
+  IJobApplicationListItem,
+} from "@/interfaces/jobApplication.interface";
+import { EarningModelTypeEnum } from "@/interfaces/enum";
 
 export const isJobOpenForApplication = (job: IJob): boolean =>
   job.is_active &&
@@ -41,17 +51,40 @@ export const JOB_CHECKOUT_PROJECTION = [
   "is_visible",
 ];
 
+// Fully-formatted earning text (e.g. "Earn 10% of order value", "Earn ₹50 per
+// order") — built once here so the frontend never has to know the per-type
+// rules (percentage has no ₹ prefix, fixed/CPC do) or duplicate the copy.
+const EARNING_MODEL_LABEL: Record<EarningModelTypeEnum, string> = {
+  [EarningModelTypeEnum.PERCENTAGE]: "of order value",
+  [EarningModelTypeEnum.FIXED_PER_ORDER]: "per order",
+  [EarningModelTypeEnum.CPC]: "per click",
+};
+
+export const buildEarningModelDisplay = (
+  earningModel?: IEarningModel,
+): string | undefined => {
+  if (!earningModel) return undefined;
+
+  const amount =
+    earningModel.type === EarningModelTypeEnum.PERCENTAGE
+      ? `${earningModel.value}%`
+      : `₹${earningModel.value}`;
+
+  return `Earn ${amount} ${EARNING_MODEL_LABEL[earningModel.type]}`;
+};
+
 export const buildJobCheckoutDetails = (
   job: IJob,
   brandName?: string,
 ): IJobCheckoutDetails => ({
   ...buildJobListItem(job, brandName),
-  earning_model: job.earning_model,
+  earning_display: buildEarningModelDisplay(job.earning_model),
   due_date: job.due_date,
 });
 
 // snapshot only the terms that matter once applied — not job_count,
-// is_active/is_visible, gender/age_limit, preview_urls, etc.
+// is_active/is_visible, gender/age_limit, product_name/preview_urls (those
+// are resolved fresh from the Job on read instead), etc.
 export const buildJobApplicationJobDetails = (
   job: IJob,
 ): IJobApplicationJobDetails => ({
@@ -61,6 +94,37 @@ export const buildJobApplicationJobDetails = (
   category: job.category,
   earning_model: job.earning_model,
   due_date: job.due_date,
+});
+
+// Fields to project at the DB level for GET /creator/job-application.
+export const JOB_APPLICATION_LIST_PROJECTION = [
+  "short_id",
+  "job_short_id",
+  "job_type",
+  "job_details",
+  "link_short_id",
+  "createdAt",
+];
+
+// brandName is resolved by the caller from the seller's user record
+// (application.job_details.seller_id); job is the current Job document
+// (looked up by application.job_short_id) so product_name/preview_urls
+// always reflect the job as it is now, not a stale snapshot.
+export const buildJobApplicationListItem = (
+  application: IJobApplication,
+  brandName?: string,
+  job?: Pick<IJob, "product_name" | "preview_urls">,
+): IJobApplicationListItem => ({
+  short_id: application.short_id,
+  job_short_id: application.job_short_id,
+  job_type: application.job_type,
+  brand_name: brandName,
+  product_name: job?.product_name,
+  preview_urls: job?.preview_urls,
+  earning_display: buildEarningModelDisplay(application.job_details.earning_model),
+  due_date: application.job_details.due_date,
+  link_short_id: application.link_short_id,
+  createdAt: application.createdAt,
 });
 
 // tags the destination with utm_campaign=sessionId so repeat clicks within

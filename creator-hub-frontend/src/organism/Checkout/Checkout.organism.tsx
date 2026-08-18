@@ -22,12 +22,6 @@ import { IJobCheckoutDetails } from "@/typings/creatorHub";
 import { getErrorMessage } from "@/utils/util";
 import { getJobPreviewImage, getJobTitle } from "@/utils/job.util";
 
-const EARNING_MODEL_LABEL: Record<string, string> = {
-  PERCENTAGE: "of order value",
-  FIXED_PER_ORDER: "per order",
-  CPC: "per click",
-};
-
 const Checkout = () => {
   const { shortId } = useParams<{ shortId: string }>();
   const navigate = useNavigate();
@@ -149,10 +143,9 @@ const Checkout = () => {
                     </p>
                   )}
                   <p className="font-semibold">{getJobTitle(job)}</p>
-                  {job.earning_model && (
+                  {job.earning_display && (
                     <p className="text-muted-foreground text-sm">
-                      Earn ₹{job.earning_model.value}{" "}
-                      {EARNING_MODEL_LABEL[job.earning_model.type] ?? ""}
+                      {job.earning_display}
                     </p>
                   )}
                 </div>

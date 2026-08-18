@@ -15,6 +15,16 @@ class JobDao {
       .lean();
   };
 
+  public getJobsByShortIds = async (
+    shortIds: string[],
+    fields: string[] = [],
+  ) => {
+    return await this.jobModel
+      .find({ short_id: { $in: shortIds } })
+      .select(fields)
+      .lean();
+  };
+
   public incrementCompletedJobCount = async (shortId: string) => {
     return await this.jobModel.updateOne(
       { short_id: shortId },

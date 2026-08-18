@@ -5,11 +5,8 @@ import { RequireAccess } from "@/atoms/RequireAccess";
 // Utils
 import { cn } from "@/lib/utils";
 // Constants
-import { NAV_ITEMS } from "@/constants/navigation.constant";
+import { BRAND_NAV_ITEM, NAV_ITEMS } from "@/constants/navigation.constant";
 import { ROUTE_PATHS } from "@/constants/common.constant";
-import { PRIVILEGES } from "@/constants/access.constant";
-// Icons
-import { PlusIcon } from "lucide-react";
 
 const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
   cn(
@@ -21,7 +18,9 @@ const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
 
 /**
  * Persistent left rail shown from the md breakpoint up, replacing BottomNav so
- * three tabs don't end up stretched thin across a wide viewport.
+ * tabs don't end up stretched thin across a wide viewport. Renders NAV_ITEMS
+ * in order (Home, Explore, Applications, Profile), gating any tab that
+ * carries a `privilege`, then the brand-only "Post a job" action last.
  */
 const SideNav = () => {
   return (
@@ -37,18 +36,28 @@ const SideNav = () => {
       </Link>
 
       <nav className="flex flex-col gap-1">
-        {NAV_ITEMS.map(({ to, label, icon: Icon, end }) => (
-          <NavLink key={to} to={to} end={end} className={navLinkClassName}>
-            <Icon className="size-5" />
-            {label}
-          </NavLink>
-        ))}
+        {NAV_ITEMS.map(({ to, label, icon: Icon, end, privilege }) => {
+          const link = (
+            <NavLink key={to} to={to} end={end} className={navLinkClassName}>
+              <Icon className="size-5" />
+              {label}
+            </NavLink>
+          );
+
+          return privilege ? (
+            <RequireAccess key={to} privilege={privilege}>
+              {link}
+            </RequireAccess>
+          ) : (
+            link
+          );
+        })}
 
         {/* Brand-only, so it stays invisible to a plain creator account */}
-        <RequireAccess privilege={PRIVILEGES.CREATE_JOBS}>
-          <NavLink to={ROUTE_PATHS.CREATE_JOB} className={navLinkClassName}>
-            <PlusIcon className="size-5" />
-            Post a job
+        <RequireAccess privilege={BRAND_NAV_ITEM.privilege}>
+          <NavLink to={BRAND_NAV_ITEM.to} className={navLinkClassName}>
+            <BRAND_NAV_ITEM.icon className="size-5" />
+            {BRAND_NAV_ITEM.label}
           </NavLink>
         </RequireAccess>
       </nav>

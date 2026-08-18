@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/atoms/ui/card";
+import { ExploreJobsIllustration } from "@/atoms/illustrations";
 // Store
 import { getAuthUser } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
@@ -17,7 +18,7 @@ import { useAppSelector } from "@/store/hooks";
 import { PRIVILEGES } from "@/constants/access.constant";
 import { ROUTE_PATHS } from "@/constants/common.constant";
 // Icons
-import { PlusIcon } from "lucide-react";
+import { CompassIcon, PlusIcon } from "lucide-react";
 
 /**
  * Placeholder landing screen proving the authenticated session round trips.
@@ -53,6 +54,32 @@ const Home = () => {
             <Button render={<Link to={ROUTE_PATHS.CREATE_JOB} />}>
               <PlusIcon />
               Post a job
+            </Button>
+          </CardContent>
+        </Card>
+      </RequireAccess>
+
+      {/*
+        Influencer landing had nothing to look at once signed in — this gives
+        a first-time creator an obvious next step into Explore instead of a
+        blank page.
+      */}
+      <RequireAccess privilege={PRIVILEGES.EXPLORE_JOBS}>
+        <Card className="overflow-hidden">
+          <ExploreJobsIllustration className="h-auto w-full max-w-sm self-center py-4" />
+          <CardHeader>
+            <CardTitle className="text-base">
+              Start earning as a creator
+            </CardTitle>
+            <CardDescription>
+              Browse affiliate jobs from brands looking for creators like you,
+              apply in a tap, and start sharing your link.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button render={<Link to={ROUTE_PATHS.EXPLORE} />}>
+              <CompassIcon />
+              Explore jobs
             </Button>
           </CardContent>
         </Card>

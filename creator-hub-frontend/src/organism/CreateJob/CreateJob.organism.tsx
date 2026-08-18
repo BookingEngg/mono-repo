@@ -231,7 +231,8 @@ const CreateJob = () => {
   return (
     <Card className="mx-auto w-full max-w-2xl">
       <CardHeader>
-        <CardTitle className="text-2xl">Post a job</CardTitle>
+        {/* MobileHeader already shows this tab's name below md */}
+        <CardTitle className="hidden text-2xl md:block">Post a job</CardTitle>
         <CardDescription>
           List a new affiliate job for creators to apply to.
         </CardDescription>

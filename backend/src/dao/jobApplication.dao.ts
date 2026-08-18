@@ -36,6 +36,28 @@ class JobApplicationDao {
       .lean();
   };
 
+  public getPaginatedJobApplicationsByUserId = async (payload: {
+    userId: string;
+    pagination: { page: number; limit: number };
+    projection?: string[];
+  }) => {
+    const { page, limit: pageSize } = payload.pagination;
+    const filter = { user_id: payload.userId, is_active: true };
+
+    const [response, count] = await Promise.all([
+      this.jobApplicationModel
+        .find(filter)
+        .select(payload.projection || [])
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * pageSize)
+        .limit(pageSize)
+        .lean(),
+      this.jobApplicationModel.countDocuments(filter),
+    ]);
+
+    return { response, count };
+  };
+
   public updateApplicationByShortId = async (
     shortId: string,
     payload: Partial<IJobApplication>,
