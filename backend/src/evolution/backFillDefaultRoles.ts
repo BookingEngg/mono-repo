@@ -1,6 +1,6 @@
 import {
-  defaultUserAssignedPrivilegeWhileSignup,
-  defaultUserAssignedRolesWhileSignup,
+  defaultUserPrivilegeWhileSignup,
+  defaultUserRolesWhileSignup,
 } from "@/constants/roles.constants";
 import userModel from "@/models/user.model";
 
@@ -9,8 +9,8 @@ import userModel from "@/models/user.model";
     {},
     {
       $set: {
-        roles: defaultUserAssignedRolesWhileSignup,
-        privileges: defaultUserAssignedPrivilegeWhileSignup,
+        roles: defaultUserRolesWhileSignup,
+        privileges: defaultUserPrivilegeWhileSignup,
       },
     }
   );

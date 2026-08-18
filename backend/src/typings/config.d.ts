@@ -31,6 +31,8 @@ export interface IDataBase {
   username: string;
   password: string;
   port: number;
+  url: string;
+  post_url: string;
 }
 
 export interface INodeMailer {

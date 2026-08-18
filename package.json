@@ -4,12 +4,14 @@
   "private": true,
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    "creator-hub-frontend"
   ],
   "scripts": {
     "backend": "npm run dev -w backend",
     "backend-prod": "npm run start -w backend",
     "frontend": "npm run dev -w frontend",
+    "creator-hub": "npm run dev -w creator-hub-frontend",
     "start": "concurrently \"npm run backend\" \"npm run frontend\""
   },
   "author": "Tushar Chand Thakur",

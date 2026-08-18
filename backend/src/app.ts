@@ -27,6 +27,8 @@ import {
 import { getRedisUrl } from "./util/utils.util";
 // Types
 import { Routes } from "@interfaces/common.interface";
+// Middleware
+import { errorHandler } from "@/middleware/common.middleware";
 
 class App {
   private app: express.Application;
@@ -89,47 +91,46 @@ class App {
     );
 
     this.initilizeRoutes(this.routes);
-    this.initilizeSocketEvents();
+    // this.initilizeSocketEvents();  // TODO:: Need to fix this (Chat Will not work)
   }
 
   private initilizeRoutes(routes: Routes[]) {
     routes.forEach((route) =>
       this.app.use(`/${serviceRoute || ""}`, route.router),
     );
+
+    // Must be registered after every route so it catches whatever they forward.
+    this.app.use(errorHandler);
   }
 
   public initilizeSocketEvents = async () => {
-    try {
-      const redisPubClient = createClient({ url: getRedisUrl() });
-      const redisSubClient = createClient({ url: getRedisUrl() });
+    const redisPubClient = createClient(getRedisUrl());
+    const redisSubClient = createClient(getRedisUrl());
 
-      const serverId = global.server_id;
-      const channelName = `server:${serverId}`;
+    const serverId = global.server_id;
+    const channelName = `server:${serverId}`;
 
-      // Connect the redis publisher and subscriber
-      await Promise.all([redisPubClient.connect(), redisSubClient.connect()]);
+    // Connect the redis publisher and subscriber
+    await Promise.all([redisPubClient.connect(), redisSubClient.connect()]);
 
-      this.io.adapter(createAdapter(redisPubClient, redisSubClient));
+    this.io.adapter(createAdapter(redisPubClient, redisSubClient));
 
-      redisSubClient.subscribe(channelName, (message) => {
-        this.socketEventHandler.handleIncomingChannelMessage(message);
-      });
+    redisSubClient.subscribe(channelName, (message) => {
+      this.socketEventHandler.handleIncomingChannelMessage(message);
+    });
 
-      this.io.on("connection", (socket) => {
-        SOCKET_EVENTS_NAMES.forEach((eventName) => {
-          socket.on(
+    this.io.on("connection", (socket) => {
+      SOCKET_EVENTS_NAMES.forEach((eventName) => {
+        socket.on(
+          eventName,
+          this.socketEventHandler.initializeSocketEvents({
             eventName,
-            this.socketEventHandler.initializeSocketEvents({
-              eventName,
-              socket,
-              io: this.io,
-            }),
-          );
-        });
+            socket,
+            io: this.io,
+          }),
+        );
       });
-    } catch (error) {
-      console.log("ERROR>>>>> ", JSON.stringify(error));
-    }
+    });
   };
 
   public listenServer() {

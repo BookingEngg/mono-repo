@@ -6,17 +6,22 @@ import CommunicationDao from "@/dao/communication.dao";
 import UserDao from "@/dao/user.dao";
 // Interfaces
 import { ICommonAuthUser, IUser } from "@/interfaces/user.interface";
+import { UserTypeEnum } from "@/interfaces/enum";
 // Constants
-import {
-  defaultUserAssignedPrivilegeWhileSignup,
-  defaultUserAssignedRolesWhileSignup,
-} from "@/constants/roles.constants";
+import { getSignupRolesAndPrivileges } from "@/constants/roles.constants";
+// Validators
+import { IUpdateOnboardingPayload } from "@/validators/user.validator";
 
 class UserService {
   private userDao = new UserDao();
   private communicationDao = new CommunicationDao();
 
-  public createUser = async (payload: ICommonAuthUser) => {
+  public createUser = async (
+    payload: ICommonAuthUser,
+    userType: UserTypeEnum
+  ) => {
+    const { roles, privileges } = getSignupRolesAndPrivileges(userType);
+
     const formattedUser = {
       first_name: payload.first_name,
       last_name: payload.last_name,
@@ -24,8 +29,8 @@ class UserService {
       email_verified: payload.email_verified,
       user_profile_picture: payload.user_profile_picture,
 
-      roles: defaultUserAssignedRolesWhileSignup, // Default user roles while signup
-      privileges: defaultUserAssignedPrivilegeWhileSignup, // Default user privileges while signup
+      roles,
+      privileges,
       friends_ids: [],
       requested_friends: [],
       blocked_user: [],
@@ -37,6 +42,37 @@ class UserService {
 
   public getInhouseUserDetailsByEmail = async (email) => {
     return this.userDao.getUserByEmail(email);
+  };
+
+  /**
+   * Influencer onboarding — date of birth/gender/social links. Every field
+   * is independently optional (dot-notation $set), so filling in just one
+   * field never clobbers the others back to null.
+   */
+  public updateOnboardingDetails = async (
+    userId: string,
+    payload: IUpdateOnboardingPayload,
+  ) => {
+    const { dob, gender, social_media_links } = payload;
+
+    const updates: Record<string, unknown> = {};
+    if (dob !== undefined) updates.dob = dob;
+    if (gender !== undefined) updates.gender = gender;
+    if (social_media_links) {
+      Object.entries(social_media_links).forEach(([platform, value]) => {
+        if (value !== undefined) {
+          updates[`social_media_links.${platform}`] = value;
+        }
+      });
+    }
+
+    await this.userDao.updateUserDetailsById(userId, { $set: updates });
+
+    return this.userDao.getUserByUserId(userId, [
+      "dob",
+      "gender",
+      "social_media_links",
+    ]);
   };
 
   public getChatUsers = async (authUser: IUser) => {

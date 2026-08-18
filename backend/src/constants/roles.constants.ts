@@ -1,3 +1,5 @@
+import { privilegesEnum, rolesEnum, UserTypeEnum } from "@/interfaces/enum";
+
 export interface Iprivileges {
   description: string;
   default: boolean;
@@ -11,96 +13,117 @@ export interface IRole {
 }
 
 const PrivilegeDetails: Record<string, Iprivileges> = {
-  "privilege/community/viewer": {
-    description: "Can View Community",
+  [privilegesEnum.DEFAULT_USER]: {
+    description: "Default Privilege of User",
     default: true,
   },
-  "privilege/community/manipulate": {
-    description: "Can Manipulate Community",
-    default: true,
-  },
-  "privilege/communication/viewer": {
-    description: "Can View Communication Tab",
-    default: true,
-  },
-  "privilege/communication/writer": {
-    description: "Can Manipulate Communication Tab",
+  [privilegesEnum.PROFILE]: {
+    description: "Profile Privilege",
     default: false,
   },
-  "privilege/communication/group/viewer": {
-    description: "Can View Group in Group Tab",
+  [privilegesEnum.PROFILE_UPDATE]: {
+    description: "Profile Update Privilege",
     default: false,
   },
-  "privilege/communication/group/writer": {
-    description: "Can Send Message in Group in Group Tab",
+  [privilegesEnum.EXPLORE_JOBS]: {
+    description: "Explore Jobs",
     default: false,
   },
-  "privilege/communication/group/create": {
-    description: "Can Create Group in Group Tab",
+  [privilegesEnum.APPLY_JOBS]: {
+    description: "Apply For Jobs",
     default: false,
   },
-  "privilege/communication/group/manipulate": {
-    description: "Can Manipulate Group in Group Tab",
+  [privilegesEnum.CREATE_JOBS]: {
+    description: "Create Jobs",
     default: false,
   },
-  "privilege/system-block": {
-    description: "Can Block Some other user",
-    default: false,
-  },
-  "privilege/assign/add-roles-privilege": {
-    description: "Can Assign Roles privileges",
-    default: false,
-  },
-  "privilege/assign/remove-roles-privilege": {
-    description: "Can Remove Roles privileges",
+  [privilegesEnum.UPDATE_JOBS]: {
+    description: "Update Jobs Details",
     default: false,
   },
 };
 
 // Default roles and privileges while signup
-export const defaultUserAssignedRolesWhileSignup = ["roles/users"];
-export const defaultUserAssignedPrivilegeWhileSignup = [
-  "privilege/community/viewer",
-  "privilege/community/manipulate",
-  "privilege/communication/viewer",
-  "privilege/communication/writer",
-  "privilege/communication/group/viewer",
-  "privilege/communication/group/writer",
+export const defaultUserRolesWhileSignup = [
+  rolesEnum.USER,
+  rolesEnum.INFLUENCER,
+];
+export const defaultUserPrivilegeWhileSignup = [
+  privilegesEnum.DEFAULT_USER,
+  privilegesEnum.PROFILE,
+  privilegesEnum.PROFILE_UPDATE,
+
+  privilegesEnum.EXPLORE_JOBS,
+];
+export const defaultBrandRolesWhileSignup = [rolesEnum.USER, rolesEnum.BRAND];
+export const defaultBrandPrivilegeWhileSignup = [
+  privilegesEnum.DEFAULT_USER,
+  privilegesEnum.PROFILE,
+  privilegesEnum.PROFILE_UPDATE,
+
+  // A brand also needs to list its own jobs, so it shares this privilege
+  // with influencers rather than having its own separate "view jobs" grant.
+  privilegesEnum.EXPLORE_JOBS,
+  privilegesEnum.CREATE_JOBS,
+  privilegesEnum.UPDATE_JOBS,
 ];
 
 const RolesDetails: IRole[] = [
   {
-    role: "roles/users",
+    role: rolesEnum.USER,
     parents: [],
-    children: ["roles/admin"],
+    children: [rolesEnum.INFLUENCER, rolesEnum.BRAND, rolesEnum.ADMIN],
     privileges: [
-      "privilege/community/viewer",
-      "privilege/community/manipulate",
-      "privilege/communication/viewer",
-      "privilege/communication/writer",
-      "privilege/communication/group/viewer",
-      "privilege/communication/group/writer",
+      privilegesEnum.DEFAULT_USER,
+      privilegesEnum.PROFILE,
+      privilegesEnum.PROFILE_UPDATE,
     ],
   },
   {
-    role: "roles/admin",
-    parents: ["roles/users"],
-    children: ["roles/super-admin"],
-    privileges: [
-      "privilege/communication/group/create",
-      "privilege/communication/group/manipulate",
-      "privilege/system-block",
-    ],
+    role: rolesEnum.INFLUENCER,
+    parents: [rolesEnum.USER],
+    children: [],
+    privileges: [privilegesEnum.EXPLORE_JOBS, privilegesEnum.APPLY_JOBS],
   },
   {
-    role: "roles/super-admin",
-    parents: ["roles/admin"],
+    role: rolesEnum.BRAND,
+    parents: [rolesEnum.USER],
     children: [],
     privileges: [
-      "privilege/assign/add-roles-privilege",
-      "privilege/assign/remove-roles-privilege",
+      privilegesEnum.EXPLORE_JOBS,
+      privilegesEnum.CREATE_JOBS,
+      privilegesEnum.UPDATE_JOBS,
     ],
   },
+  {
+    role: rolesEnum.ADMIN,
+    parents: [rolesEnum.USER],
+    children: [],
+    privileges: [],
+  },
 ];
+
+/**
+ * Roles/privileges assigned on ACCOUNT CREATION only, based on the account
+ * type a creator picked at signup. Anything other than the literal "brand"
+ * is treated as a regular user, so a bad/unexpected value can never escalate
+ * beyond the brand privilege set.
+ */
+export const getSignupRolesAndPrivileges = (
+  userType: UserTypeEnum,
+): { roles: rolesEnum[]; privileges: privilegesEnum[] } => {
+  let defaultRoles = defaultUserRolesWhileSignup;
+  let defaultPrivledges = defaultUserPrivilegeWhileSignup;
+
+  if (userType === UserTypeEnum.BRAND) {
+    defaultRoles = defaultBrandRolesWhileSignup;
+    defaultPrivledges = defaultBrandPrivilegeWhileSignup;
+  }
+
+  return {
+    roles: defaultRoles,
+    privileges: defaultPrivledges,
+  };
+};
 
 export { RolesDetails, PrivilegeDetails };

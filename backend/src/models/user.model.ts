@@ -1,6 +1,7 @@
 import { Schema } from "mongoose";
 import { MONGO_INSTANCES } from "@database";
 import { IUser } from "@/interfaces/user.interface";
+import { GenderEnum, rolesEnum } from "@/interfaces/enum";
 
 const dbConnection = MONGO_INSTANCES.praman;
 
@@ -9,6 +10,17 @@ export const IOrigin = new Schema({
   state: String,
   zipcode: Number,
 });
+
+// Influencer onboarding — instagram/facebook/youtube only for now, each
+// defaulting to null until the creator fills the onboarding form.
+export const ISocialMediaLinks = new Schema(
+  {
+    instagram: { type: String, default: null },
+    facebook: { type: String, default: null },
+    youtube: { type: String, default: null },
+  },
+  { _id: false },
+);
 
 export const IFriendsRequest = new Schema({
   user_id: String, // Sender or receiver user id
@@ -21,7 +33,10 @@ export const IBlockedRequest = new Schema({
   block_origin: String, // from decline-friend-request or blocked
 });
 
-export const ROLES = ["roles/users", "roles/admin", "roles/super-admin"];
+// Derived from rolesEnum so the schema whitelist can't drift out of sync with
+// the roles the rest of the app actually assigns (this array was previously
+// hand-typed and missing "roles/brand").
+export const ROLES = Object.values(rolesEnum);
 
 const UserSchema = new Schema<IUser>(
   {
@@ -33,18 +48,25 @@ const UserSchema = new Schema<IUser>(
     contact: { type: String }, // Still @depricated
     origin: { type: IOrigin, default: undefined },
 
+    // Influencer onboarding
+    dob: { type: Date, default: null },
+    gender: { type: String, enum: GenderEnum, default: null },
+    social_media_links: { type: ISocialMediaLinks, default: () => ({}) },
+
     // Access Control
-    roles: { type: Array(String), enum: ROLES, require: true }, // user, admin, super-admin, etc.
-    privileges: { type: Array(String), required: true}, // contain only the restricted priviledges of the roles.
-    
+    roles: { type: Array(String), enum: ROLES, require: true }, // user, admin, brand, etc.
+    privileges: { type: Array(String), required: true }, // contain only the restricted priviledges of the roles.
+
     // Community Field
     friends_ids: { type: Array(String), default: [] }, // Contain all the friends user id
     requested_friends: { type: Array(IFriendsRequest), default: [] }, // Contain all the users who request to make friend
     blocked_user: { type: Array(IBlockedRequest), default: [] }, // Contain all the blocked users for the perticular user
     // Group Communication
     group_ids: { type: Array(String), default: [] },
+
+    is_active: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 /**

@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import UserDao from "@/dao/user.dao";
 import JwtService from "@/services/jwt.service";
 import { RolesAccessibilityWithRoles } from "@/constants/common.constants";
+import { privilegesEnum, rolesEnum } from "@/interfaces/enum";
 
 class AuthMiddleware {
   private jwtService = new JwtService();
@@ -10,7 +11,7 @@ class AuthMiddleware {
   public getAuthUser = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
   ): Promise<any> => {
     try {
       const token = this.jwtService.getJwtToken(req);
@@ -32,25 +33,40 @@ class AuthMiddleware {
     }
   };
 
-  public checkRoles = (roles: string[]) => {
-    return async (req: Request, _: Response, next: NextFunction) => {
-      const user = req.user;
+  public checkRoles = (roles: rolesEnum[], priviledges: privilegesEnum[]) => {
+    return async (
+      req: Request,
+      res: Response,
+      next: NextFunction,
+    ): Promise<any> => {
+      try {
+        const user = req.user;
 
-      // Roles which are assigned by the system in DB
-      const userRoles = user.roles || [];
+        if (!user) {
+          return res.status(401).json({ message: "Invalid Token for User" });
+        }
 
-      // Check the role assign and the level of the user
-      let allRoles = [];
-      roles.forEach((role) => {
-        const allUserRoles = userRoles.filter((u_role) => {
-          return RolesAccessibilityWithRoles[u_role]?.includes(role);
-        });
+        // Roles which are assigned by the system in DB
+        const assignedUserRoles = user.roles || [];
+        const assignedUserPrivileges = user.privileges || [];
 
-        allRoles = [...allRoles, ...allUserRoles];
-      });
+        const hasAllRoles = roles.every((role) =>
+          assignedUserRoles.includes(role),
+        );
+        if (!hasAllRoles) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
 
-      if (allRoles.length) {
-        next(new Error("Authentication Error"));
+        const hasAllPrivileges = priviledges.every((priviledge) =>
+          assignedUserPrivileges.includes(priviledge),
+        );
+        if (!hasAllPrivileges) {
+          return res.status(403).json({ message: "Permission denied" });
+        }
+
+        next();
+      } catch (err) {
+        return res.status(401).json({ message: "Invalid Permission for User" });
       }
     };
   };

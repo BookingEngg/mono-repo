@@ -1,6 +1,13 @@
 import { Request, Response } from "express";
 import OAuthService from "@/services/oAuth.service";
 import JwtService from "@/services/jwt.service";
+import { UserTypeEnum } from "@/interfaces/enum";
+
+// Anything other than the literal "brand" is treated as a regular user, so a
+// tampered query/body value can never request an elevated account type.
+const toUserType = (value: string): UserTypeEnum | undefined => {
+  return value === UserTypeEnum.BRAND ? UserTypeEnum.BRAND : UserTypeEnum.INFLUENCER;
+};
 
 class OAuthController {
   private oAuthService = new OAuthService();
@@ -11,15 +18,19 @@ class OAuthController {
     return res.send(response);
   };
 
-  public initGithubOAuth = async (_req: Request, res: Response) => {
-    const githubUrl = this.oAuthService.navigateToGithubLogin();
+  public initGithubOAuth = async (req: Request, res: Response) => {
+    const userType = toUserType(req.query.user_type as string);
+    const githubUrl = this.oAuthService.navigateToGithubLogin(userType);
     return res.redirect(githubUrl);
   };
 
   public getGithubOAuthUser = async (req: Request, res: Response) => {
-    const { code } = req.query;
+    const { code, user_type } = req.query;
+    const userType = toUserType(user_type as string);
+
     const response = await this.oAuthService.getGithubVerifiedUser(
-      code as string
+      code as string,
+      userType,
     );
 
     this.jwtService.setCookieAtClientSide({
@@ -31,8 +42,11 @@ class OAuthController {
   };
 
   public getGoogleOAuthUser = async (req: Request, res: Response) => {
-    const { token } = req.body;
-    const response = await this.oAuthService.getGoogleVerifiedUser(token);
+    const { token, user_type } = req.body;
+    const response = await this.oAuthService.getGoogleVerifiedUser(
+      token,
+      toUserType(user_type),
+    );
 
     this.jwtService.setCookieAtClientSide({
       res,
