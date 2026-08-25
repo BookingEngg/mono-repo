@@ -15,7 +15,7 @@ import { ExploreJobsIllustration } from "@/atoms/illustrations";
 import { getAuthUser } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
 // Constants
-import { PRIVILEGES } from "@/constants/access.constant";
+import { PRIVILEGES, ROLES } from "@/constants/access.constant";
 import { ROUTE_PATHS } from "@/constants/common.constant";
 // Icons
 import { CompassIcon, PlusIcon } from "lucide-react";
@@ -40,9 +40,12 @@ const Home = () => {
 
       {/*
         Only a brand account can post jobs — invisible to a plain creator
-        account rather than a dead link they can't use.
+        account rather than a dead link they can't use. Gated by role, not
+        just privilege: a brand also holds EXPLORE_JOBS (it reuses that
+        route to view jobs it posted), so privilege alone isn't enough to
+        tell the two account types apart.
       */}
-      <RequireAccess privilege={PRIVILEGES.CREATE_JOBS}>
+      <RequireAccess role={ROLES.BRAND} privilege={PRIVILEGES.CREATE_JOBS}>
         <Card className="max-w-md">
           <CardHeader>
             <CardTitle className="text-base">Post a job</CardTitle>
@@ -62,9 +65,11 @@ const Home = () => {
       {/*
         Influencer landing had nothing to look at once signed in — this gives
         a first-time creator an obvious next step into Explore instead of a
-        blank page.
+        blank page. Gated by role so a brand account (which also holds
+        EXPLORE_JOBS, for viewing jobs it posted) never sees creator-facing
+        copy on its own home page.
       */}
-      <RequireAccess privilege={PRIVILEGES.EXPLORE_JOBS}>
+      <RequireAccess role={ROLES.INFLUENCER} privilege={PRIVILEGES.EXPLORE_JOBS}>
         <Card className="overflow-hidden">
           <ExploreJobsIllustration className="h-auto w-full max-w-sm self-center py-4" />
           <CardHeader>

@@ -5,7 +5,7 @@ import { RequireAccess } from "@/atoms/RequireAccess";
 // Utils
 import { cn } from "@/lib/utils";
 // Constants
-import { BRAND_NAV_ITEM, NAV_ITEMS } from "@/constants/navigation.constant";
+import { NAV_ITEMS } from "@/constants/navigation.constant";
 import { ROUTE_PATHS } from "@/constants/common.constant";
 
 const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
@@ -13,7 +13,7 @@ const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
     "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
     isActive
       ? "bg-muted text-foreground"
-      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+      : "text-muted-foreground hover:bg-muted hover:text-foreground",
   );
 
 /**
@@ -54,12 +54,12 @@ const SideNav = () => {
         })}
 
         {/* Brand-only, so it stays invisible to a plain creator account */}
-        <RequireAccess privilege={BRAND_NAV_ITEM.privilege}>
+        {/* <RequireAccess privilege={BRAND_NAV_ITEM.privilege}>
           <NavLink to={BRAND_NAV_ITEM.to} className={navLinkClassName}>
             <BRAND_NAV_ITEM.icon className="size-5" />
             {BRAND_NAV_ITEM.label}
           </NavLink>
-        </RequireAccess>
+        </RequireAccess> */}
       </nav>
     </aside>
   );

@@ -75,9 +75,20 @@ const OAuthProviders = ({
               Continue with Google
             </Button>
 
+            {/*
+              Google renders a few nested wrapper divs (including an empty
+              spacer sibling) plus the real iframe, each sized by its own
+              font-metrics/zoom-dependent measurement rather than by us —
+              stretching them via normal block-flow sizing just makes the
+              spacer and the iframe stack on top of each other instead of
+              overlapping. Pinning every level to `absolute inset-0` instead
+              makes each one — however many Google injects — overlay its
+              parent exactly, so the real clickable iframe always ends up
+              covering precisely the same box as the visible decoy button.
+            */}
             <div
               className={cn(
-                "absolute inset-0 z-10 opacity-0 [&>div]:h-full [&>div]:w-full [&_iframe]:h-full [&_iframe]:w-full",
+                "absolute inset-0 z-10 opacity-0 [&_div]:!absolute [&_div]:!inset-0 [&_div]:!m-0 [&_div]:!h-full [&_div]:!w-full [&_iframe]:!absolute [&_iframe]:!inset-0 [&_iframe]:!m-0 [&_iframe]:!h-full [&_iframe]:!w-full",
                 disabled && "pointer-events-none"
               )}
             >

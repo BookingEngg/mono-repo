@@ -24,14 +24,17 @@ export const NAV_ITEMS = [
     end: false,
     privilege: PRIVILEGES.APPLY_JOBS,
   },
-  { to: ROUTE_PATHS.PROFILE, label: "Profile", icon: UserRoundIcon, end: false },
+  {
+    to: ROUTE_PATHS.CREATE_JOB,
+    label: "Post a job",
+    icon: PlusIcon,
+    end: false,
+    privilege: PRIVILEGES.CREATE_JOBS,
+  },
+  {
+    to: ROUTE_PATHS.PROFILE,
+    label: "Profile",
+    icon: UserRoundIcon,
+    end: false,
+  },
 ];
-
-// Rendered only in SideNav, past the main tabs — a brand's "post a job"
-// action, not a primary navigation destination shared with BottomNav.
-export const BRAND_NAV_ITEM = {
-  to: ROUTE_PATHS.CREATE_JOB,
-  label: "Post a job",
-  icon: PlusIcon,
-  privilege: PRIVILEGES.CREATE_JOBS,
-};

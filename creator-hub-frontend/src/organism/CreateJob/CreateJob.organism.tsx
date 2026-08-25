@@ -33,6 +33,7 @@ import {
   ICreateJobPayload,
   IEarningModel,
   IJobCategory,
+  IJobMedia,
   TConversionTrigger,
   TEarningModelType,
   TGender,
@@ -66,6 +67,7 @@ const defaultFormValue = {
   product_id: "",
   product_name: "",
   product_link: "",
+  product_image: "",
   category_l1: "",
   category_l2: "",
   category_l3: "",
@@ -115,6 +117,14 @@ const buildPayload = (form: TFormValue): ICreateJobPayload => {
     payload.category = category;
   }
 
+  if (form.product_image.trim()) {
+    const previewImage: IJobMedia = {
+      type: "image",
+      url: form.product_image.trim(),
+    };
+    payload.preview_urls = [previewImage];
+  }
+
   if (
     form.earning_model_type &&
     form.earning_model_value &&
@@ -162,6 +172,10 @@ const validate = (form: TFormValue): TFieldErrors => {
     errors.product_link = "Enter a valid URL";
   }
 
+  if (form.product_image.trim() && !isValidUrl(form.product_image.trim())) {
+    errors.product_image = "Enter a valid URL";
+  }
+
   if (form.due_date && form.due_date < getTodayDateString()) {
     errors.due_date = "Due date can't be in the past";
   }
@@ -205,7 +219,7 @@ const CreateJob = () => {
       setFieldErrors((previousErrors) => ({ ...previousErrors, [key]: "" }));
       setForm((previousForm) => ({ ...previousForm, [key]: value }));
     },
-    []
+    [],
   );
 
   const handleSubmit = React.useCallback(async () => {
@@ -277,6 +291,17 @@ const CreateJob = () => {
             disabled={loading}
             error={fieldErrors.product_link}
             onChange={(value) => handleFieldChange(value, "product_link")}
+          />
+
+          <FormField
+            id="product_image"
+            label="Product image"
+            type="url"
+            placeholder="https://example.com/product/123.jpg"
+            value={form.product_image}
+            disabled={loading}
+            error={fieldErrors.product_image}
+            onChange={(value) => handleFieldChange(value, "product_image")}
           />
         </div>
 
@@ -364,7 +389,7 @@ const CreateJob = () => {
                 onValueChange={(value) =>
                   handleFieldChange(
                     value ?? "",
-                    "earning_model_conversion_trigger"
+                    "earning_model_conversion_trigger",
                   )
                 }
               >
@@ -443,7 +468,11 @@ const CreateJob = () => {
       </CardContent>
 
       <CardFooter>
-        <Button className="w-full sm:w-auto" disabled={loading} onClick={handleSubmit}>
+        <Button
+          className="w-full sm:w-auto"
+          disabled={loading}
+          onClick={handleSubmit}
+        >
           {loading && <Loader2Icon className="animate-spin" />}
           Post job
         </Button>

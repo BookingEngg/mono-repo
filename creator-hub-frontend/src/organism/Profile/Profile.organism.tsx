@@ -137,6 +137,18 @@ const Profile = () => {
 
       <Card className="max-w-md">
         <CardHeader>
+          <CardTitle className="text-base">Account</CardTitle>
+          <CardDescription>Signed in to Creator Hub.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" className="w-full" onClick={handleLogout}>
+            Sign out
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card className="max-w-md">
+        <CardHeader>
           <CardTitle className="text-base">Creator details</CardTitle>
           <CardDescription>
             Tell brands a bit more about yourself and where to find you.
@@ -213,18 +225,6 @@ const Profile = () => {
             Save
           </Button>
         </CardFooter>
-      </Card>
-
-      <Card className="max-w-md">
-        <CardHeader>
-          <CardTitle className="text-base">Account</CardTitle>
-          <CardDescription>Signed in to Creator Hub.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Button variant="outline" className="w-full" onClick={handleLogout}>
-            Sign out
-          </Button>
-        </CardContent>
       </Card>
     </div>
   );
