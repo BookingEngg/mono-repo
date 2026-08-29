@@ -15,14 +15,13 @@
       }
     },
     "postgres": {
-      "name": "ubuntu",
-      "username": "",
+      "database": "postgres",
+      "username": "tusharchandthakur",
       "password": "",
       "host": "localhost",
       "port": 5432,
       "dialect": "postgres",
-      "logging": false,
-      "operatorsAliases": "0"
+      "logging": false
     }
   },
   "redis": {
