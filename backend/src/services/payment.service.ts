@@ -1,21 +1,51 @@
 import { nanoid } from "nanoid";
 import { paymentConfig } from "@/config";
 import PaymentDao from "@/dao/payment.dao";
+import UserService from "@/services/user.service";
 import { IUser } from "@/interfaces/user.interface";
 import {
+  AccountStatusEnum,
   PaymentProviderEnum,
   PaymentStatusEnum,
   PaymentTypeEnum,
 } from "@/interfaces/enum";
-import { IPaymentCheckoutDetails } from "@/interfaces/payment.interface";
-import { getActiveGateway, getGateway } from "@/services/paymentGateway.service";
+import {
+  IPayment,
+  IPaymentCheckoutDetails,
+} from "@/interfaces/payment.interface";
+import {
+  getActiveGateway,
+  getGateway,
+} from "@/services/paymentGateway.service";
 import {
   ICheckoutQuery,
   IInitiatePaymentPayload,
 } from "@/validators/payment.validator";
 
+/**
+ * Payment types a user may only ever complete once. A billing-cycle payment
+ * is deliberately NOT one of these — each cycle is its own separate charge,
+ * so blocking repeats there would break normal invoicing.
+ */
+const ONE_TIME_PAYMENT_TYPES: ReadonlySet<PaymentTypeEnum> = new Set([
+  PaymentTypeEnum.SECURITY_DEPOSIT,
+]);
+
 class PaymentService {
   private paymentDao = new PaymentDao();
+  private userService = new UserService();
+
+  /**
+   * Whether a one-time charge has already been settled by this user. Always
+   * false for repeatable types, so callers don't need to special-case them.
+   */
+  private isAlreadyPaid = async (userId: string, type: PaymentTypeEnum) => {
+    if (!ONE_TIME_PAYMENT_TYPES.has(type)) {
+      return false;
+    }
+
+    return await this.paymentDao.hasSuccessfulPayment(userId, type);
+  };
 
   /**
    * Resolves what a given payment type actually costs, SERVER-SIDE.
@@ -56,11 +86,15 @@ class PaymentService {
    * every time someone merely looks at the screen.
    */
   public getCheckoutDetails = async (
-    _user: IUser,
+    user: IUser,
     query: ICheckoutQuery,
   ): Promise<IPaymentCheckoutDetails> => {
     const amount = this.resolvePayableAmount(query.payment_type, query);
     const currency = paymentConfig.currency;
+    const isPaid = await this.isAlreadyPaid(
+      String(user._id),
+      query.payment_type,
+    );
 
     const presentation: Record<
       PaymentTypeEnum,
@@ -87,6 +121,7 @@ class PaymentService {
       line_items: [{ label: copy.label, amount }],
       total: amount,
       currency,
+      is_paid: isPaid,
     };
   };
 
@@ -100,6 +135,13 @@ class PaymentService {
     user: IUser,
     payload: IInitiatePaymentPayload,
   ) => {
+    // The authoritative stop on paying a one-time charge twice. The UI also
+    // hides the button, but that's cosmetic — this is what makes a direct API
+    // call (or a stale tab) fail instead of taking the money again.
+    if (await this.isAlreadyPaid(String(user._id), payload.payment_type)) {
+      throw new Error("This payment has already been completed.");
+    }
+
     const gateway = getActiveGateway();
     const amount = this.resolvePayableAmount(payload.payment_type, payload);
     const currency = paymentConfig.currency;
@@ -208,11 +250,40 @@ class PaymentService {
       response: result.raw,
     });
 
+    // Post process after payment success
+    await this.postProcessAfterPaymentSuccess(user, payment, result.status);
+
     return {
       order_id: payment.order_id,
       payment_status: result.status,
       is_paid: result.status === PaymentStatusEnum.SUCCESS,
     };
+  };
+
+  /**
+   * A settled security deposit is what activates a brand — it's the gate on
+   * posting jobs (see AuthMiddleware.requireActiveAccount).
+   *
+   * Guarded on SUCCESS specifically: this runs for every terminal outcome, so
+   * checking only the payment TYPE would activate an account whose deposit
+   * just *failed*.
+   *
+   * Shared by /verify-payment and the webhook on purpose — a brand that pays
+   * and immediately closes the tab is settled by the webhook alone, so
+   * activating in only one path would leave them paid but unable to post.
+   */
+  private postProcessAfterPaymentSuccess = async (
+    user: IUser | string,
+    payment: IPayment,
+    latestPaymentStatus: PaymentStatusEnum,
+  ) => {
+    if (latestPaymentStatus !== PaymentStatusEnum.SUCCESS) {
+      return;
+    }
+
+    if (payment.payment_type === PaymentTypeEnum.SECURITY_DEPOSIT) {
+      await this.userService.setAccountStatus(user, AccountStatusEnum.ACTIVE);
+    }
   };
 
   /**
@@ -254,6 +325,14 @@ class PaymentService {
       status: event.status,
       response: input.body,
     });
+
+    // Only the id is available here — a webhook carries no session.
+    // Only the id is available here — a webhook carries no session.
+    await this.postProcessAfterPaymentSuccess(
+      payment.user_id as string,
+      payment,
+      event.status,
+    );
 
     // 0 rows means it was already terminal — a retry or a race with
     // /verify-payment, both of which are expected and are not errors.

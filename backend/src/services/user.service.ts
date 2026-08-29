@@ -82,6 +82,32 @@ class UserService {
    * is independently optional (dot-notation $set), so filling in just one
    * field never clobbers the others back to null.
    */
+  /**
+   * Moves an account through its lifecycle (see AccountStatusEnum).
+   *
+   * Accepts a user id as well as a full document because the callers differ:
+   * /verify-payment already has the authenticated user, while a gateway
+   * webhook only knows the id stored on the payment row.
+   *
+   * Idempotent — re-running it with the same status is a harmless no-op, which
+   * matters because the browser callback and the webhook both settle the same
+   * payment and routinely race.
+   */
+  public setAccountStatus = async (
+    user: IUser | string,
+    status: AccountStatusEnum,
+  ) => {
+    const userId = typeof user === "string" ? user : String(user._id);
+
+    if (!userId) {
+      return;
+    }
+
+    await this.userDao.updateUserDetailsById(userId, {
+      $set: { account_status: status },
+    });
+  };
+
   public updateOnboardingDetails = async (
     userId: string,
     payload: IUpdateOnboardingPayload,

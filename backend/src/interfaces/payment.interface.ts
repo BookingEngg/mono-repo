@@ -6,23 +6,32 @@ import { PaymentProviderEnum, PaymentStatusEnum, PaymentTypeEnum } from "./enum"
 // total in one shot. This row holds everything about that one payment; the
 // per-payee fan-out (Creator A, Creator B, platform) that follows a
 // successful payment is a separate concern, not modeled here.
+/**
+ * Nullable columns are typed `?: T | null` rather than `?: T` on purpose.
+ * Both states are real and they mean different things: `undefined` is "not
+ * supplied on create", while `null` is what Postgres actually hands back for
+ * a column that was never set. Narrowing to `undefined` alone would make a
+ * PaymentModel row unassignable to this interface and force a cast at every
+ * call site — which would hide exactly the mismatches this type exists to
+ * catch.
+ */
 export interface IPayment {
   id?: number;
 
-  seller_id?: string;
+  seller_id?: string | null;
   order_id: string;
-  user_id?: string;
+  user_id?: string | null;
   payable_amount: number;
   currency: string;
-  transaction_id?: string; // partner order id
+  transaction_id?: string | null; // partner order id
 
-  online_request?: object;
-  online_response?: object;
+  online_request?: object | null;
+  online_response?: object | null;
 
   payment_type: PaymentTypeEnum;
   payment_status: PaymentStatusEnum;
   payment_gateway: PaymentProviderEnum;
-  payment_cycle_id?: string;
+  payment_cycle_id?: string | null;
 
   createdAt?: Date;
   updatedAt?: Date;
@@ -86,6 +95,14 @@ export interface IPaymentCheckoutDetails {
   line_items: IPaymentLineItem[];
   total: number;
   currency: string;
+
+  /**
+   * True when this is a one-time charge the user has already completed. Lets
+   * the checkout screen render a settled state instead of a live pay button —
+   * the same condition /initiate-payment refuses on, surfaced early so the
+   * user sees "already paid" rather than an error after tapping.
+   */
+  is_paid: boolean;
 }
 
 /**

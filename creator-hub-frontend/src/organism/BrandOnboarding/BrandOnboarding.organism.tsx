@@ -7,7 +7,7 @@ import { Button } from "@/atoms/ui/button";
 import { AuthCard } from "@/molecules/AuthCard";
 import { OtpField } from "@/molecules/OtpField";
 // Services
-import { sendOtp, verifyOtp } from "@/services/Auth.service";
+import { sendOtp, verifyOtp, getUser } from "@/services/Auth.service";
 // Store
 import { getAuthUser, updateUser } from "@/store/auth";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
@@ -21,9 +21,9 @@ import { Loader2Icon } from "lucide-react";
 /**
  * Where a brand lands right after /brand/signup (account_status: "onboarding").
  * Only step for now is email verification, reusing the same OTP mechanism
- * Login uses — verifying flips the account to "active" server-side, so this
- * is also the page a returning brand would eventually complete if they
- * somehow land here again mid-verification.
+ * Login uses — verifying moves the account to "pending_deposit" server-side,
+ * which unlocks the rest of the app but not job posting; paying the security
+ * deposit is what makes it "active".
  */
 const BrandOnboarding = () => {
   const dispatch = useAppDispatch();
@@ -75,9 +75,17 @@ const BrandOnboarding = () => {
           return;
         }
 
-        dispatch(
-          updateUser({ email_verified: true, account_status: "active" }),
-        );
+        // Verifying an email no longer means "active" — a brand still has to
+        // pay its security deposit for that. Rather than guessing the next
+        // status here, take whatever the server actually set, so the client
+        // can't drift from the backend's lifecycle rules.
+        const session = await getUser();
+        if (session?.status) {
+          dispatch(updateUser(session.user));
+        } else {
+          dispatch(updateUser({ email_verified: true }));
+        }
+
         navigate(ROUTE_PATHS.HOME);
       } catch (caughtError) {
         setFieldError(getErrorMessage(caughtError, "That code is invalid."));

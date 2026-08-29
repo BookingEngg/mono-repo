@@ -1,6 +1,10 @@
 import { DB } from "@/database/postgres";
 import { IPayment } from "@/interfaces/payment.interface";
-import { PaymentProviderEnum, PaymentStatusEnum } from "@/interfaces/enum";
+import {
+  PaymentProviderEnum,
+  PaymentStatusEnum,
+  PaymentTypeEnum,
+} from "@/interfaces/enum";
 
 class PaymentDao {
   private paymentModel = DB.Payment;
@@ -27,6 +31,26 @@ class PaymentDao {
       where: { user_id: userId },
       order: [["created_at", "DESC"]],
     });
+  };
+
+  /**
+   * Whether this user has ever completed a payment of a given type. Drives
+   * "already done" state on home widgets, so a brand that has paid its
+   * deposit isn't nagged to pay it again.
+   */
+  public hasSuccessfulPayment = async (
+    userId: string,
+    paymentType: PaymentTypeEnum,
+  ) => {
+    const count = await this.paymentModel.count({
+      where: {
+        user_id: userId,
+        payment_type: paymentType,
+        payment_status: PaymentStatusEnum.SUCCESS,
+      },
+    });
+
+    return count > 0;
   };
 
   public attachTransactionId = async (id: number, transactionId: string) => {

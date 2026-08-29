@@ -19,6 +19,10 @@ export interface IPaymentCheckoutDetails {
   line_items: IPaymentLineItem[];
   total: number;
   currency: string;
+  // True for a one-time charge already settled by this user. The server
+  // refuses to initiate one of these regardless; this just lets the screen
+  // say so up front instead of erroring after a tap.
+  is_paid: boolean;
 }
 
 /**

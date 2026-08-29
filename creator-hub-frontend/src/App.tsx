@@ -14,7 +14,7 @@ import ProfilePage from "@/pages/Profile";
 import CreateJobPage from "@/pages/CreateJob";
 import ApplicationsPage from "@/pages/Applications";
 import CheckoutPage from "@/pages/Checkout";
-import PaymentSandboxPage from "@/pages/PaymentSandbox";
+import PaymentCheckoutPage from "@/pages/PaymentCheckout";
 import NotFoundPage from "@/pages/NotFound";
 // Layout
 import AuthLayout from "@/layout/AuthLayout";
@@ -101,13 +101,10 @@ const App = () => {
                 path={ROUTE_PATHS.MY_APPLICATIONS}
                 element={<ApplicationsPage />}
               />
-              {/*
-                Developer sandbox for the payment sequence. Intentionally not
-                in NAV_ITEMS — reachable by URL only.
-              */}
+              {/* Standalone payment checkout, reached from a home widget. */}
               <Route
-                path={ROUTE_PATHS.PAYMENT_SANDBOX}
-                element={<PaymentSandboxPage />}
+                path={ROUTE_PATHS.PAYMENT_CHECKOUT}
+                element={<PaymentCheckoutPage />}
               />
             </Route>
 

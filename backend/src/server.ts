@@ -5,6 +5,7 @@ import InternalRoutes from "@/routes/internal.routes";
 import IndexRoutes from "@routes/index.routes";
 import CreatorHubRoutes from "@/routes/creatorHub.route";
 import PaymentRoutes from "@/routes/payment.route";
+import HomeRoutes from "@/routes/home.route";
 
 const app = new App([
   new ExternalRoutes(),
@@ -12,6 +13,7 @@ const app = new App([
   new IndexRoutes(),
   new CreatorHubRoutes(),
   new PaymentRoutes(),
+  new HomeRoutes(),
 ]);
 
 app.listenServer();

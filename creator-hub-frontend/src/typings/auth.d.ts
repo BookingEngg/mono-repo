@@ -8,9 +8,11 @@ export interface ISocialMediaLinks {
 
 // Onboarding lifecycle of the account itself, separate from roles. A brand
 // created via /brand/signup starts "onboarding" (pending email
-// verification) and flips to "active" once that step completes. Absent on
-// every pre-existing account, which should be treated as active.
-export type TAccountStatus = "onboarding" | "active";
+// verification), moves to "pending_deposit" once the email is verified, and
+// reaches "active" only when the security deposit settles — which is what
+// unlocks posting jobs. Absent on every pre-existing account, which should
+// be treated as active.
+export type TAccountStatus = "onboarding" | "pending_deposit" | "active";
 
 export interface IUser {
   _id: string;

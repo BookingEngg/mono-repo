@@ -6,7 +6,7 @@ import MailTemplate from "@/util/mailtemplate.util";
 import { IUser } from "@/interfaces/user.interface";
 import UserDao from "@/dao/user.dao";
 import { isProduction } from "@/config";
-import { AccountStatusEnum } from "@/interfaces/enum";
+import { AccountStatusEnum, rolesEnum } from "@/interfaces/enum";
 
 class OtpService {
   private otpDao = new OtpDao();
@@ -82,16 +82,33 @@ class OtpService {
         (!userData.email_verified ||
           userData.account_status === AccountStatusEnum.ONBOARDING)
       ) {
+        // Verifying an email no longer grants ACTIVE to a brand — paying the
+        // security deposit is what does that (see PaymentService). A brand
+        // moves to PENDING_DEPOSIT instead: signed in and able to reach the
+        // deposit widget, but not yet able to post jobs. Anyone else has no
+        // deposit to pay, so they go straight to ACTIVE.
+        //
+        // Only ever moves a brand FORWARD out of ONBOARDING: an already
+        // ACTIVE brand using this as a return-login must not be demoted back
+        // to PENDING_DEPOSIT and lose job posting.
+        const isBrand = (userData.roles || []).includes(rolesEnum.BRAND);
+        const nextStatus =
+          isBrand && userData.account_status === AccountStatusEnum.ONBOARDING
+            ? AccountStatusEnum.PENDING_DEPOSIT
+            : userData.account_status === AccountStatusEnum.ONBOARDING
+              ? AccountStatusEnum.ACTIVE
+              : userData.account_status;
+
         await this.userDao.updateUserDetailsById(userData._id, {
           $set: {
             email_verified: true,
-            account_status: AccountStatusEnum.ACTIVE,
+            account_status: nextStatus,
           },
         });
         userData = {
           ...userData,
           email_verified: true,
-          account_status: AccountStatusEnum.ACTIVE,
+          account_status: nextStatus,
         };
       }
     }

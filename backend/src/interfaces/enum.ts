@@ -78,7 +78,14 @@ export enum UserTypeEnum {
 // other than a strict "onboarding" match is treated as active — existing
 // docs from before this field existed never need a migration.
 export enum AccountStatusEnum {
+  // Brand signed up but hasn't verified its email yet. Locked to the
+  // onboarding screen — nothing else in the app is reachable.
   ONBOARDING = "onboarding",
+  // Email verified, security deposit not paid. The account is usable
+  // (it can sign in, browse, and reach the deposit widget) but can't post
+  // jobs until the deposit settles.
+  PENDING_DEPOSIT = "pending_deposit",
+  // Fully activated: email verified and deposit paid.
   ACTIVE = "active",
 }
 
@@ -110,6 +117,26 @@ export enum EarningStatusEnum {
   BILLED = "billed", // included in a closed billing cycle, not yet paid
   PAID = "paid", // the payment for this entry succeeded
   REVERSED = "reversed", // underlying order/conversion was cancelled before payout
+}
+
+/**
+ * Cards the home screen renders. The backend decides which ones a given
+ * account sees (and whether each is already done), so adding a widget never
+ * means teaching the client a new role rule.
+ */
+export enum HomeWidgetEnum {
+  SECURITY_DEPOSIT = "security_deposit",
+  POST_JOB = "post_job",
+}
+
+/**
+ * What tapping a widget does. Kept as a small closed vocabulary rather than a
+ * server-sent URL: the client owns its own routing, and a server-supplied
+ * path would be both brittle across clients and an open redirect risk.
+ */
+export enum HomeWidgetActionEnum {
+  PAYMENT_CHECKOUT = "payment_checkout",
+  CREATE_JOB = "create_job",
 }
 
 export enum privilegesEnum {

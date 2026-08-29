@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import UserDao from "@/dao/user.dao";
 import JwtService from "@/services/jwt.service";
 import { RolesAccessibilityWithRoles } from "@/constants/common.constants";
-import { privilegesEnum, rolesEnum } from "@/interfaces/enum";
+import {
+  AccountStatusEnum,
+  privilegesEnum,
+  rolesEnum,
+} from "@/interfaces/enum";
 
 class AuthMiddleware {
   private jwtService = new JwtService();
@@ -31,6 +35,38 @@ class AuthMiddleware {
     } catch (error) {
       return res.status(401).json({ message: "Invalid Token for User" });
     }
+  };
+
+  /**
+   * Blocks anything an account isn't fully activated for. A brand only
+   * reaches ACTIVE once its security deposit settles, so this is what keeps
+   * an unpaid brand from posting jobs it has no budget to fund.
+   *
+   * Separate from checkRoles because it's a lifecycle gate, not a permission
+   * one: the account has the right role and privilege, it just isn't ready
+   * yet — hence 403 with a distinguishable message rather than a generic
+   * "Permission denied".
+   */
+  public requireActiveAccount = async (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<any> => {
+    const user = req.user;
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid Token for User" });
+    }
+
+    if (user.account_status !== AccountStatusEnum.ACTIVE) {
+      return res.status(403).json({
+        message:
+          "Complete your security deposit to activate your account before posting a job.",
+        account_status: user.account_status,
+      });
+    }
+
+    next();
   };
 
   public checkRoles = (roles: rolesEnum[], priviledges: privilegesEnum[]) => {

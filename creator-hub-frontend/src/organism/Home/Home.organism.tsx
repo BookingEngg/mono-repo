@@ -1,5 +1,6 @@
 // Modules
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 // Atoms
 import { RequireAccess } from "@/atoms/RequireAccess";
 import { Button } from "@/atoms/ui/button";
@@ -11,6 +12,10 @@ import {
   CardTitle,
 } from "@/atoms/ui/card";
 import { ExploreJobsIllustration } from "@/atoms/illustrations";
+// Molecules
+import { HomeWidget } from "@/molecules/HomeWidget";
+// Services
+import { getHomeWidgets } from "@/services/Home.service";
 // Store
 import { getAuthUser } from "@/store/auth";
 import { useAppSelector } from "@/store/hooks";
@@ -18,7 +23,7 @@ import { useAppSelector } from "@/store/hooks";
 import { PRIVILEGES, ROLES } from "@/constants/access.constant";
 import { ROUTE_PATHS } from "@/constants/common.constant";
 // Icons
-import { CompassIcon, PlusIcon } from "lucide-react";
+import { CompassIcon } from "lucide-react";
 
 /**
  * Placeholder landing screen proving the authenticated session round trips.
@@ -26,6 +31,14 @@ import { CompassIcon, PlusIcon } from "lucide-react";
  */
 const Home = () => {
   const { user } = useAppSelector(getAuthUser);
+
+  // Which widgets come back is decided server-side from the account's roles,
+  // so this renders whatever it's given rather than re-implementing those
+  // rules. A creator currently gets an empty list.
+  const { data: widgets = [] } = useQuery({
+    queryKey: ["home-widgets"],
+    queryFn: getHomeWidgets,
+  });
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -38,29 +51,9 @@ const Home = () => {
         </p>
       </div>
 
-      {/*
-        Only a brand account can post jobs — invisible to a plain creator
-        account rather than a dead link they can't use. Gated by role, not
-        just privilege: a brand also holds EXPLORE_JOBS (it reuses that
-        route to view jobs it posted), so privilege alone isn't enough to
-        tell the two account types apart.
-      */}
-      <RequireAccess role={ROLES.BRAND} privilege={PRIVILEGES.CREATE_JOBS}>
-        <Card className="max-w-md">
-          <CardHeader>
-            <CardTitle className="text-base">Post a job</CardTitle>
-            <CardDescription>
-              List a new affiliate job for creators to apply to.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button render={<Link to={ROUTE_PATHS.CREATE_JOB} />}>
-              <PlusIcon />
-              Post a job
-            </Button>
-          </CardContent>
-        </Card>
-      </RequireAccess>
+      {widgets.map((widget) => (
+        <HomeWidget key={widget.id} widget={widget} />
+      ))}
 
       {/*
         Influencer landing had nothing to look at once signed in — this gives

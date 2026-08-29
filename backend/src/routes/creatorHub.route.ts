@@ -92,6 +92,9 @@ class CreatorHubRoutes implements Routes {
         [rolesEnum.BRAND],
         [privilegesEnum.CREATE_JOBS],
       ),
+      // A brand only reaches ACTIVE once its security deposit settles, so
+      // this blocks posting a job there's no deposit backing.
+      this.authMiddleware.requireActiveAccount,
       this.validatorMiddleware.validateRequestBody(createJobSchema),
       asyncWrapper(this.creatorHubController.createJob),
     );

@@ -20,7 +20,7 @@ import { formatCurrency, getErrorMessage } from "@/utils/util";
 // Typings
 import { TPaymentStatus, TPaymentType } from "@/typings/payment";
 // Icons
-import { Loader2Icon } from "lucide-react";
+import { CheckCircle2Icon, Loader2Icon } from "lucide-react";
 
 type TPaymentSummaryProps = {
   paymentType: TPaymentType;
@@ -114,17 +114,29 @@ const PaymentSummary = ({
       </CardContent>
 
       <CardFooter className="grid gap-2">
-        <PaymentButton
-          paymentType={paymentType}
-          paymentCycleId={paymentCycleId}
-          description={checkout.title}
-          onSuccess={onSuccess}
-          onIncomplete={onIncomplete}
-        >
-          {actionLabel}
-        </PaymentButton>
+        {/*
+          A settled one-time charge shows its state instead of a live button.
+          The server refuses to initiate it either way — this just avoids
+          offering an action that is guaranteed to fail.
+        */}
+        {checkout.is_paid ? (
+          <div className="text-muted-foreground flex items-center justify-center gap-2 text-sm">
+            <CheckCircle2Icon className="size-4 text-emerald-600" />
+            Already paid
+          </div>
+        ) : (
+          <PaymentButton
+            paymentType={paymentType}
+            paymentCycleId={paymentCycleId}
+            description={checkout.title}
+            onSuccess={onSuccess}
+            onIncomplete={onIncomplete}
+          >
+            {actionLabel}
+          </PaymentButton>
+        )}
 
-        {note && (
+        {note && !checkout.is_paid && (
           <p className="text-muted-foreground text-center text-xs">{note}</p>
         )}
       </CardFooter>
