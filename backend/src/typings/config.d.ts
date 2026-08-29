@@ -1,3 +1,5 @@
+import type { Dialect } from "sequelize";
+
 export interface IServer {
   url: string;
   port: number;
@@ -33,6 +35,20 @@ export interface IDataBase {
   port: number;
   url: string;
   post_url: string;
+}
+
+// Postgres backs the creator-hub payments domain. Field names deliberately
+// match Sequelize's connection options (name/username/password/host/port/
+// dialect) so the whole object can be spread straight into `new Sequelize()`
+// options, the same way IDataBase mirrors what mongoose.createConnection needs.
+export interface IPostgresConfig {
+  name: string;
+  username: string;
+  password: string;
+  host: string;
+  port: number;
+  dialect: Dialect;
+  ssl?: boolean;
 }
 
 export interface INodeMailer {

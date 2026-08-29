@@ -7,7 +7,10 @@
     "build": "swc src -d dist --source-maps --copy-files",
     "dev": "cross-env NODE_ENV=development nodemon",
     "prod": "cross-env NODE_ENV=prod nodemon",
-    "script": "npm run build && cross-env NODE_ENV=prod ts-node -r tsconfig-paths/register --transpile-only ./dist/src/evolution/backFillDefaultRoles.js"
+    "script": "npm run build && cross-env NODE_ENV=prod ts-node -r tsconfig-paths/register --transpile-only ./dist/src/evolution/backFillDefaultRoles.js",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all"
   },
   "keywords": [
     "node-js"
@@ -17,6 +20,7 @@
   "dependencies": {
     "@socket.io/redis-adapter": "^8.3.0",
     "bull": "^4.16.5",
+    "cls-hooked": "^4.2.2",
     "cookie-parser": "^1.4.7",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
@@ -33,14 +37,19 @@
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.9.16",
     "otp-generator": "^4.0.1",
+    "pg": "^8.13.1",
+    "pg-hstore": "^2.3.4",
     "ramda": "^0.30.1",
+    "sequelize": "^6.37.5",
     "socket.io": "^4.8.1",
     "zod": "^4.4.3"
   },
   "devDependencies": {
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.10.17",
+    "@types/cls-hooked": "^4.3.9",
     "@types/express": "^5.0.0",
+    "@types/pg": "^8.11.10",
     "@types/redis": "^4.0.11",
     "@typescript-eslint/eslint-plugin": "^8.8.0",
     "@typescript-eslint/parser": "^8.8.0",
@@ -50,6 +59,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "nodemon": "^3.1.7",
     "prettier": "^3.3.3",
+    "sequelize-cli": "^6.6.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.6.2"

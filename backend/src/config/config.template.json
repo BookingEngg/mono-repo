@@ -13,6 +13,16 @@
         "password": "",
         "port": 27017
       }
+    },
+    "postgres": {
+      "name": "ubuntu",
+      "username": "",
+      "password": "",
+      "host": "localhost",
+      "port": 5432,
+      "dialect": "postgres",
+      "logging": false,
+      "operatorsAliases": "0"
     }
   },
   "redis": {

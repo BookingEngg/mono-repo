@@ -1,4 +1,4 @@
-import { mongoDbConfig, MONGO_DB_NAMES, env, isProduction } from "@/config";
+import { mongoDbConfig, env, isProduction } from "@/config";
 import mongoose from "mongoose";
 import { IDataBase } from "@/typings/config";
 
@@ -21,7 +21,7 @@ const getDataBaseConnection = (config: IDataBase) => {
   if (isProduction) {
     mongoose.set("debug", (collectionName, method, query, doc) => {
       const logMessage = `Mongoose Query - Collection: ${collectionName} | Method: ${method} | Query: ${JSON.stringify(query)} | Doc: ${JSON.stringify(
-        doc
+        doc,
       )}`;
       console.debug(logMessage);
     });
@@ -29,19 +29,17 @@ const getDataBaseConnection = (config: IDataBase) => {
   return mongoose.createConnection(getConnectionUrl(config));
 };
 
-const initMongoInstances = (dbNames: readonly string[]) => {
-  dbNames.forEach((db) => {
-    const dbConfig = mongoDbConfig[db];
+const initMongoInstances = () => {
+  const dbConfig = mongoDbConfig["praman"];
 
-    if (!dbConfig) {
-      throw new Error("Config Not Found");
-    }
+  if (!dbConfig) {
+    throw new Error("Config Not Found");
+  }
 
-    const connection = getDataBaseConnection(dbConfig);
-    mongoConnectionInstance[dbConfig.name] = connection;
-  });
+  const connection = getDataBaseConnection(dbConfig);
+  mongoConnectionInstance[dbConfig.name] = connection;
 };
 
-initMongoInstances(MONGO_DB_NAMES);
+initMongoInstances();
 
 export const MONGO_INSTANCES = mongoConnectionInstance;

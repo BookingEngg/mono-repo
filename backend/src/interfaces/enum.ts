@@ -72,6 +72,26 @@ export enum UserTypeEnum {
   BRAND = "brand",
 }
 
+// Kept gateway-agnostic on purpose: PaymentProviderEnum is the only place a
+// specific gateway name appears. Payment.provider_ref/provider_meta stay
+// opaque so swapping gateways later only means adding a value here, not
+// reshaping the payments schema.
+export enum PaymentProviderEnum {
+  RAZORPAY = "RAZORPAY",
+}
+
+export enum PaymentTypeEnum {
+  SECURITY_DEPOSIT = "security_deposit",
+  ONLINE = "online",
+}
+
+export enum PaymentStatusEnum {
+  INITIATED = "initiated",
+  SUCCESS = "success",
+  PENDING = "pending",
+  FAILED = "failed",
+}
+
 export enum privilegesEnum {
   // User Priviledges
   DEFAULT_USER = "privilege/user/viewer",

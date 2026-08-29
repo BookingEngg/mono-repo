@@ -29,6 +29,7 @@ import { getRedisUrl } from "./util/utils.util";
 import { Routes } from "@interfaces/common.interface";
 // Middleware
 import { errorHandler } from "@/middleware/common.middleware";
+import PaymentModel from '@/models/payment.model';
 
 class App {
   private app: express.Application;
@@ -38,6 +39,7 @@ class App {
   private server: http.Server;
   private io: Server;
   private socketEventHandler = new SocketEvents();
+  private paymentModel = new PaymentModel();
 
   constructor(routes: Routes[]) {
     global.server_id = nanoid(10);

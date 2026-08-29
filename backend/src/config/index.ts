@@ -3,6 +3,7 @@ import {
   IDataBaseConfig,
   INodeMailer,
   IOAuth,
+  IPostgresConfig,
   IPublisher,
   IRedisConfig,
   IServer,
@@ -23,8 +24,9 @@ export const isProduction = env === "prod";
 
 export const uiConfigs = nconf.get("ui") as IUiConfig;
 
-export const MONGO_DB_NAMES: readonly string[] = ["praman"];
 export const mongoDbConfig = nconf.get("databases").mongodb as IDataBaseConfig;
+// creator-hub payments domain — brand wallets, ledgers, settlements, payouts
+export const postgresDbConfig = nconf.get("databases").postgres as IPostgresConfig;
 export const redisConfig = nconf.get("redis") as IRedisConfig;
 
 export const publishers = nconf.get("publishers") as IPublisher;

@@ -1,0 +1,28 @@
+Creator Hub model
+
+Entities
+1. Brand 
+2. Creator 
+
+
+Initially Brand should have been pay the ₹1000 while onboarding
+Now brand will get the certain limit of ₹1000 marketing spend they will create job with that
+
+THIS ₹1000 was in the Creator Platform (Will be refunded back if they will churn nicly)
+
+
+Ex: 
+Brand onboarding with ₹1000 
+Created Job A with 2 quantiy of ₹500 spend each
+
+After 1 week
+Creator A (Job A) Accumulated ₹350
+Creator B (Job B) Accumulated ₹450
+
+Now the brand will get the bill of certain amount = ₹800 + platform fees
+Brand will pay the total amount to Creator Hub
+i will create the transfer of Creator A, Creator B and Creator Hub
+
+
+
+
