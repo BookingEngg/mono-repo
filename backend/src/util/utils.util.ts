@@ -20,7 +20,9 @@ export const getRedisUrl = (): object => {
 };
 
 export const getExternalDomain = () => {
-  const externalUrl = isProduction ? `https://${serverRoute}` : `http://${serverRoute}/api/v1/platform`;
+  const externalUrl = isProduction
+    ? `https://${serverRoute}`
+    : `http://${serverRoute}/backend/api/v1/platform`;
   return externalUrl;
 };
 
