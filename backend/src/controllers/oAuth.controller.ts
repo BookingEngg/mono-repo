@@ -9,6 +9,11 @@ const toUserType = (value: string): UserTypeEnum | undefined => {
   return value === UserTypeEnum.BRAND ? UserTypeEnum.BRAND : UserTypeEnum.INFLUENCER;
 };
 
+// Only the literal boolean-ish "true" opts into signup — anything else
+// (missing, "false", garbage) is treated as a login attempt, which never
+// creates a new account.
+const toIsSignup = (value: unknown): boolean => value === true || value === "true";
+
 class OAuthController {
   private oAuthService = new OAuthService();
   private jwtService = new JwtService();
@@ -20,17 +25,26 @@ class OAuthController {
 
   public initGithubOAuth = async (req: Request, res: Response) => {
     const userType = toUserType(req.query.user_type as string);
-    const githubUrl = this.oAuthService.navigateToGithubLogin(userType);
+    const isSignup = toIsSignup(req.query.is_signup);
+    const githubUrl = this.oAuthService.navigateToGithubLogin(
+      userType,
+      isSignup,
+    );
     return res.redirect(githubUrl);
   };
 
   public getGithubOAuthUser = async (req: Request, res: Response) => {
-    const { code, user_type } = req.query;
-    const userType = toUserType(user_type as string);
+    const { code, state } = req.query;
+    // user_type/is_signup never survive GitHub's own redirect — they're
+    // packed into `state` on the way out and unpacked here on the way back.
+    const { userType, isSignup } = this.oAuthService.decodeGithubState(
+      state as string,
+    );
 
     const response = await this.oAuthService.getGithubVerifiedUser(
       code as string,
       userType,
+      isSignup,
     );
 
     this.jwtService.setCookieAtClientSide({
@@ -42,10 +56,11 @@ class OAuthController {
   };
 
   public getGoogleOAuthUser = async (req: Request, res: Response) => {
-    const { token, user_type } = req.body;
+    const { token, user_type, is_signup } = req.body;
     const response = await this.oAuthService.getGoogleVerifiedUser(
       token,
       toUserType(user_type),
+      toIsSignup(is_signup),
     );
 
     this.jwtService.setCookieAtClientSide({

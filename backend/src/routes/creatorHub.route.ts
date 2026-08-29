@@ -30,14 +30,25 @@ class CreatorHubRoutes implements Routes {
   private creatorHubController = new CreatorHubControllers();
 
   constructor() {
+    this.initializePostRoutes(`${this.path}/post`);
+
+    this.initializeCheckoutRoutes(`${this.path}/checkout`);
+    this.initializeJobRoutes(`${this.path}/job`);
+    this.initializeJobApplicationRoutes(`${this.path}/job-application`);
+    this.initializeConversionRoutes(`${this.internalPath}/conversion`);
+  }
+
+  private initializePostRoutes(prefix: string) {
     this.router.get(
-      `${this.path}/post/:shortId`,
+      `${prefix}/:shortId`,
       this.validatorMiddleware.validateRequestParams(resolveLinkParamsSchema),
       this.creatorHubController.redirectLink,
     );
+  }
 
+  private initializeCheckoutRoutes(prefix: string) {
     this.router.get(
-      `${this.path}/checkout/:shortId`,
+      `${prefix}/:shortId`,
       this.authMiddleware.getAuthUser,
       this.authMiddleware.checkRoles(
         [rolesEnum.INFLUENCER],
@@ -46,10 +57,6 @@ class CreatorHubRoutes implements Routes {
       this.validatorMiddleware.validateRequestParams(resolveLinkParamsSchema),
       asyncWrapper(this.creatorHubController.getJobCheckoutDetails),
     );
-
-    this.initializeJobRoutes(`${this.path}/job`);
-    this.initializeJobApplicationRoutes(`${this.path}/job-application`);
-    this.initializeConversionRoutes(`${this.internalPath}/conversion`);
   }
 
   private initializeJobRoutes(prefix: string) {

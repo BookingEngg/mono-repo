@@ -4,6 +4,9 @@ import { Navigate, Route, Routes } from "react-router-dom";
 // Pages
 import LoginPage from "@/pages/Login";
 import SignupPage from "@/pages/Signup";
+import BrandSignupPage from "@/pages/BrandSignup";
+import BrandLoginPage from "@/pages/BrandLogin";
+import BrandOnboardingPage from "@/pages/BrandOnboarding";
 import OAuthCallbackPage from "@/pages/OAuthCallback";
 import HomePage from "@/pages/Home";
 import ExplorePage from "@/pages/Explore";
@@ -20,7 +23,7 @@ import { ErrorBoundary } from "@/atoms/ErrorBoundary";
 // Services
 import { getUser } from "@/services/Auth.service";
 // Store
-import { isUserAuthorized, login } from "@/store/auth";
+import { getAuthUser, isUserAuthorized, login } from "@/store/auth";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 // Constants
 import { ROUTE_PATHS } from "@/constants/common.constant";
@@ -30,6 +33,8 @@ import { Loader2Icon } from "lucide-react";
 const App = () => {
   const dispatch = useAppDispatch();
   const isAuthorized = useAppSelector(isUserAuthorized);
+  const { user } = useAppSelector(getAuthUser);
+  const isOnboarding = user?.account_status === "onboarding";
 
   // Blocks the first paint so a signed-in creator is never flashed the login card
   const [isSessionResolved, setIsSessionResolved] = React.useState(false);
@@ -62,7 +67,26 @@ const App = () => {
   return (
     <ErrorBoundary>
       <Routes>
-        {isAuthorized ? (
+        {isAuthorized && isOnboarding ? (
+          <>
+            {/*
+              A brand mid-onboarding (account_status: "onboarding") can only
+              reach the onboarding step itself — nothing else in the app is
+              usable until email verification completes and flips them to
+              "active", so every other URL bounces back here.
+            */}
+            <Route element={<AuthLayout />}>
+              <Route
+                path={ROUTE_PATHS.BRAND_ONBOARDING}
+                element={<BrandOnboardingPage />}
+              />
+            </Route>
+            <Route
+              path="*"
+              element={<Navigate to={ROUTE_PATHS.BRAND_ONBOARDING} replace />}
+            />
+          </>
+        ) : isAuthorized ? (
           <>
             <Route element={<MainLayout />}>
               <Route path={ROUTE_PATHS.HOME} element={<HomePage />} />
@@ -93,10 +117,22 @@ const App = () => {
               {/* "/" is the landing route: a signed-out visitor starts at signup */}
               <Route
                 path={ROUTE_PATHS.HOME}
-                element={<Navigate to={ROUTE_PATHS.SIGNUP} replace />}
+                element={<Navigate to={ROUTE_PATHS.LOGIN} replace />}
               />
               <Route path={ROUTE_PATHS.LOGIN} element={<LoginPage />} />
               <Route path={ROUTE_PATHS.SIGNUP} element={<SignupPage />} />
+              {/*
+                Brand's own signup/login — never linked from LOGIN/SIGNUP,
+                which are reserved for influencers.
+              */}
+              <Route
+                path={ROUTE_PATHS.BRAND_SIGNUP}
+                element={<BrandSignupPage />}
+              />
+              <Route
+                path={ROUTE_PATHS.BRAND_LOGIN}
+                element={<BrandLoginPage />}
+              />
               <Route
                 path={ROUTE_PATHS.OAUTH_CALLBACK}
                 element={<OAuthCallbackPage />}

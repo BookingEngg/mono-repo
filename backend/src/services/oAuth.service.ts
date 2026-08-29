@@ -28,25 +28,63 @@ class OAuthService {
   };
 
   /**
-   * GitHub's signin is a full page redirect, so `user_type` can't be sent as
-   * a request body like Google's — it's round-tripped through the `state`
-   * param instead, which GitHub echoes back verbatim to the callback.
+   * GitHub's signin is a full page redirect: GitHub's own /authorize
+   * endpoint only ever echoes `code` and `state` back to our redirect_uri,
+   * nothing else — a `user_type`/`is_signup` query param tacked onto the
+   * /authorize URL itself would silently vanish. So both are packed into
+   * `state` alongside the CSRF secret, and unpacked again in
+   * `decodeGithubState` once GitHub redirects back.
    */
-  public navigateToGithubLogin = (userType?: UserTypeEnum) => {
+  public navigateToGithubLogin = (
+    userType?: UserTypeEnum,
+    isSignup?: boolean,
+  ) => {
     const {
       client_id: clientId,
       redirect_url_endpoint: redirectUrlEndpoint,
       scope,
-      state,
     } = githubOAuthConfigs;
 
     const redirectURI = getExternalDomain() + redirectUrlEndpoint;
-    return `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectURI}&scope=${scope}&state=${state}&user_type=${userType}`;
+    const state = this.encodeGithubState(userType, isSignup);
+    return `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectURI}&scope=${scope}&state=${encodeURIComponent(state)}`;
+  };
+
+  private encodeGithubState = (userType?: UserTypeEnum, isSignup?: boolean) => {
+    const { state } = githubOAuthConfigs;
+    return `${state}|${userType ?? ""}|${isSignup ? "1" : "0"}`;
+  };
+
+  /**
+   * Rejects a state that doesn't start with our configured secret — a
+   * minimal CSRF check, same as the plain fixed-string `state` this
+   * replaced was meant to provide.
+   */
+  public decodeGithubState = (
+    rawState: string,
+  ): { userType: UserTypeEnum; isSignup: boolean } => {
+    const { state: secret } = githubOAuthConfigs;
+    const [receivedSecret, userTypeRaw, isSignupRaw] = (rawState || "").split(
+      "|",
+    );
+
+    if (receivedSecret !== secret) {
+      throw new Error("Invalid Request!");
+    }
+
+    return {
+      userType:
+        userTypeRaw === UserTypeEnum.BRAND
+          ? UserTypeEnum.BRAND
+          : UserTypeEnum.INFLUENCER,
+      isSignup: isSignupRaw === "1",
+    };
   };
 
   public getGithubVerifiedUser = async (
     code: string,
     userType?: UserTypeEnum,
+    isSignup?: boolean,
   ) => {
     const { client_id: clientId, client_secret: clientSecret } =
       githubOAuthConfigs;
@@ -77,12 +115,14 @@ class OAuthService {
       authorizedUser,
       OAuthClients.GITHUB,
       userType,
+      isSignup,
     );
   };
 
   public getGoogleVerifiedUser = async (
     token: string,
     userType: UserTypeEnum,
+    isSignup?: boolean,
   ) => {
     const { client_id: clientId } = googleOAuthConfigs;
     const googleAuthClient = new OAuth2Client(clientId);
@@ -97,6 +137,7 @@ class OAuthService {
         verifiedUser,
         OAuthClients.GOOGLE,
         userType,
+        isSignup,
       );
     } catch (_err) {
       throw _err;
@@ -107,6 +148,7 @@ class OAuthService {
     verifiedUser: object,
     source: OAuthClients,
     userType: UserTypeEnum,
+    isSignup?: boolean,
   ) => {
     if (!verifiedUser) {
       return null;
@@ -128,6 +170,21 @@ class OAuthService {
     // Only a brand-new account respects the chosen user_type — an existing
     // creator's roles are never modified just because they logged in again.
     if (!existingValidUser) {
+      // /login and /signup hit this same path — only /signup sets
+      // is_signup, so a login attempt for an email with no account errors
+      // instead of silently creating one.
+      if (!isSignup) {
+        throw new Error("No account found. Please sign up first.");
+      }
+
+      // Brands no longer create accounts via OAuth — they use the dedicated
+      // brand signup form. Existing OAuth-created brand accounts (if any)
+      // still log in fine via the `existingValidUser` branch above; this
+      // only blocks *new* brand accounts from this path.
+      if (userType === UserTypeEnum.BRAND) {
+        throw new Error("Can't signup for brand");
+      }
+
       const formattedInhouseUserMapper = {
         [OAuthClients.GOOGLE]:
           this.oAuthFormatter.getFormattedGoogleUserDetails(verifiedUser),

@@ -1,4 +1,4 @@
-import type { RequestInfo, RequestInit, Response } from "node-fetch";
+import nodeFetch from "node-fetch";
 import {
   redisConfig,
   isProduction,
@@ -8,11 +8,11 @@ import {
   uiConfigs,
 } from "@config";
 
-export const fetch = (
-  url: RequestInfo,
-  init?: RequestInit,
-): Promise<Response> =>
-  import("node-fetch").then(({ default: fetch }) => fetch(url, init));
+// node-fetch is pinned to v2 (CommonJS) rather than v3 (ESM-only) —
+// TypeScript downlevels a dynamic `import()` to a plain `require()` when
+// compiling to CommonJS (this backend's module target), so an ESM-only v3
+// package can never actually load here no matter how it's imported.
+export const fetch = nodeFetch;
 
 export const getRedisUrl = (): object => {
   const { username, password, host, port } = redisConfig;

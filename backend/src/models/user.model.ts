@@ -1,7 +1,7 @@
 import { Schema } from "mongoose";
 import { MONGO_INSTANCES } from "@database";
 import { IUser } from "@/interfaces/user.interface";
-import { GenderEnum, rolesEnum } from "@/interfaces/enum";
+import { AccountStatusEnum, GenderEnum, rolesEnum } from "@/interfaces/enum";
 
 const dbConnection = MONGO_INSTANCES.praman;
 
@@ -45,8 +45,16 @@ const UserSchema = new Schema<IUser>(
     email: { type: String, require: true },
     user_profile_picture: { type: String, default: undefined },
     email_verified: { type: Boolean, default: false },
-    contact: { type: String }, // Still @depricated
+    contact: { type: String },
     origin: { type: IOrigin, default: undefined },
+
+    // Onboarding lifecycle — see AccountStatusEnum. Every pre-existing OAuth
+    // user is already fully set up, so ACTIVE is the safe default.
+    account_status: {
+      type: String,
+      enum: AccountStatusEnum,
+      default: AccountStatusEnum.ACTIVE,
+    },
 
     // Influencer onboarding
     dob: { type: Date, default: null },

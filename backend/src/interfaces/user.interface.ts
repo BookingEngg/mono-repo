@@ -3,7 +3,7 @@ import {
   RequestStatusType,
   BlockedType,
 } from "@/constants/common.constants";
-import { GenderEnum } from "./enum";
+import { AccountStatusEnum, GenderEnum } from "./enum";
 
 export interface IBlockedUser {
   user_id: string;
@@ -33,6 +33,10 @@ export interface IUser {
   origin: IOrigin;
   email_verified: boolean;
   user_profile_picture?: string;
+
+  // Onboarding lifecycle — see AccountStatusEnum. Defaults to ACTIVE at the
+  // schema level, so only the brand-signup path needs to set this explicitly.
+  account_status: AccountStatusEnum;
 
   // Influencer onboarding fields — absent until the creator fills the
   // onboarding form, so every field defaults to null rather than undefined.

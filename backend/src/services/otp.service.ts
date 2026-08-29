@@ -6,6 +6,7 @@ import MailTemplate from "@/util/mailtemplate.util";
 import { IUser } from "@/interfaces/user.interface";
 import UserDao from "@/dao/user.dao";
 import { isProduction } from "@/config";
+import { AccountStatusEnum } from "@/interfaces/enum";
 
 class OtpService {
   private otpDao = new OtpDao();
@@ -65,10 +66,34 @@ class OtpService {
 
     if (isVerifiedOtp) {
       userData = await this.userDao.getUserByEmail(email);
-      await this.otpDao.markOtpAsVerified({
-        id: otpData._id,
-        user_id: userData._id,
-      });
+
+      if (userData && otpData) {
+        await this.otpDao.markOtpAsVerified({
+          id: otpData._id,
+          user_id: userData._id,
+        });
+      }
+
+      // Completes the brand onboarding email-verification step (and is a
+      // harmless no-op for anyone already active/verified — e.g. an
+      // influencer or a brand just using this as a return-login).
+      if (
+        userData &&
+        (!userData.email_verified ||
+          userData.account_status === AccountStatusEnum.ONBOARDING)
+      ) {
+        await this.userDao.updateUserDetailsById(userData._id, {
+          $set: {
+            email_verified: true,
+            account_status: AccountStatusEnum.ACTIVE,
+          },
+        });
+        userData = {
+          ...userData,
+          email_verified: true,
+          account_status: AccountStatusEnum.ACTIVE,
+        };
+      }
     }
 
     return userData;

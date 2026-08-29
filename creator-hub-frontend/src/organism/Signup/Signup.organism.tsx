@@ -1,26 +1,21 @@
 // Modules
-import React from "react";
 import { Link } from "react-router-dom";
 // Molecules
 import { AuthCard } from "@/molecules/AuthCard";
 import { OAuthProviders } from "@/molecules/OAuthProviders";
-import { UserTypeToggle } from "@/molecules/UserTypeToggle";
 // Hooks
 import useOAuthLogin from "@/hooks/useOAuthLogin";
 // Constants
 import { ROUTE_PATHS } from "@/constants/common.constant";
-// Typings
-import { TUserType } from "@/typings/auth";
 
 /**
- * Signup is OAuth-only: the backend has no email/password (or email+OTP)
- * account creation path, only Google and GitHub can create a new account.
- * The Creator/Brand choice below only takes effect the moment that new
- * account gets created.
+ * Influencer signup — same OAuth providers LOGIN uses, but this is the only
+ * place that passes isSignup=true, which is what actually lets the backend
+ * create a brand-new account (LOGIN's OAuth buttons will error instead of
+ * silently signing someone up). Brands sign up separately at /brand/signup
+ * (a plain form, no OAuth) — never linked from here.
  */
 const Signup = () => {
-  const [userType, setUserType] = React.useState<TUserType>("influencer");
-
   const {
     clientDetails,
     error,
@@ -28,7 +23,7 @@ const Signup = () => {
     handleGoogleSuccess,
     handleGoogleError,
     handleGithubLogin,
-  } = useOAuthLogin(userType);
+  } = useOAuthLogin("influencer", true);
 
   return (
     <AuthCard
@@ -47,22 +42,14 @@ const Signup = () => {
         </span>
       }
     >
-      <div className="grid gap-6">
-        <UserTypeToggle
-          value={userType}
-          onChange={setUserType}
-          disabled={loading}
-        />
-
-        <OAuthProviders
-          clientDetails={clientDetails}
-          label="continue with"
-          disabled={loading}
-          onGoogleSuccess={handleGoogleSuccess}
-          onGoogleError={handleGoogleError}
-          onGithubClick={handleGithubLogin}
-        />
-      </div>
+      <OAuthProviders
+        clientDetails={clientDetails}
+        label="continue with"
+        disabled={loading}
+        onGoogleSuccess={handleGoogleSuccess}
+        onGoogleError={handleGoogleError}
+        onGithubClick={handleGithubLogin}
+      />
     </AuthCard>
   );
 };

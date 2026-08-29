@@ -24,7 +24,14 @@ const defaultPayloadValue = {
   otp: "",
 };
 
-const Login = () => {
+/**
+ * Brand's own return login — email+OTP, plus OAuth as an alternative for a
+ * brand whose email happens to match a Google/GitHub account. isSignup
+ * stays false here (the default): OAuth only ever logs an *existing* brand
+ * in on this page — a brand-new account still only gets created via the
+ * plain form at /brand/signup, never through this path.
+ */
+const BrandLogin = () => {
   const {
     clientDetails,
     error,
@@ -35,25 +42,22 @@ const Login = () => {
     handleGoogleSuccess,
     handleGoogleError,
     handleGithubLogin,
-  } = useOAuthLogin();
+  } = useOAuthLogin("brand");
 
-  const [loginPayload, setLoginPayload] = React.useState(defaultPayloadValue);
+  const [payload, setPayload] = React.useState(defaultPayloadValue);
   const [isVerifyOtpVisible, setIsVerifyOtpVisible] = React.useState(false);
   const [fieldError, setFieldError] = React.useState("");
 
-  const handleFormPayloadChange = React.useCallback(
+  const handlePayloadChange = React.useCallback(
     (value: string, key: string) => {
       setFieldError("");
-      setLoginPayload((previousPayload) => ({
-        ...previousPayload,
-        [key]: value,
-      }));
+      setPayload((previous) => ({ ...previous, [key]: value }));
     },
-    []
+    [],
   );
 
   const handleOtpSend = React.useCallback(async () => {
-    if (!isValidEmail(loginPayload.email)) {
+    if (!isValidEmail(payload.email)) {
       setFieldError("Enter a valid email address");
       return;
     }
@@ -61,17 +65,17 @@ const Login = () => {
     setLoading(true);
     setError("");
     try {
-      await sendOtp({ email: loginPayload.email });
+      await sendOtp({ email: payload.email });
       setIsVerifyOtpVisible(true);
     } catch (caughtError) {
       setError(getErrorMessage(caughtError, "We could not send the code."));
     } finally {
       setLoading(false);
     }
-  }, [loginPayload.email, setError, setLoading]);
+  }, [payload.email, setError, setLoading]);
 
   const handleOtpVerify = React.useCallback(
-    async (otp: string = loginPayload.otp) => {
+    async (otp: string = payload.otp) => {
       if (otp.length !== OTP_LENGTH) {
         setFieldError(`Enter the ${OTP_LENGTH} digit code`);
         return;
@@ -80,11 +84,7 @@ const Login = () => {
       setLoading(true);
       setError("");
       try {
-        const otpResponse = await verifyOtp({
-          email: loginPayload.email,
-          otp,
-        });
-
+        const otpResponse = await verifyOtp({ email: payload.email, otp });
         if (!otpResponse?.status) {
           setFieldError("That code is invalid or has expired.");
           return;
@@ -100,58 +100,52 @@ const Login = () => {
         setLoading(false);
       }
     },
-    [loginPayload, setError, setLoading, syncAuthUser]
+    [payload, setError, setLoading, syncAuthUser],
   );
 
-  /**
-   * Returning to the email step clears the code so a stale OTP can never be
-   * submitted against a newly entered address.
-   */
   const handleBackToEmail = React.useCallback(() => {
     setIsVerifyOtpVisible(false);
     setFieldError("");
     setError("");
-    setLoginPayload((previousPayload) => ({ ...previousPayload, otp: "" }));
+    setPayload((previous) => ({ ...previous, otp: "" }));
   }, [setError]);
 
   return (
     <AuthCard
-      title="Welcome back"
+      title="Brand sign in"
       description={
         isVerifyOtpVisible
           ? "Enter the code we emailed you to continue."
-          : "Sign in to your creator account."
+          : "Sign in to your brand account."
       }
       error={error}
       footer={
-        <span className="text-muted-foreground">
-          New to Creator Hub?{" "}
-          <Link
-            to={ROUTE_PATHS.SIGNUP}
-            className="text-foreground font-medium underline-offset-4 hover:underline"
-          >
-            Create an account
-          </Link>
-        </span>
+        !isVerifyOtpVisible && (
+          <span className="text-muted-foreground">
+            New brand?{" "}
+            <Link
+              to={ROUTE_PATHS.BRAND_SIGNUP}
+              className="text-foreground font-medium underline-offset-4 hover:underline"
+            >
+              Create an account
+            </Link>
+          </span>
+        )
       }
     >
       {isVerifyOtpVisible ? (
         <div className="grid gap-4">
           <OtpField
-            value={loginPayload.otp}
-            email={loginPayload.email}
+            value={payload.otp}
+            email={payload.email}
             disabled={loading}
             error={fieldError}
-            onChange={(value) => handleFormPayloadChange(value, "otp")}
+            onChange={(value) => handlePayloadChange(value, "otp")}
             onComplete={handleOtpVerify}
             onResend={handleOtpSend}
           />
 
-          <Button
-            className="w-full"
-            disabled={loading}
-            onClick={() => handleOtpVerify()}
-          >
+          <Button className="w-full" disabled={loading} onClick={() => handleOtpVerify()}>
             {loading && <Loader2Icon className="animate-spin" />}
             Verify and sign in
           </Button>
@@ -177,11 +171,11 @@ const Login = () => {
               required
               autoComplete="email"
               placeholder="you@example.com"
-              value={loginPayload.email}
+              value={payload.email}
               disabled={loading}
               error={fieldError}
               hint="We'll email you a one time code."
-              onChange={(value) => handleFormPayloadChange(value, "email")}
+              onChange={(value) => handlePayloadChange(value, "email")}
               onEnter={handleOtpSend}
             />
 
@@ -204,4 +198,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default BrandLogin;

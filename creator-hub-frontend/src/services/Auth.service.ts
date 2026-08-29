@@ -2,6 +2,7 @@
 import axiosClient from "@/services/http";
 // Typings
 import {
+  IBrandSignupPayload,
   IOAuthClientDetails,
   IUpdateOnboardingPayload,
   TUserType,
@@ -21,6 +22,18 @@ export const sendOtp = async (payload: { email: string }) => {
 export const verifyOtp = async (payload: { email: string; otp: string }) => {
   const response = await axiosClient.post({
     url: "/otp/verify",
+    body: payload,
+  });
+
+  return response.data;
+};
+
+// Brand's small signup form — no OAuth, no password. Signs the brand in
+// immediately (same jwt-token cookie OAuth would set); email verification
+// happens afterward via sendOtp/verifyOtp as an onboarding step.
+export const brandSignup = async (payload: IBrandSignupPayload) => {
+  const response = await axiosClient.post({
+    url: "/user/brand-signup",
     body: payload,
   });
 
@@ -69,9 +82,12 @@ export const getOAuthClientDetails = async (): Promise<IOAuthClientDetails> => {
 
 // Login the User with Google OAuth Client Id. user_type only affects a
 // brand-new account — the backend ignores it when the email already exists.
+// is_signup gates whether a brand-new account is allowed to be created at
+// all: the backend errors instead of creating one when it's not set.
 export const getUserByGoogleOAuth = async (payload: {
   token: string;
   user_type?: TUserType;
+  is_signup?: boolean;
 }) => {
   const response = await axiosClient.post({
     url: "/oauth/google-user",

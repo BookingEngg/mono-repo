@@ -6,11 +6,12 @@ import CommunicationDao from "@/dao/communication.dao";
 import UserDao from "@/dao/user.dao";
 // Interfaces
 import { ICommonAuthUser, IUser } from "@/interfaces/user.interface";
-import { UserTypeEnum } from "@/interfaces/enum";
+import { AccountStatusEnum, UserTypeEnum } from "@/interfaces/enum";
 // Constants
 import { getSignupRolesAndPrivileges } from "@/constants/roles.constants";
 // Validators
 import { IUpdateOnboardingPayload } from "@/validators/user.validator";
+import { IBrandSignupPayload } from "@/validators/brandSignup.validator";
 
 class UserService {
   private userDao = new UserDao();
@@ -18,7 +19,7 @@ class UserService {
 
   public createUser = async (
     payload: ICommonAuthUser,
-    userType: UserTypeEnum
+    userType: UserTypeEnum,
   ) => {
     const { roles, privileges } = getSignupRolesAndPrivileges(userType);
 
@@ -42,6 +43,38 @@ class UserService {
 
   public getInhouseUserDetailsByEmail = async (email) => {
     return this.userDao.getUserByEmail(email);
+  };
+
+  /**
+   * Brand's small signup form — no OAuth, no password. The account is
+   * created straight into ONBOARDING and immediately signed in (the
+   * controller mints the same JWT cookie OAuth would have); email
+   * verification happens afterward as an onboarding step, not a signup
+   * gate. brand_name fills first_name since a brand has no separate
+   * first/last name concept.
+   */
+  public createBrandSignupUser = async (payload: IBrandSignupPayload) => {
+    const { roles, privileges } = getSignupRolesAndPrivileges(
+      UserTypeEnum.BRAND,
+    );
+
+    const formattedUser = {
+      first_name: payload.brand_name,
+      last_name: "",
+      email: payload.email,
+      contact: payload.contact,
+      email_verified: false,
+      account_status: AccountStatusEnum.ONBOARDING,
+
+      roles,
+      privileges,
+      friends_ids: [],
+      requested_friends: [],
+      blocked_user: [],
+
+      group_ids: [],
+    };
+    return await this.userDao.createUser(formattedUser);
   };
 
   /**
@@ -78,7 +111,7 @@ class UserService {
   public getChatUsers = async (authUser: IUser) => {
     const chatUsers = await this.userDao.getUserByUserIds(authUser.friends_ids);
     const lastReceivedChat = await this.communicationDao.getLastReceivedChat(
-      authUser._id
+      authUser._id,
     );
 
     const lastReceivedChatMap = R.indexBy(R.prop("_id"), lastReceivedChat);

@@ -72,6 +72,16 @@ export enum UserTypeEnum {
   BRAND = "brand",
 }
 
+// Lifecycle of the account itself, separate from roles/privileges. A brand
+// created via the signup form starts "onboarding" (pending email
+// verification) and flips to "active" once that step completes. Anything
+// other than a strict "onboarding" match is treated as active — existing
+// docs from before this field existed never need a migration.
+export enum AccountStatusEnum {
+  ONBOARDING = "onboarding",
+  ACTIVE = "active",
+}
+
 // Kept gateway-agnostic on purpose: PaymentProviderEnum is the only place a
 // specific gateway name appears. Payment.provider_ref/provider_meta stay
 // opaque so swapping gateways later only means adding a value here, not

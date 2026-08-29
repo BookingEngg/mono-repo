@@ -16,6 +16,7 @@ import AuthMiddleware from "@/middleware/auth.middleware";
 import ValidatorMiddleware from "@/middleware/validator.middleware";
 // Validators
 import { updateOnboardingSchema } from "@/validators/user.validator";
+import { brandSignupSchema } from "@/validators/brandSignup.validator";
 // Wrappers
 import { asyncWrapper } from "@/middleware/common.middleware";
 
@@ -69,6 +70,14 @@ class ExternalRoutes implements Routes {
   }
 
   private initializeUsersRoutes(prefix: string) {
+    // Public — no auth, this creates the account. Same signup form is never
+    // exposed on the influencer login/signup pages.
+    this.router.post(
+      `${prefix}/brand-signup`,
+      this.validatorMiddleware.validateRequestBody(brandSignupSchema),
+      asyncWrapper(this.userController.brandSignup),
+    );
+
     this.router.get(
       `${prefix}/`,
       this.authMiddleware.getAuthUser,

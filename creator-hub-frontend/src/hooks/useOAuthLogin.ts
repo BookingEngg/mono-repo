@@ -26,10 +26,13 @@ import { getErrorMessage } from "@/utils/util";
  *
  * `userType` only matters the moment a brand-new account gets created — an
  * existing creator's account type never changes just by logging in again.
- * Login calls this with no argument (defaults to "user"); Signup passes its
- * selected toggle value.
+ *
+ * `isSignup` is what actually gates account creation: the backend only
+ * creates a new profile when it's true. Login calls this with the default
+ * (false) — if no account exists for that email, the backend errors rather
+ * than silently signing someone up. Signup passes true.
  */
-const useOAuthLogin = (userType: TUserType = "influencer") => {
+const useOAuthLogin = (userType: TUserType = "influencer", isSignup = false) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -69,6 +72,7 @@ const useOAuthLogin = (userType: TUserType = "influencer") => {
         const response = await getUserByGoogleOAuth({
           token: payload.credential,
           user_type: userType,
+          is_signup: isSignup,
         });
 
         if (!response?.is_verified_user) {
@@ -86,7 +90,7 @@ const useOAuthLogin = (userType: TUserType = "influencer") => {
         setLoading(false);
       }
     },
-    [syncAuthUser, userType]
+    [isSignup, syncAuthUser, userType]
   );
 
   const handleGoogleError = React.useCallback(() => {
@@ -94,9 +98,10 @@ const useOAuthLogin = (userType: TUserType = "influencer") => {
   }, []);
 
   /**
-   * GitHub is a full page redirect handled by the backend. user_type can't be
-   * sent as a request body here, so it rides along as a query param that the
-   * backend threads through GitHub's own `state` param and back.
+   * GitHub is a full page redirect handled by the backend. Neither
+   * user_type nor is_signup can be sent as a request body here, so they
+   * ride along as query params to our own /github_init, which the backend
+   * then packs into GitHub's `state` param so they survive the round trip.
    */
   const handleGithubLogin = React.useCallback(() => {
     if (!clientDetails?.github_init_url) {
@@ -106,8 +111,9 @@ const useOAuthLogin = (userType: TUserType = "influencer") => {
 
     const url = new URL(clientDetails.github_init_url);
     url.searchParams.set("user_type", userType);
+    url.searchParams.set("is_signup", String(isSignup));
     window.open(url.toString(), "_self", "noreferrer");
-  }, [clientDetails, userType]);
+  }, [clientDetails, isSignup, userType]);
 
   return {
     clientDetails,
