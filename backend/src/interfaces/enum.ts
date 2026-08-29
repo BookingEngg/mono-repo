@@ -92,6 +92,16 @@ export enum PaymentStatusEnum {
   FAILED = "failed",
 }
 
+// Lifecycle of one earning ledger row — separate from PaymentStatusEnum,
+// which tracks the payment transaction itself, not the underlying earning
+// entry it eventually settles.
+export enum EarningStatusEnum {
+  ACCRUED = "accrued", // creator earned it, not yet rolled into a billing cycle
+  BILLED = "billed", // included in a closed billing cycle, not yet paid
+  PAID = "paid", // the payment for this entry succeeded
+  REVERSED = "reversed", // underlying order/conversion was cancelled before payout
+}
+
 export enum privilegesEnum {
   // User Priviledges
   DEFAULT_USER = "privilege/user/viewer",

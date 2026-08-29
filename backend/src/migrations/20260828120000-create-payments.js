@@ -8,10 +8,8 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
       },
-
       seller_id: {
         type: Sequelize.TEXT,
-        allowNull: false,
       },
       order_id: {
         type: Sequelize.TEXT,
@@ -19,7 +17,6 @@ module.exports = {
       },
       user_id: {
         type: Sequelize.TEXT,
-        allowNull: false,
       },
 
       payable_amount: {
@@ -31,18 +28,19 @@ module.exports = {
         allowNull: false,
         defaultValue: "INR",
       },
-
       transaction_id: {
         type: Sequelize.TEXT, // partner/gateway order id
       },
-
       online_request: {
         type: Sequelize.JSONB,
       },
       online_response: {
         type: Sequelize.JSONB,
       },
-
+      payment_type: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
       payment_status: {
         type: Sequelize.STRING,
         allowNull: false,
@@ -55,7 +53,6 @@ module.exports = {
       payment_cycle_id: {
         type: Sequelize.TEXT,
       },
-
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -79,7 +76,17 @@ module.exports = {
       type: "check",
       name: "chk_payments_status_enum",
       where: {
-        payment_status: { [Sequelize.Op.in]: ["initiated", "success", "failed"] },
+        payment_status: {
+          [Sequelize.Op.in]: ["initiated", "success", "pending", "failed"],
+        },
+      },
+    });
+    await queryInterface.addConstraint("payments", {
+      fields: ["payment_type"],
+      type: "check",
+      name: "chk_payments_type_enum",
+      where: {
+        payment_type: { [Sequelize.Op.in]: ["security_deposit", "online"] },
       },
     });
     await queryInterface.addConstraint("payments", {
@@ -90,7 +97,6 @@ module.exports = {
         payment_gateway: { [Sequelize.Op.in]: ["RAZORPAY"] },
       },
     });
-
     await queryInterface.addIndex("payments", {
       fields: ["seller_id"],
       name: "idx_payments_seller",
