@@ -70,6 +70,31 @@ export interface IOAuth {
   github: IGithubOAuth;
 }
 
+/**
+ * Payment gateway credentials. `key_id` is the only public half — it is sent
+ * to the browser so the checkout widget can identify the merchant. `key_secret`
+ * and `webhook_secret` never leave the server: they sign/verify amounts and
+ * callbacks, so leaking either would let anyone forge a "payment succeeded".
+ *
+ * Keyed by provider so a second gateway is a new entry here, not a reshape.
+ */
+export interface IPaymentGatewayCredentials {
+  key_id: string;
+  key_secret: string;
+  webhook_secret: string;
+}
+
+export interface IPaymentConfig {
+  // Which gateway new payments are routed to. Existing rows keep whatever
+  // gateway they were created with, so flipping this is always safe.
+  active_gateway: string;
+  // Refundable onboarding deposit that doubles as a brand's ads balance.
+  // Server-owned: the client never sends an amount (see payment.service).
+  security_deposit_amount: number;
+  currency: string;
+  razorpay: IPaymentGatewayCredentials;
+}
+
 export interface IGoogleOAuth {
   client_id: string;
   project_id: string;

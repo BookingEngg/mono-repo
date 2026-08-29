@@ -13,6 +13,12 @@ declare global {
         paltform?: string;
       };
       _startTime?: number;
+      /**
+       * Unparsed request body, captured by express.json's `verify` hook in
+       * app.ts. Gateway webhooks sign the exact bytes they sent, so a
+       * re-serialized req.body can never reproduce the HMAC.
+       */
+      rawBody?: string;
     }
 
     export interface Response {

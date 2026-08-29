@@ -3,6 +3,7 @@ import {
   IDataBaseConfig,
   INodeMailer,
   IOAuth,
+  IPaymentConfig,
   IPostgresConfig,
   IPublisher,
   IRedisConfig,
@@ -40,6 +41,8 @@ export const SOCKET_EVENTS_NAMES: readonly string[] = [
 ];
 
 export const nodeMailConfig = nconf.get("nodemailer") as INodeMailer;
+
+export const paymentConfig = nconf.get("payment") as IPaymentConfig;
 
 export const tokenDetails = nconf.get("token") as IToken;
 export const googleOAuthConfigs = (nconf.get("o_auth") as IOAuth).google;

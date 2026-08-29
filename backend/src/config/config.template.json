@@ -45,6 +45,16 @@
     "password": "",
     "expire_in_minutes": "5"
   },
+  "payment": {
+    "active_gateway": "RAZORPAY",
+    "security_deposit_amount": 1000,
+    "currency": "INR",
+    "razorpay": {
+      "key_id": "",
+      "key_secret": "",
+      "webhook_secret": ""
+    }
+  },
   "token": {
     "secret_key": "xxxxxxx"
   },

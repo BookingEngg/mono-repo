@@ -14,6 +14,19 @@ export const getInitials = (firstName?: string, lastName?: string): string => {
 };
 
 /**
+ * Formats an amount in MAJOR currency units (rupees, not paise) for display.
+ * Gateway payloads use minor units, but everything user-facing — and every
+ * amount our own API returns — is major, so this never divides by 100.
+ */
+export const formatCurrency = (amount: number, currency = "INR"): string => {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  }).format(amount);
+};
+
+/**
  * Pulls a human readable message out of an axios error, falling back to a
  * generic line so the UI never renders "undefined" to a creator.
  */

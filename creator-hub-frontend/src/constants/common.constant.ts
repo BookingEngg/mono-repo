@@ -28,6 +28,9 @@ export const ROUTE_PATHS = {
   PROFILE: "/profile",
   CREATE_JOB: "/job/new",
   MY_APPLICATIONS: "/applications",
+  // Developer sandbox for exercising the payment sequence end to end. Not in
+  // NAV_ITEMS — reachable by URL only, so it never shows up for real users.
+  PAYMENT_SANDBOX: "/dev/payments",
   // Route pattern for React Router registration — use getJobCheckoutPath()
   // to build an actual link with a real short_id.
   JOB_CHECKOUT: "/jobs/:shortId/checkout",

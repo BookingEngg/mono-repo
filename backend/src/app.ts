@@ -80,7 +80,17 @@ class App {
       }),
     );
     this.app.use(cookieParser());
-    this.app.use(express.json());
+    this.app.use(
+      express.json({
+        // Payment gateways sign the exact bytes they POST, so webhook
+        // verification needs the untouched body — JSON.stringify(req.body)
+        // reorders/reformats and would never match the HMAC. `verify` is the
+        // only hook that sees the buffer before it's parsed away.
+        verify: (req: express.Request, _res, buffer: Buffer) => {
+          req.rawBody = buffer.toString("utf8");
+        },
+      }),
+    );
     this.app.use(cookieParser());
     this.loggingMiddleware();
     this.app.use(
