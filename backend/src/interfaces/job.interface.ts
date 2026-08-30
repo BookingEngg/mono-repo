@@ -26,6 +26,10 @@ export interface IJob {
   product_id: string;
   product_link: string;
   product_name: string;
+  // What the product sells for — the base a PERCENTAGE earning model is
+  // calculated against. Optional because jobs created before this field
+  // existed don't carry it; callers fall back to the old wording.
+  selling_price?: number;
   preview_urls?: IJobMedia[]; // media links (images/videos) for the job preview
 
   category?: IJobCategory;
@@ -70,8 +74,13 @@ export interface IJobListItem {
 // checkout summary screen needs on top of the listing shape: what the
 // influencer earns and the due date, but still nothing seller_id/internal.
 export interface IJobCheckoutDetails extends IJobListItem {
-  // fully-formatted earning text (e.g. "Earn 10% of order value") — see
-  // buildEarningModelDisplay in creatorHub.helper.ts
+  // fully-formatted earning text (e.g. "Earn ₹120 per order (10% of ₹1,200)")
+  // — see buildEarningModelDisplay in creatorHub.helper.ts
   earning_display?: string;
+  // What the creator actually earns per conversion, in rupees. Separate from
+  // earning_display so the UI can style the figure on its own rather than
+  // parsing it back out of a sentence.
+  earning_amount?: number;
+  selling_price?: number;
   due_date?: number;
 }

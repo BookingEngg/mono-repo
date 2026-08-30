@@ -41,6 +41,9 @@ const JobApplicationSchema: Schema<IJobApplication> = new Schema(
               required: true,
             },
           },
+          // snapshotted with earning_model — a PERCENTAGE cut only means
+          // something against the price it was quoted at
+          selling_price: { type: Number, min: 0 },
           due_date: { type: Number },
         },
         { _id: false },

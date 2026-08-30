@@ -1,11 +1,12 @@
 import JobDao from "@/dao/job.dao";
 import JobApplicationDao from "@/dao/jobApplication.dao";
 import LinkDao from "@/dao/link.dao";
-import ConversionDao from "@/dao/conversion.dao";
+import EarningDao from "@/dao/earning.dao";
 import UserDao from "@/dao/user.dao";
 import {
   isJobOpenForApplication,
   buildJobApplicationJobDetails,
+  calculateJobApplicationCommission,
   buildJobApplicationListItem,
   buildJobListItem,
   buildJobCheckoutDetails,
@@ -31,7 +32,7 @@ class CreatorHubService {
   private jobDao = new JobDao();
   private jobApplicationDao = new JobApplicationDao();
   private linkDao = new LinkDao();
-  private conversionDao = new ConversionDao();
+  private earningDao = new EarningDao();
   private userDao = new UserDao();
 
   // payload is already validated by ValidatorMiddleware.validateRequestBody(createJobSchema)
@@ -41,6 +42,7 @@ class CreatorHubService {
       product_id,
       product_name,
       product_link,
+      selling_price,
       preview_urls,
       category,
       earning_model,
@@ -55,6 +57,7 @@ class CreatorHubService {
       product_id,
       product_name,
       product_link,
+      selling_price,
       preview_urls,
       category,
       earning_model,
@@ -286,15 +289,35 @@ class CreatorHubService {
     if (!link || !link.is_active) {
       throw new Error("Link not found");
     }
+    const jobApplication =
+      link.entity_id &&
+      (await this.jobApplicationDao.getApplicationByShortId(link.entity_id));
 
-    if (link.entity_type === LinkEntityType.JOB_APPLICATION && link.entity_id) {
-      await this.conversionDao.upsertConversionForVisitor({
-        job_application_short_id: link.entity_id,
-        visitor_id: sessionId,
-        trigger: ConversionTriggerEnum.LINK_CLICK,
-        event_source: ConversionEventSourceEnum.INHOUSE,
-        recorded_at: new Date(),
-      });
+    const isInternalConversionEvent =
+      jobApplication &&
+      jobApplication?.job_details?.earning_model?.conversion_trigger ===
+        ConversionTriggerEnum.LINK_CLICK;
+
+    if (isInternalConversionEvent && link.entity_id) {
+      const commission = calculateJobApplicationCommission(jobApplication);
+
+      // A CPC job with no determinable rate must not silently accrue 0 — skip
+      // and let it surface as a missing earning rather than a wrong one.
+      if (commission) {
+        // sessionId is the visitor identifier here, so the unique index
+        // collapses repeat clicks within the same 1hr session into one
+        // accrual instead of paying per refresh.
+        await this.earningDao.accrueForConversion({
+          job_application_short_id: link.entity_id,
+          visitor_id: sessionId,
+          trigger: ConversionTriggerEnum.LINK_CLICK,
+          event_source: ConversionEventSourceEnum.INHOUSE,
+          user_id: jobApplication.user_id,
+          seller_id: jobApplication.job_details?.seller_id,
+          amount: commission,
+          recorded_at: new Date(),
+        });
+      }
     }
 
     return {
@@ -322,15 +345,46 @@ class CreatorHubService {
       return { error: "Job Application not found" };
     }
 
-    await this.conversionDao.upsertConversionForVisitor({
+    // The job names ONE trigger as the paying event. Anything else the brand
+    // reports is ignored rather than stored: this used to write a row for
+    // every reported trigger, which is what made conversions look like a
+    // separate high-volume table in the first place.
+    const payingTrigger =
+      jobApplication.job_details?.earning_model?.conversion_trigger;
+
+    if (!payingTrigger || conversion_type !== payingTrigger) {
+      return { ignored: true, reason: "Not the paying trigger for this job" };
+    }
+
+    // Priced from the application's own apply-time snapshot, so a later edit
+    // to the job can't restate what an existing application pays out.
+    const amount = calculateJobApplicationCommission(jobApplication);
+
+    if (amount === undefined) {
+      // A percentage job that predates selling_price — accruing 0 would
+      // silently under-pay, so refuse rather than guess.
+      throw new Error(
+        "Commission cannot be determined for this job application",
+      );
+    }
+
+    const { created } = await this.earningDao.accrueForConversion({
       job_application_short_id: jobApplicationShortId,
+      visitor_id: visitorId,
       trigger: conversion_type,
       event_source: ConversionEventSourceEnum.BRAND,
-      visitor_id: visitorId,
-      recorded_at: conversion_time,
+      user_id: jobApplication.user_id,
+      seller_id: jobApplication.job_details?.seller_id,
+      amount,
       order_id,
       awb_no,
+      recorded_at: conversion_time,
     });
+
+    // `created: false` means this exact conversion was already accrued — a
+    // webhook retry. Still a success from the brand's side, so it stops
+    // retrying, but nothing was paid twice.
+    return { accrued: created, amount };
   };
 }
 

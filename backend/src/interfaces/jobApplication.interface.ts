@@ -12,6 +12,11 @@ export interface IJobApplicationJobDetails {
   product_link?: string;
   category?: IJobCategory;
   earning_model?: IEarningModel;
+  // Snapshotted alongside earning_model, and for the same reason: a
+  // PERCENTAGE commission is only meaningful against the price it was quoted
+  // at. Resolving this fresh from the Job would silently restate an applied
+  // creator's earnings every time the brand edited the price.
+  selling_price?: number;
   due_date?: number;
 }
 
@@ -48,9 +53,16 @@ export interface IJobApplicationListItem {
   brand_name?: string;
   product_name?: string;
   preview_urls?: IJobMedia[];
-  // fully-formatted earning text (e.g. "Earn 10% of order value") — see
-  // buildEarningModelDisplay in creatorHub.helper.ts
+  // fully-formatted earning text (e.g. "Earn ₹120 per order (10% of ₹1,200)")
+  // — see buildEarningModelDisplay in creatorHub.helper.ts
   earning_display?: string;
+  // What the creator actually earns per conversion, in rupees. Separate from
+  // earning_display so the UI can style the figure on its own rather than
+  // parsing it back out of a sentence.
+  earning_amount?: number;
+  // The price the commission was quoted against, from the apply-time
+  // snapshot — not the job's current price.
+  selling_price?: number;
   due_date?: number;
   link_short_id?: string;
   createdAt?: Date;

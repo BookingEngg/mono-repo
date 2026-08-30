@@ -41,6 +41,9 @@ export interface ICreateJobPayload {
   product_id: string;
   product_name: string;
   product_link: string;
+  // What the product sells for. Required so a PERCENTAGE commission can be
+  // shown to creators as a real rupee figure rather than a bare "10%".
+  selling_price: number;
   preview_urls?: IJobMedia[];
   category?: IJobCategory;
   earning_model?: IEarningModel;
@@ -78,9 +81,15 @@ export interface IJobListItem {
  * screen needs on top of the listing shape.
  */
 export interface IJobCheckoutDetails extends IJobListItem {
-  // fully-formatted earning text (e.g. "Earn 10% of order value") built by
-  // the backend — render as-is, don't reconstruct it from a raw value/type.
+  // fully-formatted earning text (e.g. "Earn ₹120 per order (10% of ₹1,200)")
+  // built by the backend — render as-is, don't reconstruct it from a raw
+  // value/type.
   earning_display?: string;
+  // What the creator earns per conversion, in rupees. Use this when the
+  // figure needs its own styling rather than parsing it out of
+  // earning_display. Absent on older jobs that carry no selling_price.
+  earning_amount?: number;
+  selling_price?: number;
   due_date?: number;
 }
 
@@ -111,7 +120,13 @@ export interface IJobApplicationListItem {
   brand_name?: string;
   product_name?: string;
   preview_urls?: IJobMedia[];
+  // Computed from the terms snapshotted at apply time, so it keeps showing
+  // what was agreed even if the brand later edits the job's price.
   earning_display?: string;
+  earning_amount?: number;
+  // The price the commission was quoted against, from the apply-time
+  // snapshot — not the job's current price.
+  selling_price?: number;
   due_date?: number;
   link_short_id?: string;
   createdAt?: string;

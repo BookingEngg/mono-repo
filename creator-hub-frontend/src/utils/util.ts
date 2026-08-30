@@ -22,6 +22,10 @@ export const formatCurrency = (amount: number, currency = "INR"): string => {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency,
+    // A whole amount renders as "₹1,200", not "₹1,200.00" — matching how the
+    // backend formats the same figures inside earning_display, so a price and
+    // the commission derived from it don't disagree in the same row.
+    minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   }).format(amount);
 };
@@ -32,7 +36,7 @@ export const formatCurrency = (amount: number, currency = "INR"): string => {
  */
 export const getErrorMessage = (
   error: unknown,
-  fallback = "Something went wrong. Please try again."
+  fallback = "Something went wrong. Please try again.",
 ): string => {
   const response = (
     error as { response?: { data?: { message?: string; error?: string } } }

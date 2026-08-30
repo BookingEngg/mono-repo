@@ -19,6 +19,12 @@ const JobSchema: Schema<IJob> = new Schema(
 
     product_link: { type: String, required: true },
     product_name: { type: String, required: true },
+    // What the product actually sells for. Needed to turn a PERCENTAGE
+    // earning model into a real rupee figure — "10%" tells a creator nothing
+    // without the price it's a percentage of. Optional at the schema level so
+    // jobs created before this field existed still load; the display falls
+    // back to the old "% of order value" wording when it's absent.
+    selling_price: { type: Number, min: 0 },
     preview_urls: [
       {
         _id: false,

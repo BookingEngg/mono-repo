@@ -67,6 +67,7 @@ const defaultFormValue = {
   product_id: "",
   product_name: "",
   product_link: "",
+  selling_price: "",
   product_image: "",
   category_l1: "",
   category_l2: "",
@@ -106,6 +107,7 @@ const buildPayload = (form: TFormValue): ICreateJobPayload => {
     product_id: form.product_id.trim(),
     product_name: form.product_name.trim(),
     product_link: form.product_link.trim(),
+    selling_price: Number(form.selling_price),
   };
 
   const category: IJobCategory = {};
@@ -170,6 +172,15 @@ const validate = (form: TFormValue): TFieldErrors => {
     errors.product_link = "Product link is required";
   } else if (!isValidUrl(form.product_link.trim())) {
     errors.product_link = "Enter a valid URL";
+  }
+
+  // Required, and must be > 0: a percentage commission computed against zero
+  // would show creators "Earn ₹0".
+  const sellingPrice = Number(form.selling_price);
+  if (!form.selling_price.trim()) {
+    errors.selling_price = "Selling price is required";
+  } else if (!Number.isFinite(sellingPrice) || sellingPrice <= 0) {
+    errors.selling_price = "Enter a price greater than 0";
   }
 
   if (form.product_image.trim() && !isValidUrl(form.product_image.trim())) {
@@ -291,6 +302,19 @@ const CreateJob = () => {
             disabled={loading}
             error={fieldErrors.product_link}
             onChange={(value) => handleFieldChange(value, "product_link")}
+          />
+
+          <FormField
+            id="selling_price"
+            label="Selling price (₹)"
+            type="number"
+            required
+            placeholder="1200"
+            hint="Creators see their commission calculated from this."
+            value={form.selling_price}
+            disabled={loading}
+            error={fieldErrors.selling_price}
+            onChange={(value) => handleFieldChange(value, "selling_price")}
           />
 
           <FormField

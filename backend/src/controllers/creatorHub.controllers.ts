@@ -98,10 +98,11 @@ class CreatorHubControllers {
     }
 
     const { page, limit } = req.query as unknown as IListJobsQuery;
-    const result = await this.creatorHubService.listJobApplicationsForInfluencer(
-      req.user._id,
-      { page, limit },
-    );
+    const result =
+      await this.creatorHubService.listJobApplicationsForInfluencer(
+        req.user._id,
+        { page, limit },
+      );
 
     return res.send({ status: "success", ...result });
   };
