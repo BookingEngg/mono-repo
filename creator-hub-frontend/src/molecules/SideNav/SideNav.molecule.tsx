@@ -5,7 +5,7 @@ import { RequireAccess } from "@/atoms/RequireAccess";
 // Utils
 import { cn } from "@/lib/utils";
 // Constants
-import { NAV_ITEMS } from "@/constants/navigation.constant";
+import { NAV_ITEMS, PROFILE_NAV_ITEM } from "@/constants/navigation.constant";
 import { ROUTE_PATHS } from "@/constants/common.constant";
 
 const navLinkClassName = ({ isActive }: { isActive: boolean }) =>
@@ -36,22 +36,29 @@ const SideNav = () => {
       </Link>
 
       <nav className="flex flex-col gap-1">
-        {NAV_ITEMS.map(({ to, label, icon: Icon, end, privilege }) => {
-          const link = (
-            <NavLink key={to} to={to} end={end} className={navLinkClassName}>
-              <Icon className="size-5" />
-              {label}
-            </NavLink>
-          );
+        {/*
+          Profile is appended rather than living in NAV_ITEMS because the
+          mobile bottom bar deliberately omits it (it sits in the header's top
+          right there). Appending keeps the desktop rail's order unchanged.
+        */}
+        {[...NAV_ITEMS, PROFILE_NAV_ITEM].map(
+          ({ to, label, icon: Icon, end, privilege }) => {
+            const link = (
+              <NavLink key={to} to={to} end={end} className={navLinkClassName}>
+                <Icon className="size-5" />
+                {label}
+              </NavLink>
+            );
 
-          return privilege ? (
-            <RequireAccess key={to} privilege={privilege}>
-              {link}
-            </RequireAccess>
-          ) : (
-            link
-          );
-        })}
+            return privilege ? (
+              <RequireAccess key={to} privilege={privilege}>
+                {link}
+              </RequireAccess>
+            ) : (
+              link
+            );
+          },
+        )}
 
         {/* Brand-only, so it stays invisible to a plain creator account */}
         {/* <RequireAccess privilege={BRAND_NAV_ITEM.privilege}>
