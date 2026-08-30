@@ -4,6 +4,7 @@ import {
   HouseIcon,
   PlusIcon,
   UserRoundIcon,
+  WalletIcon,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ROUTE_PATHS } from "@/constants/common.constant";
@@ -37,6 +38,13 @@ export const NAV_ITEMS: TNavItem[] = [
     icon: ClipboardListIcon,
     end: false,
     privilege: PRIVILEGES.APPLY_JOBS,
+  },
+  {
+    to: ROUTE_PATHS.SETTLEMENT,
+    label: "Settlement",
+    icon: WalletIcon,
+    end: false,
+    privilege: PRIVILEGES.CREATE_JOBS,
   },
   {
     to: ROUTE_PATHS.CREATE_JOB,

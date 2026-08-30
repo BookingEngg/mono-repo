@@ -7,13 +7,19 @@ import usePayment from "@/hooks/usePayment";
 // Utils
 import { cn } from "@/lib/utils";
 // Typings
-import { TPaymentStatus, TPaymentType } from "@/typings/payment";
+import {
+  TPaymentStatus,
+  TPaymentType,
+  TSettlementScope,
+} from "@/typings/payment";
 // Icons
 import { Loader2Icon } from "lucide-react";
 
 type TPaymentButtonProps = {
   paymentType: TPaymentType;
   paymentCycleId?: string;
+  settlementScope?: TSettlementScope;
+  settlementReference?: string;
   children?: React.ReactNode;
   description?: string;
   className?: string;
@@ -38,6 +44,8 @@ type TPaymentButtonProps = {
 const PaymentButton = ({
   paymentType,
   paymentCycleId,
+  settlementScope,
+  settlementReference,
   children = "Pay now",
   description,
   className,
@@ -52,6 +60,8 @@ const PaymentButton = ({
   const { startPayment, loading } = usePayment({
     paymentType,
     paymentCycleId,
+    settlementScope,
+    settlementReference,
     description,
     onSuccess: (orderId) => {
       toast.success(successMessage);

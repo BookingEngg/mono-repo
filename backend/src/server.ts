@@ -6,6 +6,7 @@ import IndexRoutes from "@routes/index.routes";
 import CreatorHubRoutes from "@/routes/creatorHub.route";
 import PaymentRoutes from "@/routes/payment.route";
 import HomeRoutes from "@/routes/home.route";
+import SettlementRoutes from "@/routes/settlement.route";
 
 const app = new App([
   new ExternalRoutes(),
@@ -14,6 +15,7 @@ const app = new App([
   new CreatorHubRoutes(),
   new PaymentRoutes(),
   new HomeRoutes(),
+  new SettlementRoutes(),
 ]);
 
 app.listenServer();

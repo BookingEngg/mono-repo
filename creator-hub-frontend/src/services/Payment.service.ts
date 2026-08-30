@@ -6,6 +6,7 @@ import {
   IPaymentCheckoutDetails,
   IVerifyPaymentResponse,
   TPaymentType,
+  TSettlementScope,
 } from "@/typings/payment";
 
 /**
@@ -15,6 +16,8 @@ import {
 export const getPaymentCheckoutDetails = async (params: {
   payment_type: TPaymentType;
   payment_cycle_id?: string;
+  settlement_scope?: TSettlementScope;
+  settlement_reference?: string;
 }): Promise<IPaymentCheckoutDetails> => {
   const response = await axiosClient.get({
     url: "/checkout",
@@ -33,6 +36,8 @@ export const getPaymentCheckoutDetails = async (params: {
 export const initiatePayment = async (payload: {
   payment_type: TPaymentType;
   payment_cycle_id?: string;
+  settlement_scope?: TSettlementScope;
+  settlement_reference?: string;
 }): Promise<IInitiatePaymentResponse> => {
   const response = await axiosClient.post({
     url: "/payment/initiate-payment",

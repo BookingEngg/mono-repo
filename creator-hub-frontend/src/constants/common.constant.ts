@@ -28,6 +28,8 @@ export const ROUTE_PATHS = {
   PROFILE: "/profile",
   CREATE_JOB: "/job/new",
   MY_APPLICATIONS: "/applications",
+  // Brand-only: what they've paid creators and what's still owed.
+  SETTLEMENT: "/settlement",
   // Route pattern for React Router registration — use getJobCheckoutPath()
   // to build an actual link with a real short_id.
   JOB_CHECKOUT: "/jobs/:shortId/checkout",
@@ -40,3 +42,13 @@ export const getJobCheckoutPath = (shortId: string): string =>
 
 export const getPaymentCheckoutPath = (paymentType: string): string =>
   `/payment/${paymentType}/checkout`;
+
+/**
+ * Checkout link for settling one slice of pending earnings. Carries only
+ * WHICH slice — the server sums it and prices the payment itself.
+ */
+export const getSettlementCheckoutPath = (
+  scope: "job" | "creator",
+  reference: string,
+): string =>
+  `/payment/online/checkout?scope=${scope}&ref=${encodeURIComponent(reference)}`;

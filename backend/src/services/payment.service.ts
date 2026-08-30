@@ -1,6 +1,7 @@
 import { nanoid } from "nanoid";
 import { paymentConfig } from "@/config";
 import PaymentDao from "@/dao/payment.dao";
+import EarningDao from "@/dao/earning.dao";
 import UserService from "@/services/user.service";
 import { IUser } from "@/interfaces/user.interface";
 import {
@@ -8,6 +9,7 @@ import {
   PaymentProviderEnum,
   PaymentStatusEnum,
   PaymentTypeEnum,
+  SettlementScopeEnum,
 } from "@/interfaces/enum";
 import {
   IPayment,
@@ -33,6 +35,7 @@ const ONE_TIME_PAYMENT_TYPES: ReadonlySet<PaymentTypeEnum> = new Set([
 
 class PaymentService {
   private paymentDao = new PaymentDao();
+  private earningDao = new EarningDao();
   private userService = new UserService();
 
   /**
@@ -56,22 +59,64 @@ class PaymentService {
    * gateway would happily capture it — the signature would still verify,
    * because it signs the order, not the price we intended.
    */
-  private resolvePayableAmount = (
+  /**
+   * The pending earnings a settlement covers, as ROWS not a total.
+   *
+   * Conversions keep accruing while the brand is away at the gateway, so the
+   * exact set is pinned here and carried through to settlement. Summing
+   * "everything pending" again after payment would mark rows paid that the
+   * brand never actually paid for.
+   */
+  private resolveSettlementEarnings = async (
+    user: IUser,
+    payload: { settlement_scope?: SettlementScopeEnum; settlement_reference?: string },
+  ) => {
+    if (!payload.settlement_scope || !payload.settlement_reference) {
+      throw new Error("A settlement scope and reference are required");
+    }
+
+    const earnings = await this.earningDao.getPendingEarnings(
+      String(user._id),
+      payload.settlement_scope,
+      payload.settlement_reference,
+    );
+
+    if (!earnings.length) {
+      throw new Error("There is nothing pending to settle here");
+    }
+
+    // Scoped to the caller's seller_id inside the DAO, so a brand can't settle
+    // — or even price — another brand's slice by guessing a reference.
+    const amount =
+      Math.round(
+        earnings.reduce((sum, earning) => sum + Number(earning.amount), 0) * 100,
+      ) / 100;
+
+    return { earnings, amount };
+  };
+
+  private resolvePayableAmount = async (
+    user: IUser,
     paymentType: PaymentTypeEnum,
-    _payload: { payment_cycle_id?: string },
-  ): number => {
+    payload: {
+      settlement_scope?: SettlementScopeEnum;
+      settlement_reference?: string;
+    },
+  ): Promise<{ amount: number; earningIds: number[] }> => {
     switch (paymentType) {
       case PaymentTypeEnum.SECURITY_DEPOSIT:
-        return paymentConfig.security_deposit_amount;
+        return {
+          amount: paymentConfig.security_deposit_amount,
+          earningIds: [],
+        };
 
-      case PaymentTypeEnum.ONLINE:
-        // Billing cycles (the periodic brand invoice described in
-        // creator_hub.txt) aren't modeled yet, so there is nothing
-        // authoritative to price this against. Failing loudly beats
-        // trusting a client-sent amount.
-        throw new Error(
-          "Online payments require a billing cycle, which is not available yet",
+      case PaymentTypeEnum.ONLINE: {
+        const { earnings, amount } = await this.resolveSettlementEarnings(
+          user,
+          payload,
         );
+        return { amount, earningIds: earnings.map((e) => Number(e.id)) };
+      }
 
       default:
         throw new Error("Unsupported payment type");
@@ -89,7 +134,11 @@ class PaymentService {
     user: IUser,
     query: ICheckoutQuery,
   ): Promise<IPaymentCheckoutDetails> => {
-    const amount = this.resolvePayableAmount(query.payment_type, query);
+    const { amount } = await this.resolvePayableAmount(
+      user,
+      query.payment_type,
+      query,
+    );
     const currency = paymentConfig.currency;
     const isPaid = await this.isAlreadyPaid(
       String(user._id),
@@ -107,8 +156,13 @@ class PaymentService {
         label: "Security deposit",
       },
       [PaymentTypeEnum.ONLINE]: {
-        title: "Billing cycle payment",
-        label: "Creator earnings and platform fee",
+        title:
+          query.settlement_scope === SettlementScopeEnum.CREATOR
+            ? "Settle creator earnings"
+            : "Settle job earnings",
+        description:
+          "Pays out everything currently pending in this slice. Conversions recorded after this point roll into your next settlement.",
+        label: "Pending creator earnings",
       },
     };
 
@@ -143,7 +197,11 @@ class PaymentService {
     }
 
     const gateway = getActiveGateway();
-    const amount = this.resolvePayableAmount(payload.payment_type, payload);
+    const { amount, earningIds } = await this.resolvePayableAmount(
+      user,
+      payload.payment_type,
+      payload,
+    );
     const currency = paymentConfig.currency;
 
     // Our own reference, distinct from the gateway's. Generated before the
@@ -165,7 +223,14 @@ class PaymentService {
       payable_amount: amount,
       currency,
       transaction_id: gatewayOrder.gateway_order_id,
-      online_request: gatewayOrder.raw,
+      online_request: {
+        ...gatewayOrder.raw,
+        // The exact earnings this payment covers, pinned at initiate time.
+        // Anything that accrues afterwards belongs to the next settlement.
+        settlement_earning_ids: earningIds,
+        settlement_scope: payload.settlement_scope,
+        settlement_reference: payload.settlement_reference,
+      },
       payment_type: payload.payment_type,
       payment_status: PaymentStatusEnum.INITIATED,
       payment_gateway: gateway.provider,
@@ -283,6 +348,19 @@ class PaymentService {
 
     if (payment.payment_type === PaymentTypeEnum.SECURITY_DEPOSIT) {
       await this.userService.setAccountStatus(user, AccountStatusEnum.ACTIVE);
+      return;
+    }
+
+    if (payment.payment_type === PaymentTypeEnum.ONLINE) {
+      // Settle exactly the earnings pinned when this payment was opened —
+      // not "everything currently pending", which would sweep in conversions
+      // that accrued while the brand was at the gateway and mark them paid
+      // without the brand having paid for them.
+      const earningIds =
+        ((payment.online_request as Record<string, unknown>)
+          ?.settlement_earning_ids as number[]) ?? [];
+
+      await this.earningDao.markEarningsPaid(earningIds, Number(payment.id));
     }
   };
 

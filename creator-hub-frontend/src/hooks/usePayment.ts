@@ -6,11 +6,18 @@ import { initiatePayment, verifyPayment } from "@/services/Payment.service";
 import { getErrorMessage } from "@/utils/util";
 import { openGatewayCheckout } from "@/lib/paymentGateways";
 // Typings
-import { TPaymentStatus, TPaymentType } from "@/typings/payment";
+import {
+  TPaymentStatus,
+  TPaymentType,
+  TSettlementScope,
+} from "@/typings/payment";
 
 type TUsePaymentInput = {
   paymentType: TPaymentType;
   paymentCycleId?: string;
+  /** For an "online" settlement: which slice of pending earnings to pay. */
+  settlementScope?: TSettlementScope;
+  settlementReference?: string;
   /** Merchant name shown inside the gateway sheet. */
   name?: string;
   description?: string;
@@ -34,6 +41,8 @@ type TUsePaymentInput = {
 const usePayment = ({
   paymentType,
   paymentCycleId,
+  settlementScope,
+  settlementReference,
   name = "Creator Hub",
   description,
   onSuccess,
@@ -114,6 +123,8 @@ const usePayment = ({
       const order = await initiatePayment({
         payment_type: paymentType,
         payment_cycle_id: paymentCycleId,
+        settlement_scope: settlementScope,
+        settlement_reference: settlementReference,
       });
 
       await openGatewayCheckout({
@@ -139,6 +150,8 @@ const usePayment = ({
     paymentCycleId,
     paymentType,
     settlePayment,
+    settlementReference,
+    settlementScope,
   ]);
 
   return { startPayment, loading, error, setError };

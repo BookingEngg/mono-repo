@@ -97,6 +97,16 @@ export enum PaymentProviderEnum {
   RAZORPAY = "RAZORPAY",
 }
 
+/**
+ * How a settlement payment is scoped. The brand picks a slice to settle —
+ * one job, or one creator — and the server prices it from the pending
+ * earnings in that slice.
+ */
+export enum SettlementScopeEnum {
+  JOB = "job",
+  CREATOR = "creator",
+}
+
 export enum PaymentTypeEnum {
   SECURITY_DEPOSIT = "security_deposit",
   ONLINE = "online",

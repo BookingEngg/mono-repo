@@ -13,6 +13,7 @@ import ExplorePage from "@/pages/Explore";
 import ProfilePage from "@/pages/Profile";
 import CreateJobPage from "@/pages/CreateJob";
 import ApplicationsPage from "@/pages/Applications";
+import SettlementPage from "@/pages/Settlement";
 import CheckoutPage from "@/pages/Checkout";
 import PaymentCheckoutPage from "@/pages/PaymentCheckout";
 import NotFoundPage from "@/pages/NotFound";
@@ -100,6 +101,10 @@ const App = () => {
               <Route
                 path={ROUTE_PATHS.MY_APPLICATIONS}
                 element={<ApplicationsPage />}
+              />
+              <Route
+                path={ROUTE_PATHS.SETTLEMENT}
+                element={<SettlementPage />}
               />
               {/* Standalone payment checkout, reached from a home widget. */}
               <Route

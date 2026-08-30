@@ -29,6 +29,7 @@ export class EarningModel extends Model<
   declare order_id: string | null; // brand's order id, once they report one
 
   // --- the conversion this accrued from -------------------------------
+  declare job_short_id: string | null; // denormalized so settlement can GROUP BY job
   declare job_application_short_id: string | null;
   declare visitor_id: string | null; // brand-reported identifier, dedupes retries
   declare trigger: ConversionTriggerEnum | null;
@@ -64,6 +65,7 @@ export default function (sequelize: Sequelize): typeof EarningModel {
       seller_id: { type: DataTypes.STRING },
       order_id: { type: DataTypes.STRING },
 
+      job_short_id: { type: DataTypes.STRING },
       job_application_short_id: { type: DataTypes.STRING },
       visitor_id: { type: DataTypes.STRING },
       trigger: {
@@ -109,6 +111,7 @@ export default function (sequelize: Sequelize): typeof EarningModel {
         { fields: ["seller_id"] },
         { fields: ["order_id"] },
         { fields: ["job_application_short_id"] },
+        { fields: ["seller_id", "job_short_id"] },
         // One visitor can only register the same trigger once per
         // application — what makes accrual idempotent against webhook
         // retries. Partial so a reversal (no visitor_id) can't collide with

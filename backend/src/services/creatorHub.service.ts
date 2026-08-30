@@ -308,6 +308,7 @@ class CreatorHubService {
         // collapses repeat clicks within the same 1hr session into one
         // accrual instead of paying per refresh.
         await this.earningDao.accrueForConversion({
+          job_short_id: jobApplication.job_short_id,
           job_application_short_id: link.entity_id,
           visitor_id: sessionId,
           trigger: ConversionTriggerEnum.LINK_CLICK,
@@ -369,6 +370,7 @@ class CreatorHubService {
     }
 
     const { created } = await this.earningDao.accrueForConversion({
+      job_short_id: jobApplication.job_short_id,
       job_application_short_id: jobApplicationShortId,
       visitor_id: visitorId,
       trigger: conversion_type,

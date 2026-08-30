@@ -18,13 +18,19 @@ import { getPaymentCheckoutDetails } from "@/services/Payment.service";
 // Utils
 import { formatCurrency, getErrorMessage } from "@/utils/util";
 // Typings
-import { TPaymentStatus, TPaymentType } from "@/typings/payment";
+import {
+  TPaymentStatus,
+  TPaymentType,
+  TSettlementScope,
+} from "@/typings/payment";
 // Icons
 import { CheckCircle2Icon, Loader2Icon } from "lucide-react";
 
 type TPaymentSummaryProps = {
   paymentType: TPaymentType;
   paymentCycleId?: string;
+  settlementScope?: TSettlementScope;
+  settlementReference?: string;
   actionLabel?: string;
   note?: string;
   onSuccess?: (orderId: string) => void;
@@ -43,6 +49,8 @@ type TPaymentSummaryProps = {
 const PaymentSummary = ({
   paymentType,
   paymentCycleId,
+  settlementScope,
+  settlementReference,
   actionLabel = "Pay now",
   note,
   onSuccess,
@@ -53,11 +61,19 @@ const PaymentSummary = ({
     isPending,
     error,
   } = useQuery({
-    queryKey: ["payment-checkout", paymentType, paymentCycleId],
+    queryKey: [
+      "payment-checkout",
+      paymentType,
+      paymentCycleId,
+      settlementScope,
+      settlementReference,
+    ],
     queryFn: () =>
       getPaymentCheckoutDetails({
         payment_type: paymentType,
         payment_cycle_id: paymentCycleId,
+        settlement_scope: settlementScope,
+        settlement_reference: settlementReference,
       }),
   });
 
@@ -128,6 +144,8 @@ const PaymentSummary = ({
           <PaymentButton
             paymentType={paymentType}
             paymentCycleId={paymentCycleId}
+            settlementScope={settlementScope}
+            settlementReference={settlementReference}
             description={checkout.title}
             onSuccess={onSuccess}
             onIncomplete={onIncomplete}
