@@ -60,39 +60,41 @@ class PaymentService {
    * because it signs the order, not the price we intended.
    */
   /**
-   * The pending earnings a settlement covers, as ROWS not a total.
+   * Prices a settlement slice, as a pure aggregate — no earning rows are
+   * loaded at any point in the flow.
    *
-   * Conversions keep accruing while the brand is away at the gateway, so the
-   * exact set is pinned here and carried through to settlement. Summing
-   * "everything pending" again after payment would mark rows paid that the
-   * brand never actually paid for.
+   * `as_of` is what keeps this safe without an id list: conversions keep
+   * accruing while the brand is away at the gateway, so the cutoff is
+   * captured here and re-used verbatim when the earnings are marked paid.
+   * Same predicate both times, so the set priced is exactly the set settled;
+   * anything landing after it belongs to the next settlement.
    */
-  private resolveSettlementEarnings = async (
+  private resolveSettlementSlice = async (
     user: IUser,
-    payload: { settlement_scope?: SettlementScopeEnum; settlement_reference?: string },
+    payload: {
+      settlement_scope?: SettlementScopeEnum;
+      settlement_reference?: string;
+    },
+    asOf: Date,
   ) => {
     if (!payload.settlement_scope || !payload.settlement_reference) {
       throw new Error("A settlement scope and reference are required");
     }
 
-    const earnings = await this.earningDao.getPendingEarnings(
+    // Scoped to the caller's own seller_id inside the DAO, so a brand can't
+    // price — or settle — another brand's slice by guessing a reference.
+    const summary = await this.earningDao.getPendingSettlementSummary(
       String(user._id),
       payload.settlement_scope,
       payload.settlement_reference,
+      asOf,
     );
 
-    if (!earnings.length) {
+    if (summary.pending_amount <= 0) {
       throw new Error("There is nothing pending to settle here");
     }
 
-    // Scoped to the caller's seller_id inside the DAO, so a brand can't settle
-    // — or even price — another brand's slice by guessing a reference.
-    const amount =
-      Math.round(
-        earnings.reduce((sum, earning) => sum + Number(earning.amount), 0) * 100,
-      ) / 100;
-
-    return { earnings, amount };
+    return summary;
   };
 
   private resolvePayableAmount = async (
@@ -102,20 +104,18 @@ class PaymentService {
       settlement_scope?: SettlementScopeEnum;
       settlement_reference?: string;
     },
-  ): Promise<{ amount: number; earningIds: number[] }> => {
+    asOf: Date,
+  ): Promise<{ amount: number; job_count: number }> => {
     switch (paymentType) {
       case PaymentTypeEnum.SECURITY_DEPOSIT:
         return {
           amount: paymentConfig.security_deposit_amount,
-          earningIds: [],
+          job_count: 0,
         };
 
       case PaymentTypeEnum.ONLINE: {
-        const { earnings, amount } = await this.resolveSettlementEarnings(
-          user,
-          payload,
-        );
-        return { amount, earningIds: earnings.map((e) => Number(e.id)) };
+        const summary = await this.resolveSettlementSlice(user, payload, asOf);
+        return { amount: summary.pending_amount, job_count: summary.job_count };
       }
 
       default:
@@ -134,48 +134,66 @@ class PaymentService {
     user: IUser,
     query: ICheckoutQuery,
   ): Promise<IPaymentCheckoutDetails> => {
-    const { amount } = await this.resolvePayableAmount(
+    const { amount, job_count } = await this.resolvePayableAmount(
       user,
       query.payment_type,
       query,
+      new Date(),
     );
-    const currency = paymentConfig.currency;
     const isPaid = await this.isAlreadyPaid(
       String(user._id),
       query.payment_type,
     );
 
-    const presentation: Record<
-      PaymentTypeEnum,
-      { title: string; description?: string; label: string }
-    > = {
-      [PaymentTypeEnum.SECURITY_DEPOSIT]: {
-        title: "Refundable security deposit",
-        description:
-          "A one time deposit that becomes your marketing spend limit. Refunded when you leave in good standing.",
-        label: "Security deposit",
+    const presentation: Record<PaymentTypeEnum, Function> = {
+      [PaymentTypeEnum.SECURITY_DEPOSIT]: () => {
+        return {
+          title: "Refundable security deposit",
+          description:
+            "A one time deposit that becomes your marketing spend limit. Refunded when you leave in good standing.",
+          line_items: [{ label: "Security deposit", amount }],
+          total: amount,
+          currency: paymentConfig.currency,
+        };
       },
-      [PaymentTypeEnum.ONLINE]: {
-        title:
-          query.settlement_scope === SettlementScopeEnum.CREATOR
-            ? "Settle creator earnings"
-            : "Settle job earnings",
-        description:
-          "Pays out everything currently pending in this slice. Conversions recorded after this point roll into your next settlement.",
-        label: "Pending creator earnings",
+      [PaymentTypeEnum.ONLINE]: () => {
+        // 1% platform fee
+        const platformFee = amount / 100;
+        return {
+          title:
+            query.settlement_scope === SettlementScopeEnum.CREATOR
+              ? "Settle creator earnings"
+              : "Settle job earnings",
+          description:
+            "Pays out everything currently pending in this slice. Conversions recorded after this point roll into your next settlement.",
+          line_items: [
+            {
+              label: `Pending creator earnings across ${job_count} job${job_count === 1 ? "" : "s"}`,
+              amount,
+            },
+            {
+              label: `Platform charges`,
+              amount: platformFee,
+            },
+          ],
+          total: amount + platformFee,
+          currency: "INR",
+        };
       },
     };
 
-    const copy = presentation[query.payment_type];
+    const copy = presentation[query.payment_type]() as {
+      title: string;
+      description?: string;
+      line_items: { label: string; amount: number }[];
+      total: number;
+      currency: string;
+    };
 
     return {
       payment_type: query.payment_type,
-      title: copy.title,
-      description: copy.description,
-      line_items: [{ label: copy.label, amount }],
-      total: amount,
-      currency,
       is_paid: isPaid,
+      ...copy,
     };
   };
 
@@ -197,10 +215,15 @@ class PaymentService {
     }
 
     const gateway = getActiveGateway();
-    const { amount, earningIds } = await this.resolvePayableAmount(
+    // Captured before pricing so the amount charged and the rows later
+    // marked paid are the same set.
+    const settlementAsOf = new Date();
+
+    const { amount } = await this.resolvePayableAmount(
       user,
       payload.payment_type,
       payload,
+      settlementAsOf,
     );
     const currency = paymentConfig.currency;
 
@@ -225,9 +248,9 @@ class PaymentService {
       transaction_id: gatewayOrder.gateway_order_id,
       online_request: {
         ...gatewayOrder.raw,
-        // The exact earnings this payment covers, pinned at initiate time.
-        // Anything that accrues afterwards belongs to the next settlement.
-        settlement_earning_ids: earningIds,
+        // The cutoff defining which earnings this payment covers. Anything
+        // accruing after it belongs to the next settlement.
+        settlement_as_of: settlementAsOf.toISOString(),
         settlement_scope: payload.settlement_scope,
         settlement_reference: payload.settlement_reference,
       },
@@ -352,15 +375,25 @@ class PaymentService {
     }
 
     if (payment.payment_type === PaymentTypeEnum.ONLINE) {
-      // Settle exactly the earnings pinned when this payment was opened —
-      // not "everything currently pending", which would sweep in conversions
-      // that accrued while the brand was at the gateway and mark them paid
-      // without the brand having paid for them.
-      const earningIds =
-        ((payment.online_request as Record<string, unknown>)
-          ?.settlement_earning_ids as number[]) ?? [];
+      // Settle using the same cutoff the payment was priced against, so
+      // conversions that accrued while the brand was at the gateway aren't
+      // marked paid without the brand having paid for them.
+      const request = (payment.online_request ?? {}) as Record<string, unknown>;
+      const asOf = request.settlement_as_of
+        ? new Date(request.settlement_as_of as string)
+        : undefined;
+      const reference = request.settlement_reference as string | undefined;
+      const scope = request.settlement_scope as SettlementScopeEnum | undefined;
 
-      await this.earningDao.markEarningsPaid(earningIds, Number(payment.id));
+      if (asOf && reference && scope) {
+        await this.earningDao.markPendingEarningsPaid(
+          String(payment.seller_id),
+          scope,
+          reference,
+          asOf,
+          Number(payment.id),
+        );
+      }
     }
   };
 

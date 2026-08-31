@@ -11,12 +11,13 @@ import { asyncWrapper } from "@/middleware/common.middleware";
 import { privilegesEnum, rolesEnum } from "@/interfaces/enum";
 
 /**
- * A brand's settlement position, sliced two ways:
+ * A brand's settlement position, per creator:
  *
- *   GET /settlement/job      → per job they listed
  *   GET /settlement/creator  → per creator who earned from them
  *
- * Both read the same earnings rows, so their totals agree.
+ * Settlement is per creator rather than per job because a brand pays a
+ * person, not a campaign — one creator earning across three jobs should be
+ * one payout, not three.
  */
 class SettlementRoutes implements Routes {
   public path = "/api/v1/platform/settlement";
@@ -34,16 +35,6 @@ class SettlementRoutes implements Routes {
     // their own seller_id so one brand can never read another's position.
     // No requireActiveAccount — a brand mid-onboarding still has a right to
     // see what it owes; that gate is about creating new obligations.
-    this.router.get(
-      `${prefix}/job`,
-      this.authMiddleware.getAuthUser,
-      this.authMiddleware.checkRoles(
-        [rolesEnum.BRAND],
-        [privilegesEnum.CREATE_JOBS],
-      ),
-      asyncWrapper(this.settlementController.getSettlementByJob),
-    );
-
     this.router.get(
       `${prefix}/creator`,
       this.authMiddleware.getAuthUser,

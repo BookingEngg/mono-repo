@@ -19,7 +19,7 @@ const SUPPORTED_PAYMENT_TYPES: TPaymentType[] = ["security_deposit", "online"];
 
 // Slices a settlement may be scoped to, whitelisted for the same reason as
 // the payment types above.
-const SUPPORTED_SCOPES: TSettlementScope[] = ["job", "creator"];
+const SUPPORTED_SCOPES: TSettlementScope[] = ["creator"];
 
 /**
  * Checkout screen for a standalone payment (as opposed to a job application

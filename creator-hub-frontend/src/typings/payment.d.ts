@@ -2,9 +2,10 @@
 // server-side from this value — the client never sends an amount.
 export type TPaymentType = "security_deposit" | "online";
 
-// Which slice of pending earnings an "online" settlement covers. The server
-// sums that slice itself — the client never sends an amount.
-export type TSettlementScope = "job" | "creator";
+// Which slice of pending earnings an "online" settlement covers. Settlement
+// is per creator — a brand pays a person, not a campaign. The server sums the
+// slice itself; the client never sends an amount.
+export type TSettlementScope = "creator";
 
 export type TPaymentProvider = "RAZORPAY";
 

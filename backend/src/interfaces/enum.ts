@@ -98,12 +98,13 @@ export enum PaymentProviderEnum {
 }
 
 /**
- * How a settlement payment is scoped. The brand picks a slice to settle —
- * one job, or one creator — and the server prices it from the pending
- * earnings in that slice.
+ * How a settlement payment is scoped. Settlement is per creator: a brand pays
+ * one creator everything currently owed to them, across every job.
+ *
+ * Kept as an enum rather than dropped entirely so adding another slice later
+ * doesn't mean reshaping the payment payload.
  */
 export enum SettlementScopeEnum {
-  JOB = "job",
   CREATOR = "creator",
 }
 

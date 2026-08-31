@@ -48,7 +48,7 @@ export const getPaymentCheckoutPath = (paymentType: string): string =>
  * WHICH slice — the server sums it and prices the payment itself.
  */
 export const getSettlementCheckoutPath = (
-  scope: "job" | "creator",
+  scope: "creator",
   reference: string,
 ): string =>
   `/payment/online/checkout?scope=${scope}&ref=${encodeURIComponent(reference)}`;

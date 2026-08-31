@@ -1,4 +1,4 @@
-import { literal } from "sequelize";
+import { literal, Op } from "sequelize";
 import { DB } from "@/database/postgres";
 import { EarningStatusEnum, SettlementScopeEnum } from "@/interfaces/enum";
 import { EarningModel } from "@/models/earning.model";
@@ -87,15 +87,11 @@ class EarningDao {
     ] as [ReturnType<typeof literal>, string];
   };
 
-  private runSettlementAggregate = async (
-    sellerId: string,
-    groupColumn: "job_short_id" | "user_id",
-    distinctColumn: "user_id" | "job_short_id",
-    distinctAlias: string,
-  ) => {
+  /** One row per creator who has earned from this brand. */
+  public getSettlementByCreator = async (sellerId: string) => {
     return (await this.earningModel.findAll({
       attributes: [
-        groupColumn,
+        "user_id",
         this.sumWhereStatus([EarningStatusEnum.PAID], "settled_amount"),
         this.sumWhereStatus(
           [EarningStatusEnum.ACCRUED, EarningStatusEnum.BILLED],
@@ -105,89 +101,99 @@ class EarningDao {
         [literal("COUNT(id)"), "conversion_count"],
         // literal, not fn("DISTINCT", ...) — Sequelize would emit
         // COUNT(DISTINCT(x)) as a nested function call, not the SQL keyword.
-        [literal(`COUNT(DISTINCT ${distinctColumn})`), distinctAlias],
+        [literal("COUNT(DISTINCT job_short_id)"), "job_count"],
       ] as any,
       where: { seller_id: sellerId } as any,
-      group: [groupColumn],
+      group: ["user_id"],
       raw: true,
     })) as unknown as Record<string, unknown>[];
   };
 
   /**
-   * The pending (unpaid) earnings in one settlement slice.
+   * What a settlement slice is worth, as an aggregate — no rows loaded.
    *
-   * Returns the rows themselves, not just a sum, because the caller has to
-   * pin down WHICH earnings a payment covers: conversions keep accruing while
-   * the brand is at the gateway, and marking "everything pending" as paid
-   * afterwards would settle rows the brand never paid for.
+   * `asOf` is the cutoff that makes a settlement safe: conversions keep
+   * accruing while the brand is away at the gateway, so both this and the
+   * later mark-as-paid filter on `created_at <= asOf`. Same predicate, same
+   * set — anything that lands afterwards belongs to the next settlement.
+   *
+   * Capture `asOf` BEFORE calling this, not from inside: deriving it here
+   * would let a row slip in between the timestamp and the SUM.
    */
-  public getPendingEarnings = async (
+  public getPendingSettlementSummary = async (
     sellerId: string,
-    scope: SettlementScopeEnum,
+    _scope: SettlementScopeEnum,
     reference: string,
-  ) => {
-    const scopeColumn =
-      scope === SettlementScopeEnum.JOB ? "job_short_id" : "user_id";
+    asOf: Date,
+  ): Promise<{
+    pending_amount: number;
+    job_count: number;
+    conversion_count: number;
+  }> => {
+    const [row] = (await this.earningModel.findAll({
+      attributes: [
+        [literal("COALESCE(SUM(amount), 0)"), "pending_amount"],
+        [literal("COUNT(DISTINCT job_short_id)"), "job_count"],
+        [literal("COUNT(id)"), "conversion_count"],
+      ] as any,
+      where: this.pendingSliceWhere(sellerId, reference, asOf),
+      raw: true,
+    })) as unknown as Record<string, unknown>[];
 
-    return await this.earningModel.findAll({
-      where: {
-        seller_id: sellerId,
-        [scopeColumn]: reference,
-        earning_status: [
-          EarningStatusEnum.ACCRUED,
-          EarningStatusEnum.BILLED,
-        ] as any,
-      } as any,
-      order: [["created_at", "ASC"]],
-    });
+    // Postgres hands SUM over DECIMAL back as a string rather than narrowing
+    // to a float and losing precision, so these have to be parsed.
+    return {
+      pending_amount: Number(row?.pending_amount ?? 0),
+      job_count: Number(row?.job_count ?? 0),
+      conversion_count: Number(row?.conversion_count ?? 0),
+    };
   };
 
   /**
-   * Settles an exact set of earnings against a payment.
+   * The predicate shared by pricing and settling. Keeping it in one place is
+   * what guarantees the two can't drift — if they did, a brand could be
+   * charged for one set of earnings and have a different set marked paid.
    *
-   * Scoped to still-unpaid rows so a replayed webhook can't re-settle an
-   * earning that a different payment already covered — the same terminal
-   * guard the payments table uses. Returns the row count so callers can spot
-   * a partial match instead of assuming success.
+   * Settlement is per creator, so `reference` is always a user id. The scope
+   * parameter stays in the public signatures so adding another slice later
+   * doesn't ripple through every call site.
    */
-  public markEarningsPaid = async (earningIds: number[], paymentId: number) => {
-    if (!earningIds.length) {
-      return 0;
-    }
+  private pendingSliceWhere = (
+    sellerId: string,
+    reference: string,
+    asOf: Date,
+  ) =>
+    ({
+      seller_id: sellerId,
+      user_id: reference,
+      earning_status: [
+        EarningStatusEnum.ACCRUED,
+        EarningStatusEnum.BILLED,
+      ] as any,
+      created_at: { [Op.lte]: asOf },
+    }) as any;
 
+  /**
+   * Settles a whole slice in one set-based UPDATE.
+   *
+   * Still scoped to unpaid rows, so a replayed webhook re-runs the same
+   * statement and updates nothing rather than double-settling. Returns the
+   * row count so a caller can tell a real settlement from a replay.
+   */
+  public markPendingEarningsPaid = async (
+    sellerId: string,
+    scope: SettlementScopeEnum,
+    reference: string,
+    asOf: Date,
+    paymentId: number,
+  ) => {
     const [affectedRows] = await this.earningModel.update(
       { earning_status: EarningStatusEnum.PAID, payment_id: paymentId } as any,
-      {
-        where: {
-          id: earningIds as any,
-          earning_status: [
-            EarningStatusEnum.ACCRUED,
-            EarningStatusEnum.BILLED,
-          ] as any,
-        } as any,
-      },
+      { where: this.pendingSliceWhere(sellerId, reference, asOf) },
     );
 
     return affectedRows;
   };
-
-  /** One row per job the brand has earnings against. */
-  public getSettlementByJob = async (sellerId: string) =>
-    this.runSettlementAggregate(
-      sellerId,
-      "job_short_id",
-      "user_id",
-      "creator_count",
-    );
-
-  /** One row per creator who has earned from this brand. */
-  public getSettlementByCreator = async (sellerId: string) =>
-    this.runSettlementAggregate(
-      sellerId,
-      "user_id",
-      "job_short_id",
-      "job_count",
-    );
 }
 
 export default EarningDao;
