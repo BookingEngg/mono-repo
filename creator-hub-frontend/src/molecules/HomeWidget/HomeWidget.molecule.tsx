@@ -19,7 +19,7 @@ import {
 // Typings
 import { IHomeWidget } from "@/typings/home";
 // Icons
-import { CheckCircle2Icon, PlusIcon } from "lucide-react";
+import { CheckCircle2Icon, PlusIcon, UserPenIcon } from "lucide-react";
 
 type THomeWidgetProps = {
   widget: IHomeWidget;
@@ -44,6 +44,16 @@ const HomeWidget = ({ widget }: THomeWidgetProps) => {
 
       case "create_job":
         return { href: ROUTE_PATHS.CREATE_JOB, icon: <PlusIcon /> };
+
+      case "open_profile":
+        // The section rides in the query string so the profile page can open
+        // that accordion, and so the link stays shareable/back-button safe.
+        return {
+          href: widget.action.section
+            ? `${ROUTE_PATHS.PROFILE}?section=${widget.action.section}`
+            : ROUTE_PATHS.PROFILE,
+          icon: <UserPenIcon />,
+        };
 
       default:
         // An action type this client build doesn't know yet — render the card

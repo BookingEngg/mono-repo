@@ -36,7 +36,7 @@ class SettlementRoutes implements Routes {
     // No requireActiveAccount — a brand mid-onboarding still has a right to
     // see what it owes; that gate is about creating new obligations.
     this.router.get(
-      `${prefix}/creator`,
+      `${prefix}`,
       this.authMiddleware.getAuthUser,
       this.authMiddleware.checkRoles(
         [rolesEnum.BRAND],

@@ -13,6 +13,6 @@ import {
 export const getSettlementByCreator = async (): Promise<
   ISettlementResponse<ISettlementByCreatorRow>
 > => {
-  const response = await axiosClient.get({ url: "/settlement/creator" });
+  const response = await axiosClient.get({ url: "/settlement" });
   return response.data;
 };

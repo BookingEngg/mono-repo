@@ -28,6 +28,7 @@ import { getUser } from "@/services/Auth.service";
 import { getAuthUser, isUserAuthorized, login } from "@/store/auth";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 // Constants
+import { ROLES } from "@/constants/access.constant";
 import { ROUTE_PATHS } from "@/constants/common.constant";
 // Icons
 import { Loader2Icon } from "lucide-react";
@@ -36,7 +37,15 @@ const App = () => {
   const dispatch = useAppDispatch();
   const isAuthorized = useAppSelector(isUserAuthorized);
   const { user } = useAppSelector(getAuthUser);
-  const isOnboarding = user?.account_status === "onboarding";
+  // Scoped to brands on purpose. "onboarding" means two different things by
+  // role: for a brand it's an unverified email, which really does block the
+  // whole app; for a creator it's an unfinished profile, which the home
+  // widgets prompt for while the rest of the app stays usable. Without the
+  // role check a creator would be bounced to the brand verification screen
+  // and never reach their own profile to finish setting up.
+  const isBrandOnboarding =
+    user?.account_status === "onboarding" &&
+    (user?.roles ?? []).includes(ROLES.BRAND);
 
   // Blocks the first paint so a signed-in creator is never flashed the login card
   const [isSessionResolved, setIsSessionResolved] = React.useState(false);
@@ -69,7 +78,7 @@ const App = () => {
   return (
     <ErrorBoundary>
       <Routes>
-        {isAuthorized && isOnboarding ? (
+        {isAuthorized && isBrandOnboarding ? (
           <>
             {/*
               A brand mid-onboarding (account_status: "onboarding") can only

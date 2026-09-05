@@ -11,17 +11,6 @@ export const IOrigin = new Schema({
   zipcode: Number,
 });
 
-// Influencer onboarding — instagram/facebook/youtube only for now, each
-// defaulting to null until the creator fills the onboarding form.
-export const ISocialMediaLinks = new Schema(
-  {
-    instagram: { type: String, default: null },
-    facebook: { type: String, default: null },
-    youtube: { type: String, default: null },
-  },
-  { _id: false },
-);
-
 export const IFriendsRequest = new Schema({
   user_id: String, // Sender or receiver user id
   request_status: String, // Status of request
@@ -59,7 +48,6 @@ const UserSchema = new Schema<IUser>(
     // Influencer onboarding
     dob: { type: Date, default: null },
     gender: { type: String, enum: GenderEnum, default: null },
-    social_media_links: { type: ISocialMediaLinks, default: () => ({}) },
 
     // Access Control
     roles: { type: Array(String), enum: ROLES, require: true }, // user, admin, brand, etc.

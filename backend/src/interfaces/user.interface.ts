@@ -40,9 +40,9 @@ export interface IUser {
 
   // Influencer onboarding fields — absent until the creator fills the
   // onboarding form, so every field defaults to null rather than undefined.
+  // social_media_links moved to the user_profiles document.
   dob: Date | null;
   gender: GenderEnum | null;
-  social_media_links: ISocialMediaLinks;
 
   roles: string[];
   privileges: string[];

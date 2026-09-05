@@ -2,6 +2,7 @@ import {
   HomeWidgetActionEnum,
   HomeWidgetEnum,
   PaymentTypeEnum,
+  ProfileSectionEnum,
 } from "./enum";
 
 /**
@@ -12,6 +13,8 @@ import {
 export interface IHomeWidgetAction {
   type: HomeWidgetActionEnum;
   payment_type?: PaymentTypeEnum;
+  // For OPEN_PROFILE: which section the profile page should expand on arrival.
+  section?: ProfileSectionEnum;
 }
 
 export interface IHomeWidget {

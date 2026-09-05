@@ -55,7 +55,7 @@ class UserDao {
 
   // Get community paginated user list
   public getPaginatedNewUsers = async (payload: {
-    filter: Record<string, stirng | boolean>;
+    filter: Record<string, unknown>;
     pagination: { page: number; limit: number };
   }) => {
     const { page, limit: pageSize } = payload.pagination;

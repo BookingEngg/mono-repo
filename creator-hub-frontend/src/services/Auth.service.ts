@@ -4,6 +4,7 @@ import axiosClient from "@/services/http";
 import {
   IBrandSignupPayload,
   IOAuthClientDetails,
+  IProfileDetails,
   IUpdateOnboardingPayload,
   TUserType,
 } from "@/typings/auth";
@@ -58,8 +59,29 @@ export const logoutAuthUser = async () => {
   return response.data;
 };
 
-// Influencer onboarding — date of birth, gender, social media links. Every
-// field is independently optional; omit what you don't want to change.
+// Submits a completed creator profile for approval. The endpoint is a no-op
+// for now — the review workflow lands behind it later.
+export const requestOnboardingApproval = async () => {
+  const response = await axiosClient.post({
+    url: "/user/onboarding/request",
+  });
+
+  return response.data;
+};
+
+// Full profile details for the signed-in creator, including bank and KYC.
+// Separate from getUser so payout details aren't fetched on every app load.
+export const getProfileDetails = async (): Promise<IProfileDetails> => {
+  const response = await axiosClient.get({
+    url: "/user/profile",
+  });
+
+  return response.data.data;
+};
+
+// Profile save — date of birth, gender, social links, address, bank and KYC.
+// Every field is independently optional; omit what you don't want to change,
+// which is what lets each accordion section save on its own.
 export const updateOnboardingDetails = async (
   payload: IUpdateOnboardingPayload
 ) => {

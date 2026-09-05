@@ -103,6 +103,26 @@ class ExternalRoutes implements Routes {
       asyncWrapper(this.userController.getDashboardSummary),
     );
 
+    this.router.get(
+      `${prefix}/profile`,
+      this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.USER],
+        [privilegesEnum.PROFILE],
+      ),
+      asyncWrapper(this.userController.getProfileDetails),
+    );
+
+    this.router.post(
+      `${prefix}/onboarding/request`,
+      this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.USER],
+        [privilegesEnum.PROFILE_UPDATE],
+      ),
+      asyncWrapper(this.userController.requestOnboardingApproval),
+    );
+
     this.router.put(
       `${prefix}/onboarding`,
       this.authMiddleware.getAuthUser,

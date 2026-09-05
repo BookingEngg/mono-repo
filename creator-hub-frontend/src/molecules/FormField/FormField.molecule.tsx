@@ -12,6 +12,10 @@ type TFormFieldProps = {
   value: string;
   onChange: (value: string) => void;
   type?: React.HTMLInputTypeAttribute;
+  // Numeric-but-not-<input type=number> fields (pincode, account number) still
+  // want the numeric keypad on mobile, without the spinner or the value
+  // coercion that type="number" brings.
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   placeholder?: string;
   autoComplete?: string;
   disabled?: boolean;
@@ -33,6 +37,7 @@ const FormField = ({
   value,
   onChange,
   type = "text",
+  inputMode,
   placeholder,
   autoComplete,
   disabled,
@@ -58,6 +63,7 @@ const FormField = ({
       <Input
         id={id}
         type={type}
+        inputMode={inputMode}
         value={value}
         placeholder={placeholder}
         autoComplete={autoComplete}

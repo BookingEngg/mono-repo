@@ -138,6 +138,13 @@ export enum EarningStatusEnum {
 export enum HomeWidgetEnum {
   SECURITY_DEPOSIT = "security_deposit",
   POST_JOB = "post_job",
+
+  // Creator setup prompts. Split into three rather than one "complete your
+  // profile" card because they're filled at different times — a creator can
+  // start applying to jobs before they've got bank details to hand.
+  UPDATE_PROFILE = "update_profile",
+  UPDATE_BANK_DETAILS = "update_bank_details",
+  UPDATE_KYC_DETAILS = "update_kyc_details",
 }
 
 /**
@@ -148,6 +155,19 @@ export enum HomeWidgetEnum {
 export enum HomeWidgetActionEnum {
   PAYMENT_CHECKOUT = "payment_checkout",
   CREATE_JOB = "create_job",
+  // All three creator setup widgets land on the profile page; `section` says
+  // which accordion to open, so the client doesn't infer it from the id.
+  OPEN_PROFILE = "open_profile",
+}
+
+/**
+ * The collapsible sections of the profile page. Named server-side so a widget
+ * can point at one without the client mapping widget ids to sections.
+ */
+export enum ProfileSectionEnum {
+  BASIC_DETAILS = "basic_details",
+  BANK_DETAILS = "bank_details",
+  KYC_DETAILS = "kyc_details",
 }
 
 export enum privilegesEnum {

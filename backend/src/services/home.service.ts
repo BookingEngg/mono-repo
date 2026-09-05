@@ -7,12 +7,16 @@ import {
   HomeWidgetEnum,
   PaymentTypeEnum,
   privilegesEnum,
+  ProfileSectionEnum,
   rolesEnum,
 } from "@/interfaces/enum";
+import { IProfileCompletion } from "@/interfaces/userProfile.interface";
+import UserService from "@/services/user.service";
 import { IHomeWidget } from "@/interfaces/home.interface";
 
 class HomeService {
   private paymentDao = new PaymentDao();
+  private userService = new UserService();
 
   /**
    * Widgets for the signed-in account's home screen.
@@ -21,8 +25,8 @@ class HomeService {
    * the client renders whatever it is given, which also means a creator can't
    * surface a brand-only action by editing local state.
    *
-   * Only brand widgets exist today; a creator gets an empty list, which the
-   * UI renders as its own first-run content.
+   * A creator gets setup prompts while onboarding; a fully set-up creator
+   * gets an empty list, which the UI renders as its own first-run content.
    */
   public getHomeWidgets = async (user: IUser): Promise<IHomeWidget[]> => {
     const roles = user.roles || [];
@@ -48,10 +52,88 @@ class HomeService {
       if (canPostJobs) {
         widgets.push(this.buildPostJobWidget());
       }
+    } else if (roles.includes(rolesEnum.INFLUENCER)) {
+      widgets.push(...(await this.buildCreatorSetupWidgets(user)));
     }
 
     return widgets;
   };
+
+  /**
+   * Setup prompts for a creator who hasn't finished their profile.
+   *
+   * Two conditions, both required. ONBOARDING scopes this to accounts still
+   * being set up, so a long-standing creator who deliberately left a field
+   * blank isn't nagged forever. The per-section completion flags then drop the
+   * cards that are already done — the point of these widgets is the work
+   * that's left, so a finished section shouldn't keep occupying the home
+   * screen the way the security deposit (a receipt) does.
+   */
+  private buildCreatorSetupWidgets = async (
+    user: IUser,
+  ): Promise<IHomeWidget[]> => {
+    if (user.account_status !== AccountStatusEnum.ONBOARDING) {
+      return [];
+    }
+
+    const completion = await this.userService.getProfileCompletion(
+      String(user._id),
+    );
+
+    const sections: {
+      done: boolean;
+      widget: IHomeWidget;
+    }[] = [
+      {
+        done: completion.basic_details,
+        widget: this.buildProfileWidget(
+          HomeWidgetEnum.UPDATE_PROFILE,
+          ProfileSectionEnum.BASIC_DETAILS,
+          "Update your profile",
+          "Add your date of birth, gender and address so brands know who they're working with.",
+          "Update profile",
+        ),
+      },
+      {
+        done: completion.bank_details,
+        widget: this.buildProfileWidget(
+          HomeWidgetEnum.UPDATE_BANK_DETAILS,
+          ProfileSectionEnum.BANK_DETAILS,
+          "Add your bank details",
+          "We need an account number and IFSC code to pay out what you earn.",
+          "Add bank details",
+        ),
+      },
+      {
+        done: completion.kyc_details,
+        widget: this.buildProfileWidget(
+          HomeWidgetEnum.UPDATE_KYC_DETAILS,
+          ProfileSectionEnum.KYC_DETAILS,
+          "Complete your KYC",
+          "Add your PAN to verify your identity before your first payout.",
+          "Add PAN",
+        ),
+      },
+    ];
+
+    return sections.filter(({ done }) => !done).map(({ widget }) => widget);
+  };
+
+  private buildProfileWidget = (
+    id: HomeWidgetEnum,
+    section: ProfileSectionEnum,
+    title: string,
+    description: string,
+    ctaLabel: string,
+  ): IHomeWidget => ({
+    id,
+    title,
+    description,
+    cta_label: ctaLabel,
+    // The section travels with the action so the profile page opens the right
+    // accordion instead of the client mapping widget ids back to sections.
+    action: { type: HomeWidgetActionEnum.OPEN_PROFILE, section },
+  });
 
   private buildPostJobWidget = (): IHomeWidget => ({
     id: HomeWidgetEnum.POST_JOB,
