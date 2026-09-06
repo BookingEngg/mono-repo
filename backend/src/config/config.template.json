@@ -46,7 +46,7 @@
     "expire_in_minutes": "5"
   },
   "payment": {
-    "active_gateway": "RAZORPAY",
+    "active_gateway": "razorpay",
     "security_deposit_amount": 1000,
     "platform_fee_percentage": 1,
     "currency": "INR",

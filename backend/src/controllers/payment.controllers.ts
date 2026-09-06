@@ -59,9 +59,11 @@ class PaymentControllers {
    * stashes rawBody (a re-serialized body would not reproduce the signature).
    */
   public handleWebhook = async (req: Request, res: Response): Promise<any> => {
+    // Lowercased to match PaymentProviderEnum, so /webhook/Razorpay from a
+    // dashboard-configured URL still resolves.
     const provider = (
       req.params.provider || ""
-    ).toUpperCase() as PaymentProviderEnum;
+    ).toLowerCase() as PaymentProviderEnum;
 
     // Each gateway names its signature header differently, so the adapter
     // tells us which one to read rather than the controller hardcoding one.

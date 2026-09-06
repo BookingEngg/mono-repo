@@ -36,7 +36,7 @@ import { Loader2Icon, TrashIcon } from "lucide-react";
 
 const PAYMENT_TYPE_OPTIONS: { value: TPaymentType; label: string }[] = [
   { value: "security_deposit", label: "security_deposit (₹1000, implemented)" },
-  { value: "online", label: "online (needs a billing cycle — expected to fail)" },
+  { value: "settlement", label: "settlement (needs a billing cycle — expected to fail)" },
 ];
 
 type TLogEntry = {

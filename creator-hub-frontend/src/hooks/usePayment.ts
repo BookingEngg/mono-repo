@@ -15,7 +15,7 @@ import {
 type TUsePaymentInput = {
   paymentType: TPaymentType;
   paymentCycleId?: string;
-  /** For an "online" settlement: which slice of pending earnings to pay. */
+  /** For a settlement: which slice of pending earnings to pay. */
   settlementScope?: TSettlementScope;
   settlementReference?: string;
   /** Merchant name shown inside the gateway sheet. */

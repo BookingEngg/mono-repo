@@ -51,4 +51,4 @@ export const getSettlementCheckoutPath = (
   scope: "creator",
   reference: string,
 ): string =>
-  `/payment/online/checkout?scope=${scope}&ref=${encodeURIComponent(reference)}`;
+  `${getPaymentCheckoutPath("settlement")}?scope=${scope}&ref=${encodeURIComponent(reference)}`;

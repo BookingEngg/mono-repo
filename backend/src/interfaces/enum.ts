@@ -94,7 +94,7 @@ export enum AccountStatusEnum {
 // opaque so swapping gateways later only means adding a value here, not
 // reshaping the payments schema.
 export enum PaymentProviderEnum {
-  RAZORPAY = "RAZORPAY",
+  RAZORPAY = "razorpay",
 }
 
 /**
@@ -110,7 +110,9 @@ export enum SettlementScopeEnum {
 
 export enum PaymentTypeEnum {
   SECURITY_DEPOSIT = "security_deposit",
-  ONLINE = "online",
+  // A brand paying out what it owes its creators. Named for what it is rather
+  // than for the channel it happens over — every payment here is online.
+  SETTLEMENT = "settlement",
 }
 
 export enum PaymentStatusEnum {

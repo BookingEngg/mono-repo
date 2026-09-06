@@ -86,7 +86,9 @@ module.exports = {
       type: "check",
       name: "chk_payments_type_enum",
       where: {
-        payment_type: { [Sequelize.Op.in]: ["security_deposit", "online"] },
+        payment_type: {
+          [Sequelize.Op.in]: ["security_deposit", "settlement"],
+        },
       },
     });
     await queryInterface.addConstraint("payments", {
@@ -94,7 +96,7 @@ module.exports = {
       type: "check",
       name: "chk_payments_gateway_enum",
       where: {
-        payment_gateway: { [Sequelize.Op.in]: ["RAZORPAY"] },
+        payment_gateway: { [Sequelize.Op.in]: ["razorpay"] },
       },
     });
     await queryInterface.addIndex("payments", {

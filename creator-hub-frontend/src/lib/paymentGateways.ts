@@ -98,8 +98,10 @@ const razorpayAdapter: IGatewayAdapter = {
   },
 };
 
+// Keyed by the provider string the API sends in sdk_payload.provider, so these
+// keys have to track backend PaymentProviderEnum exactly.
 const GATEWAY_ADAPTERS: Record<TPaymentProvider, IGatewayAdapter> = {
-  RAZORPAY: razorpayAdapter,
+  razorpay: razorpayAdapter,
 };
 
 export const openGatewayCheckout = async (input: TOpenCheckoutInput) => {

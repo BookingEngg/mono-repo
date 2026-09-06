@@ -377,7 +377,7 @@ export const formatOrderPayload = (
     payment_type: input.payment_type,
   };
 
-  if (input.payment_type === PaymentTypeEnum.ONLINE) {
+  if (input.payment_type === PaymentTypeEnum.SETTLEMENT) {
     if (input.settlement_scope) notes.settlement_scope = input.settlement_scope;
     if (input.settlement_reference) {
       notes.settlement_reference = input.settlement_reference;
@@ -405,7 +405,7 @@ export const formatOrderPayload = (
     amount: toMinorUnit(charge.total),
     currency: charge.currency,
     receipt: input.receipt,
-    ...(input.payment_type === PaymentTypeEnum.ONLINE ? { transfers } : {}),
+    ...(input.payment_type === PaymentTypeEnum.SETTLEMENT ? { transfers } : {}),
     notes,
   };
 };

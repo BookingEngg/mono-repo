@@ -15,7 +15,7 @@ import { ArrowLeftIcon } from "lucide-react";
 // URL segments a user may legitimately land on. Anything else is rejected
 // rather than forwarded to the API, so a hand-typed path can't probe for
 // payment types that aren't meant to be self-serve.
-const SUPPORTED_PAYMENT_TYPES: TPaymentType[] = ["security_deposit", "online"];
+const SUPPORTED_PAYMENT_TYPES: TPaymentType[] = ["security_deposit", "settlement"];
 
 // Slices a settlement may be scoped to, whitelisted for the same reason as
 // the payment types above.
@@ -30,7 +30,7 @@ const PaymentCheckout = () => {
   const { paymentType } = useParams<{ paymentType: string }>();
   const [searchParams] = useSearchParams();
 
-  // An "online" settlement carries which slice it covers. The server re-reads
+  // A settlement carries which slice it covers. The server re-reads
   // the pending earnings for that slice and prices it — these params only say
   // WHICH slice, never how much.
   const scopeParam = searchParams.get("scope") as TSettlementScope | null;
@@ -43,7 +43,7 @@ const PaymentCheckout = () => {
   const isSupported =
     SUPPORTED_PAYMENT_TYPES.includes(paymentType as TPaymentType) &&
     // A settlement without a slice has nothing to price.
-    (paymentType !== "online" || (!!settlementScope && !!reference));
+    (paymentType !== "settlement" || (!!settlementScope && !!reference));
 
   return (
     <div className="mx-auto grid w-full max-w-lg gap-4 py-4">
@@ -62,12 +62,12 @@ const PaymentCheckout = () => {
           paymentType={paymentType as TPaymentType}
           settlementScope={settlementScope}
           settlementReference={reference}
-          actionLabel={paymentType === "online" ? "Settle now" : "Pay now"}
+          actionLabel={paymentType === "settlement" ? "Settle now" : "Pay now"}
           // Land back where the brand came from so the row they just settled
           // re-fetches and shows its new position.
           onSuccess={() =>
             navigate(
-              paymentType === "online"
+              paymentType === "settlement"
                 ? ROUTE_PATHS.SETTLEMENT
                 : ROUTE_PATHS.HOME,
             )

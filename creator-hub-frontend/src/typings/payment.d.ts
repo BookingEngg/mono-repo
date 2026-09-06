@@ -1,13 +1,15 @@
 // Mirrors the backend PaymentTypeEnum. What a payment costs is decided
 // server-side from this value — the client never sends an amount.
-export type TPaymentType = "security_deposit" | "online";
+export type TPaymentType = "security_deposit" | "settlement";
 
-// Which slice of pending earnings an "online" settlement covers. Settlement
+// Which slice of pending earnings a settlement covers. Settlement
 // is per creator — a brand pays a person, not a campaign. The server sums the
 // slice itself; the client never sends an amount.
 export type TSettlementScope = "creator";
 
-export type TPaymentProvider = "RAZORPAY";
+// Mirrors backend PaymentProviderEnum — lowercase, matching what the API
+// returns in sdk_payload.provider.
+export type TPaymentProvider = "razorpay";
 
 export type TPaymentStatus = "initiated" | "success" | "pending" | "failed";
 

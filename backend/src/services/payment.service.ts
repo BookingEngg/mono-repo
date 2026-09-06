@@ -329,7 +329,7 @@ class PaymentService {
       return;
     }
 
-    if (payment.payment_type === PaymentTypeEnum.ONLINE) {
+    if (payment.payment_type === PaymentTypeEnum.SETTLEMENT) {
       // Settle using the same cutoff the payment was priced against, so
       // conversions that accrued while the brand was at the gateway aren't
       // marked paid without the brand having paid for them.

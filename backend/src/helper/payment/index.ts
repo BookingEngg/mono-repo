@@ -13,7 +13,7 @@ import { IPaymentRequestBody, TPaymentTypeHelper } from "./payment.types";
  */
 const PAYMENT_TYPE_HELPERS: Record<PaymentTypeEnum, TPaymentTypeHelper> = {
   [PaymentTypeEnum.SECURITY_DEPOSIT]: getSecurityDepositPaymentDetails,
-  [PaymentTypeEnum.ONLINE]: getSettlementPaymentDetails,
+  [PaymentTypeEnum.SETTLEMENT]: getSettlementPaymentDetails,
 };
 
 /**
