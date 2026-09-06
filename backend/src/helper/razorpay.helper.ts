@@ -1,7 +1,9 @@
+import { PaymentTypeEnum } from "@/interfaces/enum";
 import {
   IConfigureRouteProductInput,
   ICreateLinkedAccountInput,
   ICreateStakeholderInput,
+  IResolvedCharge,
   IRouteAddress,
   IStakeholderAddress,
 } from "@/interfaces/payment.interface";
@@ -325,4 +327,85 @@ export const configureProductForUser = (
   };
 
   return configureProduct(input);
+};
+
+// ---------------------------------------------------------------------
+// Orders
+// ---------------------------------------------------------------------
+
+/**
+ * Razorpay bills in the smallest currency unit (paise); we store and reason in
+ * rupees. Rounded rather than truncated so a float artifact like 899.99999
+ * can't silently become ₹8.99 short.
+ */
+const toMinorUnit = (amount: number) => Math.round(amount * 100);
+
+export interface IFormatOrderPayloadInput {
+  payment_type: PaymentTypeEnum;
+  /**
+   * The resolved charge — the single source of the amount, the currency and
+   * the breakdown. Passed whole rather than as loose fields so the order can't
+   * be built for a different total than the one that was priced.
+   */
+  charge: IResolvedCharge;
+  /** Our own payments.order_id, echoed back by Razorpay as `receipt`. */
+  receipt: string;
+  user_id: string;
+  /** Only meaningful for a settlement payout. */
+  settlement_scope?: string;
+  settlement_reference?: string;
+}
+
+/**
+ * Body for POST /v1/orders, shaped by what the payment is for.
+ *
+ * The money fields are identical across types — what differs is the notes,
+ * which is the only context Razorpay hands back on a webhook. A settlement
+ * carries which creator it covers so a payout can be reconciled from the
+ * gateway's side alone; a deposit has nothing further to say.
+ *
+ * Razorpay requires every note value to be a string, so nothing here is left
+ * as a number or undefined.
+ */
+export const formatOrderPayload = (
+  input: IFormatOrderPayloadInput,
+): Record<string, any> => {
+  const { charge } = input;
+
+  const notes: Record<string, string> = {
+    user_id: input.user_id,
+    payment_type: input.payment_type,
+  };
+
+  if (input.payment_type === PaymentTypeEnum.ONLINE) {
+    if (input.settlement_scope) notes.settlement_scope = input.settlement_scope;
+    if (input.settlement_reference) {
+      notes.settlement_reference = input.settlement_reference;
+    }
+  }
+
+  // The same breakdown the user approved at checkout, itemised on the order.
+  // Every figure is derived from `charge`, so the lines always add up to the
+  // `amount` beside them.
+  const transfers = charge.line_items
+    .filter((transfer) => Boolean(transfer.is_transfer_payment))
+    .map((transfer) => {
+      return {
+        account: transfer.account_id,
+        amount: toMinorUnit(transfer.amount),
+        currency: "INR",
+        notes: {
+          name: "creator_payment",
+        },
+        on_hold: false,
+      };
+    });
+
+  return {
+    amount: toMinorUnit(charge.total),
+    currency: charge.currency,
+    receipt: input.receipt,
+    ...(input.payment_type === PaymentTypeEnum.ONLINE ? { transfers } : {}),
+    notes,
+  };
 };

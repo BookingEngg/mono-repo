@@ -1,4 +1,4 @@
-import { literal, Op } from "sequelize";
+import { col, fn, literal, Op } from "sequelize";
 import { DB } from "@/database/postgres";
 import { EarningStatusEnum, SettlementScopeEnum } from "@/interfaces/enum";
 import { EarningModel } from "@/models/earning.model";
@@ -132,9 +132,11 @@ class EarningDao {
   }> => {
     const [row] = (await this.earningModel.findAll({
       attributes: [
-        [literal("COALESCE(SUM(amount), 0)"), "pending_amount"],
-        [literal("COUNT(DISTINCT job_short_id)"), "job_count"],
-        [literal("COUNT(id)"), "conversion_count"],
+        // COALESCE, because SUM over no rows is NULL rather than 0 — and a
+        // NULL here would surface as a NaN price at checkout.
+        [fn("COALESCE", fn("SUM", col("amount")), 0), "pending_amount"],
+        [fn("COUNT", fn("DISTINCT", col("job_short_id"))), "job_count"],
+        [fn("COUNT", col("id")), "conversion_count"],
       ] as any,
       where: this.pendingSliceWhere(sellerId, reference, asOf),
       raw: true,

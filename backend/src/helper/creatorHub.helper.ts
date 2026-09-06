@@ -10,6 +10,7 @@ import {
   IJobApplicationListItem,
 } from "@/interfaces/jobApplication.interface";
 import { EarningModelTypeEnum } from "@/interfaces/enum";
+import { formatMoney } from "@/helper/money.helper";
 
 export const isJobOpenForApplication = (job: IJob): boolean =>
   job.is_active &&
@@ -108,8 +109,9 @@ export const calculateJobApplicationCommission = (
     application?.job_details?.selling_price,
   );
 
-const formatRupees = (amount: number): string =>
-  `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 }).format(amount)}`;
+// Delegates so checkout lines and earning copy can never format the same
+// figure differently.
+const formatRupees = (amount: number): string => formatMoney(amount);
 
 /**
  * Fully-formatted earning text, built once here so the frontend never has to

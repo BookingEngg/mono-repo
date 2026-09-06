@@ -1,3 +1,4 @@
+import { cast, col, fn } from "sequelize";
 import { DB } from "@/database/postgres";
 import { IPayment } from "@/interfaces/payment.interface";
 import {
@@ -68,15 +69,64 @@ class PaymentDao {
    * captured success. Returns the number of rows actually changed so callers
    * can tell a real transition from a duplicate.
    */
+  /**
+   * Appends one gateway exchange to the payment's response log.
+   *
+   * `array_append` runs inside the UPDATE, so the append is atomic: the
+   * browser callback and the webhook race by design, and reading the array
+   * into JS first would let the slower one overwrite the faster one's entry.
+   * A NULL array appends cleanly to a single-element one, so no initialisation
+   * is needed.
+   *
+   * Unguarded on purpose — see markPaymentStatus.
+   */
+  public appendOnlineResponse = async (id: number, response: object) => {
+    const [affectedRows] = await this.paymentModel.update(
+      {
+        online_response: fn(
+          "array_append",
+          col("online_response"),
+          cast(JSON.stringify(response), "jsonb"),
+        ) as any,
+      },
+      { where: { id } },
+    );
+
+    return affectedRows;
+  };
+
+  /**
+   * Records what the gateway told us about a payment: logs the exchange, and
+   * moves the payment's status if it is still open.
+   *
+   * Two statements rather than one, deliberately. The status update carries a
+   * terminal-state guard — the browser callback and the webhook both report
+   * the same outcome and race, and the webhook may retry for days, so a late
+   * `payment.failed` must not overwrite a captured success. But the response
+   * log has no business being guarded: the webhook that lost the race still
+   * carries the gateway's own account of the payment, and folding the append
+   * into the guarded UPDATE silently discards exactly that. So the exchange is
+   * always recorded; only the transition is conditional.
+   *
+   * Returns the number of rows the status actually moved, so callers can tell
+   * a real transition from a duplicate report.
+   */
   public markPaymentStatus = async (payload: {
     id: number;
     status: PaymentStatusEnum;
     response?: object;
+    transactionId?: string;
   }) => {
+    if (payload.response) {
+      await this.appendOnlineResponse(payload.id, payload.response);
+    }
+
     const [affectedRows] = await this.paymentModel.update(
       {
         payment_status: payload.status,
-        ...(payload.response ? { online_response: payload.response } : {}),
+        ...(payload.transactionId
+          ? { transaction_id: payload.transactionId }
+          : {}),
       },
       {
         where: {

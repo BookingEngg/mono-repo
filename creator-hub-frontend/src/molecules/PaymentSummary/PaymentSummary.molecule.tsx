@@ -16,7 +16,7 @@ import { PaymentButton } from "@/molecules/PaymentButton";
 // Services
 import { getPaymentCheckoutDetails } from "@/services/Payment.service";
 // Utils
-import { formatCurrency, getErrorMessage } from "@/utils/util";
+import { getErrorMessage } from "@/utils/util";
 // Typings
 import {
   TPaymentStatus,
@@ -114,7 +114,7 @@ const PaymentSummary = ({
           >
             <span className="text-muted-foreground">{item.label}</span>
             <span className="font-medium">
-              {formatCurrency(item.amount, checkout.currency)}
+              {item.amount_display}
             </span>
           </div>
         ))}
@@ -124,7 +124,7 @@ const PaymentSummary = ({
         <div className="flex items-center justify-between">
           <span className="font-medium">Total</span>
           <span className="text-lg font-semibold">
-            {formatCurrency(checkout.total, checkout.currency)}
+            {checkout.total_display}
           </span>
         </div>
       </CardContent>

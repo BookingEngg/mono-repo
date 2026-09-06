@@ -3,7 +3,6 @@ import { fetch } from "@/util/utils.util";
 import { paymentConfig } from "@/config";
 import { PaymentProviderEnum, PaymentStatusEnum } from "@/interfaces/enum";
 import {
-  ICreateGatewayOrderInput,
   IGatewayOrder,
   IGatewayPaymentStatus,
   IGatewayWebhookEvent,
@@ -44,15 +43,16 @@ class RazorpayHttp implements IPaymentGateway {
     return `Basic ${encoded}`;
   };
 
-  /**
-   * Razorpay bills in the smallest currency unit (paise), we store and reason
-   * in rupees. Rounding here rather than truncating avoids a float artifact
-   * like 899.99999 silently becoming ₹8.99 short.
-   */
-  private toMinorUnit = (amount: number) => Math.round(amount * 100);
 
+  /**
+   * Opens an order. Takes an already-built body — formatOrderPayload in
+   * razorpay.helper.ts constructs it — so this stays a transport, matching the
+   * Route calls below.
+   *
+   * @param payload body from razorpay.helper's formatOrderPayload
+   */
   public createOrder = async (
-    input: ICreateGatewayOrderInput,
+    payload: Record<string, any>,
   ): Promise<IGatewayOrder> => {
     const response = await fetch(`${RAZORPAY_API_BASE}/orders`, {
       method: "POST",
@@ -60,12 +60,7 @@ class RazorpayHttp implements IPaymentGateway {
         Authorization: this.getAuthHeader(),
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        amount: this.toMinorUnit(input.amount),
-        currency: input.currency,
-        receipt: input.receipt,
-        notes: input.notes,
-      }),
+      body: JSON.stringify(payload),
     });
 
     const body = (await response.json()) as Record<string, any>;

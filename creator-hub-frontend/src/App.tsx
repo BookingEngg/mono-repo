@@ -43,8 +43,16 @@ const App = () => {
   // widgets prompt for while the rest of the app stays usable. Without the
   // role check a creator would be bounced to the brand verification screen
   // and never reach their own profile to finish setting up.
+  //
+  // email_verified is checked too, not just the status. This screen resolves
+  // exactly one thing — email verification — so a brand that has already
+  // verified must never land back on it. The two fields are written together
+  // on verification, but if they ever diverge, keying on the status alone
+  // traps a verified brand here with no way forward. Letting them through is
+  // safe: posting jobs is separately gated on the security deposit.
   const isBrandOnboarding =
     user?.account_status === "onboarding" &&
+    !user?.email_verified &&
     (user?.roles ?? []).includes(ROLES.BRAND);
 
   // Blocks the first paint so a signed-in creator is never flashed the login card

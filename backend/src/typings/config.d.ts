@@ -91,6 +91,10 @@ export interface IPaymentConfig {
   // Refundable onboarding deposit that doubles as a brand's ads balance.
   // Server-owned: the client never sends an amount (see payment.service).
   security_deposit_amount: number;
+  // Percent (1 = 1%) added on top of a settlement. Optional so a config
+  // predating this key loads — the service falls back rather than computing
+  // NaN into a charge.
+  platform_fee_percentage?: number;
   currency: string;
   razorpay: IPaymentGatewayCredentials;
 }

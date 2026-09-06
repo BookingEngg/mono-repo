@@ -14,6 +14,12 @@ export type TPaymentStatus = "initiated" | "success" | "pending" | "failed";
 export interface IPaymentLineItem {
   label: string;
   amount: number;
+  // `amount`, formatted server-side ("₹8.12", "₹1,20,000"). The raw number
+  // stays for any arithmetic; this is what gets rendered.
+  amount_display: string;
+  // Distinct jobs this line covers. Settlement lines only — a security
+  // deposit isn't tied to any job.
+  job_count?: number;
 }
 
 /** STEP 1 response — the pre-payment summary. */
@@ -23,6 +29,9 @@ export interface IPaymentCheckoutDetails {
   description?: string;
   line_items: IPaymentLineItem[];
   total: number;
+  // `total`, formatted server-side. Render this rather than formatting
+  // `total` locally, so the figure matches everywhere it appears.
+  total_display: string;
   currency: string;
   // True for a one-time charge already settled by this user. The server
   // refuses to initiate one of these regardless; this just lets the screen

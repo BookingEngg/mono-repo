@@ -1,7 +1,10 @@
 import { nanoid } from "nanoid";
 import { paymentConfig } from "@/config";
+import { getPaymentDetails } from "@/helper/payment";
+import { formatOrderPayload } from "@/helper/razorpay.helper";
 import PaymentDao from "@/dao/payment.dao";
 import EarningDao from "@/dao/earning.dao";
+import UserProfileDao from "@/dao/userProfile.dao";
 import UserService from "@/services/user.service";
 import { IUser } from "@/interfaces/user.interface";
 import {
@@ -12,8 +15,12 @@ import {
   SettlementScopeEnum,
 } from "@/interfaces/enum";
 import {
+  IGatewayOrderResult,
   IPayment,
   IPaymentCheckoutDetails,
+  IPaymentDetails,
+  IPaymentTypeDetails,
+  IResolvedCharge,
 } from "@/interfaces/payment.interface";
 import {
   getActiveGateway,
@@ -22,6 +29,7 @@ import {
 import {
   ICheckoutQuery,
   IInitiatePaymentPayload,
+  IPaymentRequestPayload,
 } from "@/validators/payment.validator";
 
 /**
@@ -37,6 +45,7 @@ class PaymentService {
   private paymentDao = new PaymentDao();
   private earningDao = new EarningDao();
   private userService = new UserService();
+  private userProfileDao = new UserProfileDao();
 
   /**
    * Whether a one-time charge has already been settled by this user. Always
@@ -59,149 +68,125 @@ class PaymentService {
    * gateway would happily capture it — the signature would still verify,
    * because it signs the order, not the price we intended.
    */
-  /**
-   * Prices a settlement slice, as a pure aggregate — no earning rows are
-   * loaded at any point in the flow.
-   *
-   * `as_of` is what keeps this safe without an id list: conversions keep
-   * accruing while the brand is away at the gateway, so the cutoff is
-   * captured here and re-used verbatim when the earnings are marked paid.
-   * Same predicate both times, so the set priced is exactly the set settled;
-   * anything landing after it belongs to the next settlement.
-   */
-  private resolveSettlementSlice = async (
-    user: IUser,
-    payload: {
-      settlement_scope?: SettlementScopeEnum;
-      settlement_reference?: string;
-    },
-    asOf: Date,
-  ) => {
-    if (!payload.settlement_scope || !payload.settlement_reference) {
-      throw new Error("A settlement scope and reference are required");
-    }
-
-    // Scoped to the caller's own seller_id inside the DAO, so a brand can't
-    // price — or settle — another brand's slice by guessing a reference.
-    const summary = await this.earningDao.getPendingSettlementSummary(
-      String(user._id),
-      payload.settlement_scope,
-      payload.settlement_reference,
-      asOf,
-    );
-
-    if (summary.pending_amount <= 0) {
-      throw new Error("There is nothing pending to settle here");
-    }
-
-    return summary;
-  };
-
-  private resolvePayableAmount = async (
-    user: IUser,
-    paymentType: PaymentTypeEnum,
-    payload: {
-      settlement_scope?: SettlementScopeEnum;
-      settlement_reference?: string;
-    },
-    asOf: Date,
-  ): Promise<{ amount: number; job_count: number }> => {
-    switch (paymentType) {
-      case PaymentTypeEnum.SECURITY_DEPOSIT:
-        return {
-          amount: paymentConfig.security_deposit_amount,
-          job_count: 0,
-        };
-
-      case PaymentTypeEnum.ONLINE: {
-        const summary = await this.resolveSettlementSlice(user, payload, asOf);
-        return { amount: summary.pending_amount, job_count: summary.job_count };
-      }
-
-      default:
-        throw new Error("Unsupported payment type");
-    }
-  };
 
   /**
    * STEP 1 — /checkout
    *
-   * What the customer is about to pay, before anything is created. Read-only
-   * on purpose: opening a gateway order here would litter abandoned orders
-   * every time someone merely looks at the screen.
+   * What the user is about to pay for, before any gateway is involved. Thin on
+   * purpose: every figure and every word comes from the same resolver that
+   * /initiate-payment bills from, so the two cannot disagree.
    */
   public getCheckoutDetails = async (
     user: IUser,
     query: ICheckoutQuery,
   ): Promise<IPaymentCheckoutDetails> => {
-    const { amount, job_count } = await this.resolvePayableAmount(
-      user,
-      query.payment_type,
-      query,
-      new Date(),
-    );
-    const isPaid = await this.isAlreadyPaid(
-      String(user._id),
-      query.payment_type,
-    );
-
-    const presentation: Record<PaymentTypeEnum, Function> = {
-      [PaymentTypeEnum.SECURITY_DEPOSIT]: () => {
-        return {
-          title: "Refundable security deposit",
-          description:
-            "A one time deposit that becomes your marketing spend limit. Refunded when you leave in good standing.",
-          line_items: [{ label: "Security deposit", amount }],
-          total: amount,
-          currency: paymentConfig.currency,
-        };
-      },
-      [PaymentTypeEnum.ONLINE]: () => {
-        // 1% platform fee
-        const platformFee = amount / 100;
-        return {
-          title:
-            query.settlement_scope === SettlementScopeEnum.CREATOR
-              ? "Settle creator earnings"
-              : "Settle job earnings",
-          description:
-            "Pays out everything currently pending in this slice. Conversions recorded after this point roll into your next settlement.",
-          line_items: [
-            {
-              label: `Pending creator earnings across ${job_count} job${job_count === 1 ? "" : "s"}`,
-              amount,
-            },
-            {
-              label: `Platform charges`,
-              amount: platformFee,
-            },
-          ],
-          total: amount + platformFee,
-          currency: "INR",
-        };
-      },
-    };
-
-    const copy = presentation[query.payment_type]() as {
-      title: string;
-      description?: string;
-      line_items: { label: string; amount: number }[];
-      total: number;
-      currency: string;
-    };
+    const paymentDetails = await this.resolvePaymentDetails(user, query);
 
     return {
-      payment_type: query.payment_type,
+      payment_type: paymentDetails.payment_type,
+      is_paid: paymentDetails.is_paid,
+      title: paymentDetails.title,
+      description: paymentDetails.description,
+      line_items: paymentDetails.charge.line_items,
+      total: paymentDetails.charge.total,
+      total_display: paymentDetails.charge.total_display,
+      currency: paymentDetails.charge.currency,
+    };
+  };
+
+  /**
+   * Everything about a payment, for any type: what it costs, what to call it,
+   * whether it is already settled, and the reference we will bill it under.
+   *
+   * Pricing itself lives in helper/payment — one module per type — so this
+   * stays type-agnostic and adding a type never touches this file.
+   *
+   * The order id is generated here rather than after the gateway call so the
+   * gateway can echo it back as `receipt`, which is what lets us reconcile
+   * even if our own write fails midway.
+   */
+  public resolvePaymentDetails = async (
+    user: IUser,
+    payload: IPaymentRequestPayload,
+    asOf: Date = new Date(),
+  ): Promise<IPaymentDetails> => {
+    const { payment_type: paymentType } = payload;
+
+    const [{ charge, title, description, metadata }, isPaid] =
+      await Promise.all([
+        getPaymentDetails(paymentType, { ...payload, user, as_of: asOf }),
+        this.isAlreadyPaid(String(user._id), paymentType),
+      ]);
+
+    return {
+      payment_type: paymentType,
+      order_id: `${paymentType}_${nanoid(12)}`,
+      charge,
+      title,
+      description,
       is_paid: isPaid,
-      ...copy,
+      metadata,
+      payment_cycle_id: payload.payment_cycle_id,
+    };
+  };
+
+  /**
+   * Opens the order on the gateway from already-resolved payment details.
+   *
+   * Returns the request and the response whole, not just the id: both are
+   * persisted, and when a payment is disputed weeks later the exact bytes we
+   * sent and got back are the only account of what happened.
+   */
+  private createGatewayOrder = async (
+    user: IUser,
+    paymentDetails: IPaymentDetails,
+  ): Promise<IGatewayOrderResult> => {
+    const gateway = getActiveGateway();
+    const { charge, order_id, payment_type, metadata } = paymentDetails;
+
+    const request = formatOrderPayload({
+      payment_type,
+      // The charge decides the amount, the currency and the itemised lines.
+      charge,
+      receipt: order_id,
+      user_id: String(user._id),
+      settlement_scope: metadata.settlement_scope as string | undefined,
+      settlement_reference: metadata.settlement_reference as string | undefined,
+    });
+
+    const gatewayOrder = await gateway.createOrder(request);
+
+    return {
+      gateway_order_id: gatewayOrder.gateway_order_id,
+      request,
+      response: gatewayOrder.raw as Record<string, any>,
+      // Everything here is fed straight into the gateway SDK by the client.
+      sdk_payload: {
+        provider: gateway.provider,
+        key: gateway.getPublicKey(),
+        gateway_order_id: gatewayOrder.gateway_order_id,
+        // Gateway widgets want the minor unit; keeping the conversion here
+        // means the UI never has to know that rule per gateway.
+        amount_in_minor_unit: Math.round(charge.total * 100),
+        currency: charge.currency,
+        prefill: {
+          name: `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim(),
+          email: user.email,
+          contact: user.contact ?? "",
+        },
+      },
     };
   };
 
   /**
    * STEP 2 — /initiate-payment
    *
-   * Opens the order on the gateway, records our own `initiated` row, and
-   * returns exactly what the SDK needs. No secrets leave this method.
+   * Type-agnostic by design: resolve the details for whatever type was asked
+   * for, open the order, record it, hand back the SDK payload. Nothing here
+   * knows what a security deposit or a settlement is — that all lives in the
+   * per-type builders above.
+   *
+   * No secrets leave this method.
    */
   public initiatePayment = async (
     user: IUser,
@@ -214,71 +199,41 @@ class PaymentService {
       throw new Error("This payment has already been completed.");
     }
 
-    const gateway = getActiveGateway();
-    // Captured before pricing so the amount charged and the rows later
-    // marked paid are the same set.
-    const settlementAsOf = new Date();
-
-    const { amount } = await this.resolvePayableAmount(
+    // Captured before pricing so the amount charged and the rows later marked
+    // paid are the same set.
+    const paymentDetails = await this.resolvePaymentDetails(
       user,
-      payload.payment_type,
       payload,
-      settlementAsOf,
+      new Date(),
     );
-    const currency = paymentConfig.currency;
 
-    // Our own reference, distinct from the gateway's. Generated before the
-    // gateway call so the gateway can echo it back as `receipt`, which is what
-    // lets us reconcile even if our own write fails midway.
-    const orderId = `${payload.payment_type}_${nanoid(12)}`;
-
-    const gatewayOrder = await gateway.createOrder({
-      amount,
-      currency,
-      receipt: orderId,
-      notes: { user_id: String(user._id), payment_type: payload.payment_type },
-    });
+    const { gateway_order_id, request, response, sdk_payload } =
+      await this.createGatewayOrder(user, paymentDetails);
 
     await this.paymentDao.createPayment({
-      order_id: orderId,
+      order_id: paymentDetails.order_id,
       user_id: String(user._id),
       seller_id: String(user._id),
-      payable_amount: amount,
-      currency,
-      transaction_id: gatewayOrder.gateway_order_id,
-      online_request: {
-        ...gatewayOrder.raw,
-        // The cutoff defining which earnings this payment covers. Anything
-        // accruing after it belongs to the next settlement.
-        settlement_as_of: settlementAsOf.toISOString(),
-        settlement_scope: payload.settlement_scope,
-        settlement_reference: payload.settlement_reference,
-      },
-      payment_type: payload.payment_type,
+      payable_amount: paymentDetails.charge.total,
+      currency: paymentDetails.charge.currency,
+      transaction_id: gateway_order_id,
+      // What we sent, plus the type's own context — settlement reads
+      // settlement_as_of back out of here when the payment succeeds.
+      online_request: { ...request, ...paymentDetails.metadata },
+      // What the gateway returned. Previously this landed in online_request
+      // too, which left the row with no record of the request at all.
+      online_response: [response],
+      payment_type: paymentDetails.payment_type,
       payment_status: PaymentStatusEnum.INITIATED,
-      payment_gateway: gateway.provider,
-      payment_cycle_id: payload.payment_cycle_id,
+      payment_gateway: getActiveGateway().provider,
+      payment_cycle_id: paymentDetails.payment_cycle_id,
     });
 
     return {
-      order_id: orderId,
-      amount,
-      currency,
-      // Everything below is fed straight into the gateway SDK by the client.
-      sdk_payload: {
-        provider: gateway.provider,
-        key: gateway.getPublicKey(),
-        gateway_order_id: gatewayOrder.gateway_order_id,
-        // Gateway widgets want the minor unit; keeping the conversion here
-        // means the UI never has to know that rule per gateway.
-        amount_in_minor_unit: Math.round(amount * 100),
-        currency,
-        prefill: {
-          name: `${user.first_name ?? ""} ${user.last_name ?? ""}`.trim(),
-          email: user.email,
-          contact: user.contact ?? "",
-        },
-      },
+      order_id: paymentDetails.order_id,
+      amount: paymentDetails.charge.total,
+      currency: paymentDetails.charge.currency,
+      sdk_payload,
     };
   };
 

@@ -26,7 +26,8 @@ export interface IPayment {
   transaction_id?: string | null; // partner order id
 
   online_request?: object | null;
-  online_response?: object | null;
+  /** Appended to per gateway exchange — never replaced. See the model. */
+  online_response?: object[] | null;
 
   payment_type: PaymentTypeEnum;
   payment_status: PaymentStatusEnum;
@@ -47,14 +48,6 @@ export interface IGatewayOrder {
   raw: Record<string, unknown>;
 }
 
-export interface ICreateGatewayOrderInput {
-  // Major currency units (rupees, not paise). Each gateway converts to
-  // whatever unit it wants at its own boundary — callers never deal in paise.
-  amount: number;
-  currency: string;
-  receipt: string; // our own payments.order_id, echoed back by the gateway
-  notes?: Record<string, string>;
-}
 
 /**
  * Normalized view of a gateway webhook, so the service layer can act on a
@@ -86,6 +79,98 @@ export interface IGatewayPaymentStatus {
 export interface IPaymentLineItem {
   label: string;
   amount: number;
+  /**
+   * Distinct jobs this line covers. Only settlement lines have one — a
+   * security deposit isn't tied to any job — so it's optional rather than
+   * forced to a meaningless zero.
+   */
+  job_count?: number;
+  is_transfer_payment?: boolean;
+  /**
+   * The same figure, formatted for display ("₹8.12", "₹1,20,000").
+   *
+   * Sent alongside the raw number rather than instead of it: the client still
+   * needs `amount` for any arithmetic, but formatting server-side means
+   * grouping and decimals match everywhere the figure appears, and a client
+   * can render it without knowing the currency's rules.
+   */
+  amount_display: string;
+  account_id?: string;
+}
+
+/**
+ * Everything owed for one payment, computed in a single place.
+ *
+ * Both the checkout screen and the gateway call read from this, which is what
+ * guarantees the amount a user is shown is the amount they're charged — the
+ * two used to derive their totals separately and could disagree.
+ */
+export interface IResolvedCharge {
+  line_items: IPaymentLineItem[];
+  /** Before platform charges. */
+  subtotal: number;
+  platform_fee: number;
+  /** subtotal + platform_fee — the amount actually charged. */
+  total: number;
+  /** `total`, formatted for display. */
+  total_display: string;
+  currency: string;
+}
+
+/**
+ * Everything needed to open a payment, resolved server-side before any
+ * gateway is touched.
+ *
+ * Built by one function per payment type, so adding a type means adding a
+ * builder and registering it — the gateway call, the DB write and the SDK
+ * response below it never change.
+ */
+export interface IPaymentDetails {
+  payment_type: PaymentTypeEnum;
+  /** Our own reference, distinct from the gateway's order id. */
+  order_id: string;
+  /**
+   * What this payment costs, in full. The amount billed is always
+   * `charge.total` and the currency always `charge.currency` — kept only here
+   * so no caller can bill one figure while displaying another.
+   */
+  charge: IResolvedCharge;
+  title: string;
+  description: string;
+  /**
+   * True when this one-time charge is already settled. Resolved here rather
+   * than by each caller so /checkout and /initiate-payment can't disagree
+   * about whether a payment is still owed.
+   */
+  is_paid: boolean;
+  /**
+   * Type-specific context persisted onto the payment row and read back when
+   * the payment settles (e.g. which earnings slice a settlement covers).
+   */
+  metadata: Record<string, unknown>;
+  payment_cycle_id?: string | null;
+}
+
+/**
+ * What one payment type contributes: what it costs, how it's described, and
+ * the context that has to survive onto the payment row. The generic layer
+ * supplies everything else.
+ */
+export interface IPaymentTypeDetails {
+  charge: IResolvedCharge;
+  title: string;
+  description: string;
+  metadata: Record<string, unknown>;
+}
+
+/** Outcome of opening an order — kept whole so both halves can be persisted. */
+export interface IGatewayOrderResult {
+  gateway_order_id: string;
+  /** Exactly what we sent. */
+  request: Record<string, any>;
+  /** Exactly what came back. */
+  response: Record<string, any>;
+  sdk_payload: Record<string, any>;
 }
 
 export interface IPaymentCheckoutDetails {
@@ -94,6 +179,8 @@ export interface IPaymentCheckoutDetails {
   description?: string;
   line_items: IPaymentLineItem[];
   total: number;
+  /** `total`, formatted for display. */
+  total_display: string;
   currency: string;
 
   /**
@@ -119,7 +206,15 @@ export interface IPaymentGateway {
   /** Public merchant identifier, safe to hand to the browser. */
   getPublicKey(): string;
 
-  createOrder(input: ICreateGatewayOrderInput): Promise<IGatewayOrder>;
+  /**
+   * Opens an order from an already-built, gateway-shaped body.
+   *
+   * The body is opaque to this port on purpose: each gateway's order API takes
+   * a different shape, so the per-gateway formatter (razorpay.helper's
+   * formatOrderPayload, and its equivalent for any future gateway) is the seam
+   * that knows the wire format, and this stays the seam that sends it.
+   */
+  createOrder(payload: Record<string, any>): Promise<IGatewayOrder>;
 
   /**
    * Asks the gateway, server to server, what actually became of an order.

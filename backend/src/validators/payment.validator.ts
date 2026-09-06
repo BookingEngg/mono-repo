@@ -4,7 +4,7 @@ import { PaymentTypeEnum, SettlementScopeEnum } from "@/interfaces/enum";
 /**
  * Note what is deliberately ABSENT from every schema here: an amount. The
  * client names what it is paying for; the server prices it (see
- * PaymentService.resolvePayableAmount). Accepting an amount would make the
+ * PaymentService.resolvePaymentDetails). Accepting an amount would make the
  * whole flow forgeable.
  */
 
@@ -32,6 +32,13 @@ export const initiatePaymentSchema = z.object({
 });
 
 export type IInitiatePaymentPayload = z.infer<typeof initiatePaymentSchema>;
+
+/**
+ * What /checkout and /initiate-payment both send — the same fields, since
+ * pricing a payment and opening one need identical inputs. Named separately so
+ * the shared code that takes either doesn't have to pick one arbitrarily.
+ */
+export type IPaymentRequestPayload = ICheckoutQuery & IInitiatePaymentPayload;
 
 /**
  * STEP 3 — POST /verify-payment

@@ -127,6 +127,8 @@ const usePayment = ({
         settlement_reference: settlementReference,
       });
 
+      console.log("initiate payment>>>>>>>> ", order);
+
       await openGatewayCheckout({
         sdkPayload: order.sdk_payload,
         name,

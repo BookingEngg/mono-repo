@@ -25,7 +25,10 @@ export class PaymentModel extends Model<
   declare transaction_id: string | null; // partner/gateway order id
 
   declare online_request: CreationOptional<object | null>;
-  declare online_response: CreationOptional<object | null>;
+  // An array, appended to once per gateway exchange: the order response, then
+   // each verify poll and webhook. A payment's whole history with the gateway
+   // lives here, so nothing is overwritten when an outcome is re-reported.
+   declare online_response: CreationOptional<object[] | null>;
 
   declare payment_type: PaymentTypeEnum;
   declare payment_status: CreationOptional<PaymentStatusEnum>;
@@ -56,7 +59,7 @@ export default function (sequelize: Sequelize): typeof PaymentModel {
       transaction_id: { type: DataTypes.TEXT },
 
       online_request: { type: DataTypes.JSONB },
-      online_response: { type: DataTypes.JSONB },
+      online_response: { type: DataTypes.ARRAY(DataTypes.JSONB) },
 
       payment_type: {
         type: DataTypes.STRING,
