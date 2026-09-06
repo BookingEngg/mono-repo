@@ -58,6 +58,7 @@ export interface IUpdateOnboardingPayload {
   dob?: string | null;
   gender?: TGender | null;
   social_media_links?: ISocialMediaLinks;
+  contact?: string | null;
   address?: IAddress;
   bank_account_number?: string | null;
   ifsc_code?: string | null;
@@ -79,6 +80,7 @@ export interface IProfileDetails {
   dob?: string | null;
   gender?: TGender | null;
   social_media_links?: ISocialMediaLinks;
+  contact?: string | null;
   address?: IAddress;
   bank_account_number?: string | null;
   ifsc_code?: string | null;

@@ -8,9 +8,16 @@ import {
   IGatewayPaymentStatus,
   IGatewayWebhookEvent,
   IPaymentGateway,
+  IRouteAccount,
+  IRouteProduct,
+  IRouteStakeholder,
 } from "@/interfaces/payment.interface";
 
 const RAZORPAY_API_BASE = "https://api.razorpay.com/v1";
+
+// Accounts, stakeholders and products live on v2 — the same host and the same
+// Basic auth, but a different version prefix from the payments API above.
+const RAZORPAY_API_V2_BASE = "https://api.razorpay.com/v2";
 
 /**
  * Razorpay adapter built on its plain REST API — deliberately no `razorpay`
@@ -212,6 +219,182 @@ class RazorpayHttp implements IPaymentGateway {
       gateway_order_id: paymentEntity?.order_id || orderEntity?.id,
       gateway_payment_id: paymentEntity?.id,
       status,
+    };
+  };
+
+  // ---------------------------------------------------------------------
+  // Route onboarding
+  //
+  // Four calls, in order, to give a creator a linked account Razorpay can
+  // settle their earnings into:
+  //   1. createLinkedAccount     POST   /v2/accounts
+  //   2. createStakeholder       POST   /v2/accounts/:id/stakeholders
+  //   3. requestRouteProduct     POST   /v2/accounts/:id/products
+  //   4. configureRouteProduct   PATCH  /v2/accounts/:id/products/:productId
+  //
+  // Each is a separate call because each can fail on its own and Razorpay has
+  // no transaction across them. The caller owns the sequencing and persists
+  // the id each step returns, so a retry resumes rather than starting over.
+  //
+  // Each function issues its own request end to end, so one can be changed —
+  // a different header, a retry, a version bump — without touching the other
+  // three.
+  //
+  // These take an already-built body. Constructing it is razorpay.helper.ts's
+  // job (createLinkedAccount and friends), which keeps this file to
+  // signing, sending and reading the response.
+  // ---------------------------------------------------------------------
+
+  /**
+   * 1. The creator's linked account. Returns its `acc_...` id.
+   *
+   * @param payload body from razorpay.helper's createLinkedAccount
+   */
+  public createLinkedAccount = async (
+    payload: Record<string, any>,
+  ): Promise<IRouteAccount> => {
+    const response = await fetch(`${RAZORPAY_API_V2_BASE}/accounts`, {
+      method: "POST",
+      headers: {
+        Authorization: this.getAuthHeader(),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const body = (await response.json()) as Record<string, any>;
+
+    if (!response.ok || !body?.id) {
+      // Razorpay names the offending field on validation failures, and
+      // onboarding payloads are large — without the field a rejection is
+      // near-impossible to place.
+      const error = body?.error || {};
+      const field = error.field ? ` (field: ${error.field})` : "";
+      throw new Error(
+        `Razorpay: ${error.description || "Could not create the linked account"}${field}`,
+      );
+    }
+
+    return { id: body.id, raw: body };
+  };
+
+  /**
+   * 2. The person behind the account, for KYC.
+   *
+   * @param payload body from buildStakeholderPayload
+   */
+  public createStakeholder = async (
+    accountId: string,
+    payload: Record<string, any>,
+  ): Promise<IRouteStakeholder> => {
+    const response = await fetch(
+      `${RAZORPAY_API_V2_BASE}/accounts/${accountId}/stakeholders`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: this.getAuthHeader(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    const body = (await response.json()) as Record<string, any>;
+
+    if (!response.ok || !body?.id) {
+      const error = body?.error || {};
+      const field = error.field ? ` (field: ${error.field})` : "";
+      throw new Error(
+        `Razorpay: ${error.description || "Could not create the stakeholder"}${field}`,
+      );
+    }
+
+    return { id: body.id, raw: body };
+  };
+
+  /**
+   * 3. Asks for the Route product on this account. Returns an `acc_prd_...`
+   * id that step 4 configures; the product is not usable until then.
+   *
+   * @param payload body from razorpay.helper's createProduct
+   */
+  public requestRouteProduct = async (
+    accountId: string,
+    payload: Record<string, any>,
+  ): Promise<IRouteProduct> => {
+    const response = await fetch(
+      `${RAZORPAY_API_V2_BASE}/accounts/${accountId}/products`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: this.getAuthHeader(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    const body = (await response.json()) as Record<string, any>;
+
+    if (!response.ok || !body?.id) {
+      const error = body?.error || {};
+      const field = error.field ? ` (field: ${error.field})` : "";
+      throw new Error(
+        `Razorpay: ${error.description || "Could not request the route product"}${field}`,
+      );
+    }
+
+    return {
+      id: body.id,
+      activation_status: body.activation_status,
+      requirements: body.requirements,
+      raw: body,
+    };
+  };
+
+  /**
+   * 4. Attaches the creator's bank account, which is what Razorpay actually
+   * reviews.
+   *
+   * The response's `activation_status` is the answer to "can we pay them
+   * yet": "activated" means settlements will go through, while "under_review"
+   * / "needs_clarification" mean Razorpay is still checking — and
+   * `requirements` lists what it is missing. Returned rather than interpreted
+   * here, since what to do about each state is a business decision.
+   *
+   * @param payload body from razorpay.helper's configureProduct
+   */
+  public configureRouteProduct = async (
+    accountId: string,
+    productId: string,
+    payload: Record<string, any>,
+  ): Promise<IRouteProduct> => {
+    const response = await fetch(
+      `${RAZORPAY_API_V2_BASE}/accounts/${accountId}/products/${productId}`,
+      {
+        method: "PATCH",
+        headers: {
+          Authorization: this.getAuthHeader(),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    const body = (await response.json()) as Record<string, any>;
+    if (!response.ok) {
+      const error = body?.error || {};
+      const field = error.field ? ` (field: ${error.field})` : "";
+      throw new Error(
+        `Razorpay: ${error.description || "Could not configure the route product"}${field}`,
+      );
+    }
+
+    return {
+      id: body.id || productId,
+      activation_status: body.activation_status,
+      requirements: body.requirements,
+      raw: body,
     };
   };
 }

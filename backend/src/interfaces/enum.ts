@@ -135,6 +135,19 @@ export enum EarningStatusEnum {
  * account sees (and whether each is already done), so adding a widget never
  * means teaching the client a new role rule.
  */
+/**
+ * Where a creator stands with Razorpay Route, which is what decides whether we
+ * can settle money to them.
+ *
+ * Derived from the product's `activation_status`: only "activated" means
+ * settlements will actually go through, so everything else — requested,
+ * under_review, needs_clarification — collapses to UNDER_REVIEW.
+ */
+export enum RouteStatusEnum {
+  READY = "READY",
+  UNDER_REVIEW = "UNDER_REVIEW",
+}
+
 export enum HomeWidgetEnum {
   SECURITY_DEPOSIT = "security_deposit",
   POST_JOB = "post_job",

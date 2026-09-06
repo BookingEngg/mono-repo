@@ -101,6 +101,7 @@ const Profile = () => {
   const [form, setForm] = React.useState({
     dob: "",
     gender: "" as TGender | "",
+    contact: "",
     instagram: "",
     facebook: "",
     youtube: "",
@@ -127,6 +128,7 @@ const Profile = () => {
     setForm({
       dob: toDateInputValue(profile.dob),
       gender: profile.gender ?? "",
+      contact: profile.contact ?? "",
       instagram: profile.social_media_links?.instagram ?? "",
       facebook: profile.social_media_links?.facebook ?? "",
       youtube: profile.social_media_links?.youtube ?? "",
@@ -174,6 +176,7 @@ const Profile = () => {
         basic_details: {
           dob: orNull(form.dob),
           gender: form.gender || null,
+          contact: orNull(form.contact),
           social_media_links: {
             instagram: orNull(form.instagram),
             facebook: orNull(form.facebook),
@@ -361,6 +364,19 @@ const Profile = () => {
                           </SelectContent>
                         </Select>
                       </div>
+
+                      <FormField
+                        id="contact"
+                        label="Mobile number"
+                        type="tel"
+                        inputMode="numeric"
+                        autoComplete="tel"
+                        placeholder="9000090000"
+                        hint="10 digits, used for your payout account."
+                        value={form.contact}
+                        disabled={savingSection !== null}
+                        onChange={setField("contact")}
+                      />
 
                       <div className="grid gap-3">
                         <p className="text-sm font-medium">Address</p>

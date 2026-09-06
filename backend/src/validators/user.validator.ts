@@ -31,6 +31,15 @@ export const updateOnboardingSchema = z.object({
   gender: z.nativeEnum(GenderEnum).nullable().optional(),
   social_media_links: socialMediaLinksSchema.optional(),
 
+  // Indian mobile: 10 digits starting 6-9. Razorpay rejects anything else on
+  // the linked account.
+  contact: z
+    .string()
+    .trim()
+    .regex(/^[6-9][0-9]{9}$/, "Enter a valid 10 digit mobile number")
+    .nullable()
+    .optional(),
+
   address: addressSchema.optional(),
 
   // 9-18 digits covers every Indian bank's account number length.

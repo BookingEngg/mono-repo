@@ -1,6 +1,8 @@
 import { Schema } from "mongoose";
 import { MONGO_INSTANCES } from "@/database";
+import { RouteStatusEnum } from "@/interfaces/enum";
 import { IUserProfile } from "@/interfaces/userProfile.interface";
+import { nanoid } from "nanoid";
 
 const dbConnection = MONGO_INSTANCES.praman;
 
@@ -38,6 +40,7 @@ export const IAddress = new Schema(
  */
 const UserProfileSchema: Schema<IUserProfile> = new Schema(
   {
+    short_id: { type: String, required: true },
     user_id: { type: String, required: true },
 
     bank_account_number: { type: String, default: null },
@@ -46,6 +49,22 @@ const UserProfileSchema: Schema<IUserProfile> = new Schema(
 
     address: { type: IAddress, default: () => ({}) },
 
+    // Razorpay Route linked account id, set once onboarding succeeds.
+    razorpay_account_id: { type: String, default: null },
+
+    // Razorpay stakeholder id, set once the stakeholder is created.
+    razorpay_stakeholder_id: { type: String, default: null },
+
+    // Razorpay Route product id, set once the product is requested.
+    razorpay_product_id: { type: String, default: null },
+
+    // Route activation state — READY once Razorpay activates the product.
+    razorpay_route_status: {
+      type: String,
+      enum: RouteStatusEnum,
+      default: null,
+    },
+
     // Moved here from the user model.
     social_media_links: { type: ISocialMediaLinks, default: () => ({}) },
   },
@@ -53,6 +72,13 @@ const UserProfileSchema: Schema<IUserProfile> = new Schema(
     timestamps: true,
   },
 );
+
+UserProfileSchema.pre("save", function (next) {
+  if (!this.short_id) {
+    this.short_id = nanoid(15);
+  }
+  next();
+});
 
 // One profile per user — the whole model is a 1:1 extension of the user doc,
 // so a second row would silently split a person's details in two.

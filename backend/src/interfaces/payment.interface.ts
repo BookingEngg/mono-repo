@@ -142,3 +142,104 @@ export interface IPaymentGateway {
 
   parseWebhookEvent(body: Record<string, any>): IGatewayWebhookEvent | null;
 }
+
+/**
+ * Razorpay Route onboarding — creating the linked account a creator is paid
+ * out to. Separate from IPaymentGateway on purpose: that port is about
+ * charging a customer, and every gateway implements it. Payout onboarding has
+ * no common shape across gateways, so forcing it into the port would break
+ * exactly the gateway-agnosticism the port exists to protect.
+ */
+export interface ICreateLinkedAccountInput {
+  email: string;
+  phone: string;
+  /** Shown to us and on the creator's own dashboard. */
+  legal_business_name: string;
+  /** Shown to customers on statements. Defaults to the legal name. */
+  customer_facing_business_name?: string;
+  /** Razorpay vocabulary: individual, proprietorship, partnership, … */
+  business_type: string;
+  /** The person Razorpay should contact about this account. */
+  contact_name?: string;
+  /**
+   * Our own id for the creator. Razorpay enforces uniqueness on it, which is
+   * what stops a retry from creating a second account for the same person.
+   */
+  reference_id: string;
+
+  business_category?: string;
+  business_subcategory?: string;
+  registered_address?: IRouteAddress;
+  pan?: string;
+  gst?: string;
+}
+
+export interface IRouteAddress {
+  street1?: string;
+  street2?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  /** ISO 3166 alpha-2, uppercase — e.g. "IN". */
+  country?: string;
+}
+
+/**
+ * A stakeholder's residential address.
+ *
+ * Deliberately NOT IRouteAddress: Razorpay takes a single `street` here,
+ * while the account's registered address takes `street1`/`street2`. Same
+ * concept, two different wire shapes — sharing one type would silently send
+ * the wrong keys on one of them.
+ */
+export interface IStakeholderAddress {
+  street?: string;
+  city?: string;
+  state?: string;
+  postal_code?: string;
+  /** ISO 3166 alpha-2, uppercase — e.g. "IN". */
+  country?: string;
+}
+
+export interface ICreateStakeholderInput {
+  name: string;
+  email: string;
+  percentage_ownership?: number;
+  /** Any of director / executive / any combination Razorpay accepts. */
+  relationship?: Record<string, boolean>;
+  residential_address?: IStakeholderAddress;
+  /** Stakeholder KYC is the individual's PAN, not the business's. */
+  pan?: string;
+  phone_primary?: string;
+  notes?: Record<string, string>;
+}
+
+export interface IConfigureRouteProductInput {
+  /** Where Razorpay settles this creator's share. */
+  account_number: string;
+  ifsc_code: string;
+  beneficiary_name?: string;
+  tnc_accepted?: boolean;
+}
+
+export interface IRouteAccount {
+  id: string;
+  raw: Record<string, any>;
+}
+
+export interface IRouteStakeholder {
+  id: string;
+  raw: Record<string, any>;
+}
+
+export interface IRouteProduct {
+  id: string;
+  /**
+   * Razorpay's own field is `activation_status` — "activated",
+   * "under_review", "needs_clarification" or "requested". Surfaced verbatim
+   * rather than mapped, so the caller decides what each one means.
+   */
+  activation_status?: string;
+  requirements?: Record<string, any>[];
+  raw: Record<string, any>;
+}

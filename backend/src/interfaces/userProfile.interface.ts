@@ -1,3 +1,4 @@
+import { RouteStatusEnum } from "./enum";
 import { ISocialMediaLinks } from "./user.interface";
 
 export interface IAddress {
@@ -26,6 +27,7 @@ export interface IUserProfile {
   // References users._id. Stored as a string like every other cross-document
   // reference in this codebase rather than an ObjectId ref.
   user_id: string;
+  short_id: string;
 
   // Payout destination. Optional because a creator can use the app long
   // before they set up how they get paid.
@@ -34,6 +36,34 @@ export interface IUserProfile {
   pan?: string | null;
 
   address?: IAddress;
+
+  /**
+   * Razorpay Route linked account (`acc_...`) this creator is settled into.
+   * Set once onboarding succeeds; its presence is what marks the creator as
+   * already onboarded, so a retry resumes rather than creating a duplicate.
+   */
+  razorpay_account_id?: string | null;
+
+  /**
+   * Razorpay stakeholder (`sth_...`) for this creator — the person behind the
+   * linked account, carrying their KYC. Stored for the same reason as the
+   * account id: so a retry after a later-step failure resumes rather than
+   * creating a second stakeholder.
+   */
+  razorpay_stakeholder_id?: string | null;
+
+  /**
+   * The Route product (`acc_prd_...`) requested on the linked account. Route
+   * is what lets us split a payment to this creator, so until this exists
+   * they can't be paid at all.
+   */
+  razorpay_product_id?: string | null;
+
+  /**
+   * Whether Razorpay has activated this creator's Route product. READY is the
+   * only state in which a settlement will succeed.
+   */
+  razorpay_route_status?: RouteStatusEnum | null;
 
   // Moved off the user document — it belongs with the rest of the profile.
   social_media_links?: ISocialMediaLinks;

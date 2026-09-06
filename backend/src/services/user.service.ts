@@ -5,13 +5,26 @@ import moment from "moment";
 import CommunicationDao from "@/dao/communication.dao";
 import UserDao from "@/dao/user.dao";
 import UserProfileDao from "@/dao/userProfile.dao";
+// Helper
+import {
+  configureProductForUser,
+  createLinkedAccountForUser,
+  createProduct,
+  createStakeholderForUser,
+} from "@/helper/razorpay.helper";
+// Https
+import RazorpayHttp from "@/https/razorpay.http";
 import {
   IAddress,
   IProfileCompletion,
 } from "@/interfaces/userProfile.interface";
 // Interfaces
 import { ICommonAuthUser, IUser } from "@/interfaces/user.interface";
-import { AccountStatusEnum, UserTypeEnum } from "@/interfaces/enum";
+import {
+  AccountStatusEnum,
+  RouteStatusEnum,
+  UserTypeEnum,
+} from "@/interfaces/enum";
 // Constants
 import { getSignupRolesAndPrivileges } from "@/constants/roles.constants";
 // Validators
@@ -21,6 +34,9 @@ import { IBrandSignupPayload } from "@/validators/brandSignup.validator";
 class UserService {
   private userDao = new UserDao();
   private userProfileDao = new UserProfileDao();
+  // Used directly rather than through the gateway registry: Route onboarding
+  // is Razorpay-specific and deliberately not part of IPaymentGateway.
+  private razorpayHttp = new RazorpayHttp();
   private communicationDao = new CommunicationDao();
 
   public createUser = async (
@@ -140,7 +156,7 @@ class UserService {
    */
   public getProfileDetails = async (userId: string) => {
     const [user, profile] = await Promise.all([
-      this.userDao.getUserByUserId(userId, ["dob", "gender"]),
+      this.userDao.getUserByUserId(userId, ["dob", "gender", "contact"]),
       this.userProfileDao.getProfileByUserId(userId),
     ]);
 
@@ -148,6 +164,7 @@ class UserService {
       dob: user?.dob ?? null,
       gender: user?.gender ?? null,
       social_media_links: profile?.social_media_links ?? {},
+      contact: user?.contact ?? null,
       address: profile?.address ?? {},
       bank_account_number: profile?.bank_account_number ?? null,
       ifsc_code: profile?.ifsc_code ?? null,
@@ -168,6 +185,7 @@ class UserService {
   private deriveCompletion = (details: {
     dob?: Date | null;
     gender?: string | null;
+    contact?: string | null;
     address?: IAddress;
     bank_account_number?: string | null;
     ifsc_code?: string | null;
@@ -175,9 +193,12 @@ class UserService {
   }): IProfileCompletion => {
     const address = details.address ?? {};
 
+    // Contact is part of basic details because Razorpay requires a phone on
+    // the linked account — a creator without one can't be onboarded at all.
     const basic_details = Boolean(
       details.dob &&
         details.gender &&
+        details.contact &&
         address.addr &&
         address.city &&
         address.state &&
@@ -201,7 +222,7 @@ class UserService {
     userId: string,
   ): Promise<IProfileCompletion> => {
     const [user, profile] = await Promise.all([
-      this.userDao.getUserByUserId(userId, ["dob", "gender"]),
+      this.userDao.getUserByUserId(userId, ["dob", "gender", "contact"]),
       this.userProfileDao.getProfileByUserId(userId, [
         "address",
         "bank_account_number",
@@ -213,6 +234,7 @@ class UserService {
     return this.deriveCompletion({
       dob: user?.dob,
       gender: user?.gender,
+      contact: user?.contact,
       address: profile?.address,
       bank_account_number: profile?.bank_account_number,
       ifsc_code: profile?.ifsc_code,
@@ -220,9 +242,26 @@ class UserService {
     });
   };
 
+  /**
+   * Puts a creator's completed profile through Razorpay Route onboarding, so
+   * their earnings have somewhere to settle.
+   *
+   * Idempotent at the front: an account that isn't ONBOARDING has already been
+   * through this, and re-running would ask Razorpay to create a second linked
+   * account for the same person.
+   */
   public processOnboardingProfile = async (userId: string) => {
     const [user, userProfile] = await Promise.all([
-      this.userDao.getUserByUserId(userId, ["account_status"]),
+      // Name, email and contact all end up in the Razorpay payload, so they
+      // have to be selected here — account_status alone would send a linked
+      // account with an undefined email.
+      this.userDao.getUserByUserId(userId, [
+        "account_status",
+        "first_name",
+        "last_name",
+        "email",
+        "contact",
+      ]),
       this.userProfileDao.getProfileByUserId(userId, []),
     ]);
 
@@ -237,6 +276,94 @@ class UserService {
     if (!bankAccountNumber || !ifscCode || !pan) {
       throw new Error("Complete your onboarding steps");
     }
+
+    let razorpayLinkedAccountId = userProfile?.razorpay_account_id;
+
+    // Stage 1: Create the Razorpay account - (Creates the creator as a money recipient under your Razorpay account)
+    if (!razorpayLinkedAccountId) {
+      const requestPayload = createLinkedAccountForUser(user, userProfile);
+      const linkedAccount =
+        await this.razorpayHttp.createLinkedAccount(requestPayload);
+
+      await this.userProfileDao.upsertProfile(userId, {
+        razorpay_account_id: linkedAccount.id,
+      });
+      razorpayLinkedAccountId = linkedAccount.id;
+    }
+
+    // Stage 2: Create the stakeholder — (Identifies the person responsible/associated with that creator account for KYC/compliance)
+    let razorpayStakeholderId = userProfile?.razorpay_stakeholder_id;
+
+    if (!razorpayStakeholderId) {
+      const stakeholderPayload = createStakeholderForUser(user, userProfile);
+      const stakeholder = await this.razorpayHttp.createStakeholder(
+        razorpayLinkedAccountId,
+        stakeholderPayload,
+      );
+
+      // Persisted before the next stage, so a failure further along doesn't
+      // strand a stakeholder we'd then try to create a second time.
+      await this.userProfileDao.upsertProfile(userId, {
+        razorpay_stakeholder_id: stakeholder.id,
+      });
+      razorpayStakeholderId = stakeholder.id;
+    }
+
+    // Stage 3: Create the route / product — (Enable Route for this creator account)
+    let razorpayProductId = userProfile?.razorpay_product_id;
+    let routeActivationStatus: string | undefined;
+
+    if (!razorpayProductId) {
+      const productPayload = createProduct();
+      const product = await this.razorpayHttp.requestRouteProduct(
+        razorpayLinkedAccountId,
+        productPayload,
+      );
+
+      await this.userProfileDao.upsertProfile(userId, {
+        razorpay_product_id: product.id,
+      });
+      razorpayProductId = product.id;
+      routeActivationStatus = product.activation_status;
+    }
+
+    // Stage 4: Configure the route — (Provides the creator's bank/settlement details so Razorpay knows where to settle the money)
+    let routeStatus = userProfile?.razorpay_route_status;
+
+    if (routeStatus !== RouteStatusEnum.READY) {
+      const configPayload = configureProductForUser(user, userProfile);
+      const configured = await this.razorpayHttp.configureRouteProduct(
+        razorpayLinkedAccountId,
+        razorpayProductId,
+        configPayload,
+      );
+
+      routeActivationStatus = configured.activation_status;
+      // "activated" is the only state money actually moves in — every other
+      // one (requested, under_review, needs_clarification) is still pending.
+      routeStatus =
+        configured.activation_status === "activated"
+          ? RouteStatusEnum.READY
+          : RouteStatusEnum.UNDER_REVIEW;
+
+      await this.userProfileDao.upsertProfile(userId, {
+        razorpay_route_status: routeStatus,
+      });
+
+      // Route being live is what completes a creator's onboarding — they can
+      // be paid, so there's nothing left to gate them on.
+      if (routeStatus === RouteStatusEnum.READY) {
+        await this.setAccountStatus(userId, AccountStatusEnum.ACTIVE);
+      }
+    }
+
+    return {
+      razorpay_account_id: razorpayLinkedAccountId,
+      razorpay_stakeholder_id: razorpayStakeholderId,
+      razorpay_product_id: razorpayProductId,
+      razorpay_route_status: routeStatus,
+      route_activation_status: routeActivationStatus,
+    };
   };
 
   /**
@@ -255,6 +382,7 @@ class UserService {
       dob,
       gender,
       social_media_links,
+      contact,
       address,
       bank_account_number,
       ifsc_code,
@@ -264,6 +392,9 @@ class UserService {
     const userUpdates: Record<string, unknown> = {};
     if (dob !== undefined) userUpdates.dob = dob;
     if (gender !== undefined) userUpdates.gender = gender;
+    // Lives on the user document alongside the brand signup form's number,
+    // rather than being duplicated onto the profile.
+    if (contact !== undefined) userUpdates.contact = contact;
 
     // Dot-notation throughout so sending one nested key never wipes its
     // siblings — saving just Instagram must not null out YouTube, and saving
@@ -298,19 +429,11 @@ class UserService {
 
     const details = await this.getProfileDetails(userId);
 
-    // Finishing every section is what ends a creator's onboarding. Guarded on
-    // ONBOARDING so this can never pull a brand out of PENDING_DEPOSIT and
-    // hand it job posting without the deposit.
-    if (details.completion.is_complete) {
-      const user = await this.userDao.getUserByUserId(userId, [
-        "account_status",
-      ]);
-      if (user?.account_status === AccountStatusEnum.ONBOARDING) {
-        await this.setAccountStatus(userId, AccountStatusEnum.ACTIVE);
-        return { ...details, account_status: AccountStatusEnum.ACTIVE };
-      }
-    }
-
+    // Deliberately does NOT flip the account to ACTIVE. Filling in the form
+    // only makes the profile submittable — Razorpay activating the Route
+    // product is what ends onboarding (see processOnboardingProfile). Flipping
+    // here would leave the account ACTIVE and make that call early-return, so
+    // the creator would never be onboarded to Razorpay at all.
     return details;
   };
 
