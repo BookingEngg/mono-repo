@@ -19,6 +19,9 @@ const JobSchema: Schema<IJob> = new Schema(
 
     product_link: { type: String, required: true },
     product_name: { type: String, required: true },
+    // Long-form copy shown on the job detail screen. Optional because jobs
+    // created before this field existed don't carry one.
+    product_description: { type: String, default: null },
     // What the product actually sells for. Needed to turn a PERCENTAGE
     // earning model into a real rupee figure — "10%" tells a creator nothing
     // without the price it's a percentage of. Optional at the schema level so

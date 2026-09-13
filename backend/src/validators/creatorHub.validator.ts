@@ -34,6 +34,7 @@ export const createJobSchema = z.object({
   job_type: z.enum([JobTypeEnum.AFFILIATE]),
   product_id: z.string().min(1).max(50),
   product_name: z.string().min(1).max(200),
+  product_description: z.string().min(1).max(5000).nullable().optional(),
   // Required for new jobs: a PERCENTAGE commission can't be shown as a
   // real figure without it.
   selling_price: z.number().positive(),

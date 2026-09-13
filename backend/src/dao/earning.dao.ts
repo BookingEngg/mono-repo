@@ -9,14 +9,21 @@ class EarningDao {
   /**
    * Records an accrual for a conversion, exactly once.
    *
-   * `findOrCreate` rather than create-if-missing: brand webhooks retry, and a
-   * retry can race the original. The unique index on
-   * (job_application_short_id, visitor_id, trigger) is what actually enforces
-   * this — the DB rejects the second insert, so two concurrent retries can't
-   * both pay out.
+   * One statement — `INSERT ... ON CONFLICT DO NOTHING` — rather than
+   * findOrCreate, which wraps a SELECT and an INSERT in a transaction and, on
+   * Postgres, compiles a temporary plpgsql function to catch the unique
+   * violation. That is four round trips plus a CREATE/DROP FUNCTION for a
+   * write that sits in front of a visitor waiting on a redirect.
    *
-   * Returns `created: false` on a duplicate so callers can tell a real
-   * accrual from a replay without treating the replay as an error.
+   * Correctness is unchanged: the partial unique index on
+   * (job_application_short_id, visitor_id, trigger) is what actually enforces
+   * exactly-once, and it did under findOrCreate too. Brand webhooks retry, and
+   * a retry can race the original — the database rejects the second insert
+   * either way, so two concurrent retries cannot both pay out.
+   *
+   * Returns `created: false` on a duplicate so callers can tell a real accrual
+   * from a replay without treating the replay as an error. A skipped insert
+   * returns no row, which is how that is detected.
    */
   public accrueForConversion = async (payload: {
     job_short_id?: string;
@@ -31,21 +38,23 @@ class EarningDao {
     order_id?: string;
     awb_no?: string;
     recorded_at: Date;
-  }): Promise<{ earning: EarningModel; created: boolean }> => {
-    const [earning, created] = await this.earningModel.findOrCreate({
-      where: {
-        job_application_short_id: payload.job_application_short_id,
-        visitor_id: payload.visitor_id ?? null,
-        trigger: payload.trigger,
-      } as any,
-      defaults: {
-        ...payload,
-        currency: payload.currency ?? "INR",
-        earning_status: EarningStatusEnum.ACCRUED,
-      } as any,
-    });
+  }): Promise<{ earning: EarningModel | null; created: boolean }> => {
+    const [earning] = await this.earningModel.bulkCreate(
+      [
+        {
+          ...payload,
+          currency: payload.currency ?? "INR",
+          earning_status: EarningStatusEnum.ACCRUED,
+        } as any,
+      ],
+      { ignoreDuplicates: true },
+    );
 
-    return { earning, created };
+    // ON CONFLICT DO NOTHING returns nothing for a skipped row, so an absent
+    // id is the signal that this conversion was already accrued.
+    const created = Boolean(earning?.id);
+
+    return { earning: created ? earning : null, created };
   };
 
   public getEarningsByApplicationShortId = async (

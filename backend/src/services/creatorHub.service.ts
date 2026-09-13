@@ -10,8 +10,10 @@ import {
   buildJobApplicationListItem,
   buildJobListItem,
   buildJobCheckoutDetails,
+  buildJobDetails,
   JOB_LIST_PROJECTION,
   JOB_CHECKOUT_PROJECTION,
+  JOB_DETAILS_PROJECTION,
   JOB_APPLICATION_LIST_PROJECTION,
 } from "@/helper/creatorHub.helper";
 import {
@@ -152,6 +154,35 @@ class CreatorHubService {
    * Job detail for the influencer's checkout/apply-summary screen. Brand
    * accounts never reach this — gated at the route by role, not here.
    */
+  /**
+   * Full detail for one job — what a creator sees before deciding to apply.
+   *
+   * Unlike the checkout read, a closed job is returned rather than refused:
+   * a creator following a link to a job that has since filled up should see
+   * it with applying disabled, not a "not found" error. Only a job that never
+   * existed is a 404.
+   */
+  public getJobDetails = async (shortId: string, userId: string) => {
+    const job = await this.jobDao.getJobByShortId(
+      shortId,
+      JOB_DETAILS_PROJECTION,
+    );
+
+    if (!job) {
+      throw new Error("Job not found");
+    }
+
+    const [seller, application] = await Promise.all([
+      this.userDao.getUserByUserId(job.seller_id, ["first_name", "last_name"]),
+      // Drives the CTA — an existing application means "view it", not "apply
+      // again", and the API is what decides that rather than the client
+      // guessing from a list it may not have loaded.
+      this.jobApplicationDao.getApplicationByUserAndJob(userId, shortId),
+    ]);
+
+    return buildJobDetails(job, this.getBrandName(seller), application ?? undefined);
+  };
+
   public getJobCheckoutDetails = async (shortId: string) => {
     const job = await this.jobDao.getJobByShortId(
       shortId,
@@ -304,20 +335,39 @@ class CreatorHubService {
       // A CPC job with no determinable rate must not silently accrue 0 — skip
       // and let it surface as a missing earning rather than a wrong one.
       if (commission) {
-        // sessionId is the visitor identifier here, so the unique index
-        // collapses repeat clicks within the same 1hr session into one
-        // accrual instead of paying per refresh.
-        await this.earningDao.accrueForConversion({
-          job_short_id: jobApplication.job_short_id,
-          job_application_short_id: link.entity_id,
-          visitor_id: sessionId,
-          trigger: ConversionTriggerEnum.LINK_CLICK,
-          event_source: ConversionEventSourceEnum.INHOUSE,
-          user_id: jobApplication.user_id,
-          seller_id: jobApplication.job_details?.seller_id,
-          amount: commission,
-          recorded_at: new Date(),
-        });
+        // Deliberately NOT awaited. The visitor's redirect does not depend on
+        // this write — the destination came from the link above — so making
+        // them wait for Postgres only adds latency to the one request that is
+        // literally someone waiting on a page load.
+        //
+        // Safe to float here because this is a long-lived Express process, not
+        // a function that can be frozen mid-flight. The catch is required: an
+        // unhandled rejection on a floating promise takes the process down.
+        //
+        // sessionId is the visitor identifier, so the unique index collapses
+        // repeat clicks within the same 1hr session into one accrual instead
+        // of paying per refresh.
+        this.earningDao
+          .accrueForConversion({
+            job_short_id: jobApplication.job_short_id,
+            job_application_short_id: link.entity_id,
+            visitor_id: sessionId,
+            trigger: ConversionTriggerEnum.LINK_CLICK,
+            event_source: ConversionEventSourceEnum.INHOUSE,
+            user_id: jobApplication.user_id,
+            seller_id: jobApplication.job_details?.seller_id,
+            amount: commission,
+            // Stamped now rather than when the insert lands, so a slow write
+            // cannot misreport when the click actually happened.
+            recorded_at: new Date(),
+          })
+          .catch((error) => {
+            console.error("Failed to accrue LINK_CLICK earning", {
+              job_application_short_id: link.entity_id,
+              visitor_id: sessionId,
+              error,
+            });
+          });
       }
     }
 

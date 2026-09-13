@@ -5,6 +5,7 @@ import {
   ICreateJobPayload,
   IJobApplicationListResponse,
   IJobCheckoutDetails,
+  IJobDetails,
   IJobListResponse,
 } from "@/typings/creatorHub";
 
@@ -43,6 +44,15 @@ export const listBrandJobs = async (params: {
   });
 
   return response.data;
+};
+
+// Full detail for one job — what the job page renders. Influencer only.
+export const getJobDetails = async (shortId: string): Promise<IJobDetails> => {
+  const response = await axiosClient.get({
+    url: `/creator/job/${shortId}`,
+  });
+
+  return response.data.data;
 };
 
 // Checkout/apply-summary detail for a single job. Influencer only — a brand

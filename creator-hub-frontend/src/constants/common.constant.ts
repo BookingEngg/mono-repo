@@ -32,10 +32,14 @@ export const ROUTE_PATHS = {
   SETTLEMENT: "/settlement",
   // Route pattern for React Router registration — use getJobCheckoutPath()
   // to build an actual link with a real short_id.
+  JOB_DETAILS: "/jobs/:shortId",
   JOB_CHECKOUT: "/jobs/:shortId/checkout",
   // Pattern for React Router — use getPaymentCheckoutPath() to build a link.
   PAYMENT_CHECKOUT: "/payment/:paymentType/checkout",
 };
+
+export const getJobDetailsPath = (shortId: string): string =>
+  `/jobs/${shortId}`;
 
 export const getJobCheckoutPath = (shortId: string): string =>
   `/jobs/${shortId}/checkout`;

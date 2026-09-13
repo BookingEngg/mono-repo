@@ -1,5 +1,6 @@
 // Modules
 import React from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { CheckIcon, CopyIcon, PackageIcon } from "lucide-react";
 // Atoms
@@ -7,6 +8,7 @@ import { Button } from "@/atoms/ui/button";
 // Typings
 import { IJobApplicationListItem } from "@/typings/creatorHub";
 // Utils
+import { getJobDetailsPath } from "@/constants/common.constant";
 import { getJobApplicationLink, getPreviewImage } from "@/utils/job.util";
 import { formatCurrency } from "@/utils/util";
 
@@ -49,7 +51,19 @@ const JobApplicationRow = ({ application }: TJobApplicationRowProps) => {
 
   return (
     <div className="border-border bg-background flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4">
-      <div className="flex min-w-0 items-center gap-3">
+      {/*
+        Only the content block is a link, not the whole row — the Copy link
+        button sits alongside it, and a button nested inside an anchor is
+        invalid markup that swallows its own click.
+
+        Points at the job rather than the application: a creator tapping what
+        they applied to wants to re-read the product. A job the brand has
+        since removed lands on the detail page's own "couldn't load" state.
+      */}
+      <Link
+        to={getJobDetailsPath(application.job_short_id)}
+        className="flex min-w-0 items-center gap-3 rounded-lg transition-opacity hover:opacity-80"
+      >
         <div className="bg-muted text-muted-foreground flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg">
           {previewImage ? (
             <img
@@ -97,7 +111,7 @@ const JobApplicationRow = ({ application }: TJobApplicationRowProps) => {
             </p>
           )}
         </div>
-      </div>
+      </Link>
 
       {application.link_short_id && (
         <Button

@@ -26,6 +26,8 @@ export interface IJob {
   product_id: string;
   product_link: string;
   product_name: string;
+  // Long-form product copy, shown on the job detail screen.
+  product_description?: string | null;
   // What the product sells for — the base a PERCENTAGE earning model is
   // calculated against. Optional because jobs created before this field
   // existed don't carry it; callers fall back to the old wording.
@@ -73,6 +75,32 @@ export interface IJobListItem {
 // Shape returned by GET /creator/job/checkout/:shortId — everything the
 // checkout summary screen needs on top of the listing shape: what the
 // influencer earns and the due date, but still nothing seller_id/internal.
+/**
+ * Everything the job detail screen shows — the checkout summary plus the
+ * long-form copy and whether this creator has already applied.
+ *
+ * Separate from IJobCheckoutDetails because it is read by a creator browsing,
+ * not one committing: it carries no seller_id or internal fields, but does
+ * carry enough for the screen to decide between "Apply" and "View your
+ * application".
+ */
+export interface IJobDetails extends IJobCheckoutDetails {
+  product_description?: string | null;
+  product_link?: string;
+  /** Who the brand wants creating for this product. Absent means anyone. */
+  gender?: GenderEnum;
+  age_limit?: {
+    lower: number | null;
+    upper: number | null;
+  };
+  /** True when the signed-in creator already applied to this job. */
+  is_applied: boolean;
+  /** Their application's short_id, when they have one. */
+  application_short_id?: string;
+  /** False once the job is filled, expired or hidden. */
+  is_open: boolean;
+}
+
 export interface IJobCheckoutDetails extends IJobListItem {
   // fully-formatted earning text (e.g. "Earn ₹120 per order (10% of ₹1,200)")
   // — see buildEarningModelDisplay in creatorHub.helper.ts

@@ -28,6 +28,43 @@ export const sequelize = new Sequelize(
   {
     ...postgresDbConfig,
     ...(isProduction ? {} : { logging: (sql: string) => console.log(sql) }),
+
+    pool: {
+      max: 10,
+      /**
+       * The important one. Sequelize defaults to min 0 and evicts idle
+       * connections after 10s, so on anything but constant traffic the next
+       * request pays to open a fresh connection — TCP, TLS and auth — before
+       * it can run a single statement. That is seconds against a managed
+       * Postgres, and it is why a redirect that normally answers in ~100ms
+       * occasionally took five: not the query, the connect.
+       *
+       * Holding two connections open means a request after a quiet spell
+       * finds one waiting.
+       */
+      min: 2,
+      // Well above the eviction window, so a warm connection survives a gap
+      // in traffic rather than being closed and immediately reopened.
+      idle: 60_000,
+      // Bounded so a pool starved by a stuck query fails fast and visibly
+      // instead of hanging a request for a minute (the default).
+      acquire: 10_000,
+      // Recycled periodically anyway — long-lived connections behind a load
+      // balancer get dropped server-side without the client noticing.
+      evict: 300_000,
+    },
+
+    // Detects a connection a network device has silently dropped, rather than
+    // handing it to a query that then waits for a timeout.
+    dialectOptions: {
+      keepAlive: true,
+    },
+
+    retry: {
+      // A connection killed between checkout and use is retried once rather
+      // than surfacing as a request failure.
+      max: 2,
+    },
   },
 );
 

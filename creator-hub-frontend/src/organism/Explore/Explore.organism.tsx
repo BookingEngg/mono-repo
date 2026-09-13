@@ -14,7 +14,7 @@ import {
 } from "@/services/CreatorHub.service";
 // Constants
 import { ROLES } from "@/constants/access.constant";
-import { getJobCheckoutPath } from "@/constants/common.constant";
+import { getJobDetailsPath } from "@/constants/common.constant";
 // Typings
 import { IJobListItem } from "@/typings/creatorHub";
 // Utils
@@ -110,9 +110,14 @@ const Explore = () => {
               <JobCard
                 key={job.short_id}
                 job={job}
+                /*
+                  Opens the job's own page rather than jumping straight to
+                  checkout — a creator should be able to read the product
+                  before committing to apply.
+                */
                 applyHref={
                   !isBrand && job.short_id
-                    ? getJobCheckoutPath(job.short_id)
+                    ? getJobDetailsPath(job.short_id)
                     : undefined
                 }
               />

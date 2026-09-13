@@ -108,6 +108,25 @@ class CreatorHubControllers {
   };
 
   /**
+   * Full detail for one job, for the creator viewing it.
+   */
+  public getJobDetails = async (
+    req: Request<{ shortId: string }>,
+    res: Response,
+  ): Promise<any> => {
+    if (!req.user?._id) {
+      return res.status(401);
+    }
+
+    const job = await this.creatorHubService.getJobDetails(
+      req.params.shortId,
+      req.user._id,
+    );
+
+    return res.send({ status: "success", data: job });
+  };
+
+  /**
    * Resolve a redirection link's short_id and redirect to its destination
    */
   public redirectLink = async (

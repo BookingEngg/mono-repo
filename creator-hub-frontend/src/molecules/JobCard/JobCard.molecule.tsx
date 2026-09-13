@@ -21,8 +21,21 @@ const JobCard = ({ job, applyHref }: TJobCardProps) => {
   const isLastJob = remaining === 1;
   const usedRatio = totalJobs > 0 ? completed / totalJobs : 0;
 
+  /*
+    The whole card is the target when there's somewhere to go — tapping the
+    image or the title is the natural gesture, and confining it to the button
+    made most of the card dead space. The button stays as the visible
+    affordance, but it is a span rather than a nested link: an anchor inside
+    an anchor is invalid and browsers resolve it unpredictably.
+  */
+  const Wrapper = applyHref ? Link : "div";
+  const wrapperProps = applyHref
+    ? { to: applyHref, className: "block focus-visible:ring-ring/50 focus-visible:ring-3 rounded-2xl outline-none" }
+    : {};
+
   return (
-    <div className="border-border bg-background overflow-hidden rounded-2xl border">
+    <Wrapper {...(wrapperProps as any)}>
+      <div className="border-border bg-background overflow-hidden rounded-2xl border transition-shadow hover:shadow-md">
       <div className="bg-muted relative aspect-4/5 w-full">
         {previewImage ? (
           <img
@@ -72,15 +85,13 @@ const JobCard = ({ job, applyHref }: TJobCardProps) => {
 
         {/* Only an influencer can apply — a brand viewing its own job gets no CTA */}
         {applyHref && (
-          <Button
-            className="mt-1 w-full uppercase"
-            render={<Link to={applyHref} />}
-          >
+          <Button className="mt-1 w-full uppercase" render={<span />}>
             Explore job
           </Button>
         )}
       </div>
-    </div>
+      </div>
+    </Wrapper>
   );
 };
 

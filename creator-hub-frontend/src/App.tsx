@@ -15,6 +15,7 @@ import CreateJobPage from "@/pages/CreateJob";
 import ApplicationsPage from "@/pages/Applications";
 import SettlementPage from "@/pages/Settlement";
 import CheckoutPage from "@/pages/Checkout";
+import JobDetailsPage from "@/pages/JobDetails";
 import PaymentCheckoutPage from "@/pages/PaymentCheckout";
 import NotFoundPage from "@/pages/NotFound";
 // Layout
@@ -134,7 +135,13 @@ const App = () => {
               Rendered outside MainLayout: a focused, single-purpose flow with
               its own header, not the SideNav/BottomNav chrome.
             */}
+            {/*
+              Declared before JOB_DETAILS: "/jobs/:shortId" would otherwise
+              match "/jobs/abc/checkout"'s first segment pattern ambiguously,
+              and the more specific route should win regardless.
+            */}
             <Route path={ROUTE_PATHS.JOB_CHECKOUT} element={<CheckoutPage />} />
+            <Route path={ROUTE_PATHS.JOB_DETAILS} element={<JobDetailsPage />} />
 
             {/* Any URL an authorized creator has no business on falls back here */}
             <Route path="*" element={<NotFoundPage />} />

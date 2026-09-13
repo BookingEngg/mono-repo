@@ -44,6 +44,7 @@ export interface ICreateJobPayload {
   // What the product sells for. Required so a PERCENTAGE commission can be
   // shown to creators as a real rupee figure rather than a bare "10%".
   selling_price: number;
+  product_description?: string | null;
   preview_urls?: IJobMedia[];
   category?: IJobCategory;
   earning_model?: IEarningModel;
@@ -91,6 +92,25 @@ export interface IJobCheckoutDetails extends IJobListItem {
   earning_amount?: number;
   selling_price?: number;
   due_date?: number;
+}
+
+/**
+ * Mirrors backend's IJobDetails — GET /creator/job/:shortId. The checkout
+ * shape plus the long-form copy and whether this creator already applied.
+ */
+export interface IJobDetails extends IJobCheckoutDetails {
+  product_description?: string | null;
+  product_link?: string;
+  // Eligibility — shown so a creator knows before applying, not after.
+  gender?: TGender;
+  age_limit?: IAgeLimit;
+  // Decided server-side, so the screen doesn't have to guess from a list it
+  // may not have loaded.
+  is_applied: boolean;
+  application_short_id?: string;
+  // False once the job is filled or hidden — the page still renders, with
+  // applying disabled.
+  is_open: boolean;
 }
 
 export interface IJobListPagination {

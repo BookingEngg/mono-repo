@@ -2,6 +2,7 @@ import {
   IEarningModel,
   IJob,
   IJobCheckoutDetails,
+  IJobDetails,
   IJobListItem,
 } from "@/interfaces/job.interface";
 import {
@@ -145,6 +146,40 @@ export const buildEarningModelDisplay = (
 
   return `Earn ${formatRupees(amount)} ${label}`;
 };
+
+/**
+ * Detail screen needs the copy and the destination link on top of the
+ * checkout summary — but still nothing internal (no seller_id, job_count
+ * internals, or visibility flags beyond the derived is_open).
+ */
+export const JOB_DETAILS_PROJECTION = [
+  ...JOB_CHECKOUT_PROJECTION,
+  "product_description",
+  "product_link",
+  // Eligibility the creator should see before applying, rather than finding
+  // out from a rejection.
+  "gender",
+  "age_limit",
+];
+
+export const buildJobDetails = (
+  job: IJob,
+  brandName: string | undefined,
+  application?: { short_id?: string },
+): IJobDetails => ({
+  ...buildJobCheckoutDetails(job, brandName),
+  product_description: job.product_description,
+  product_link: job.product_link,
+  gender: job.gender,
+  age_limit: job.age_limit,
+  // Drives the CTA: a creator who already applied is sent to their
+  // application rather than being offered a second one.
+  is_applied: Boolean(application),
+  application_short_id: application?.short_id,
+  // Computed rather than exposing is_active/is_visible/job_count — the screen
+  // only needs to know whether applying is still possible.
+  is_open: isJobOpenForApplication(job),
+});
 
 export const buildJobCheckoutDetails = (
   job: IJob,

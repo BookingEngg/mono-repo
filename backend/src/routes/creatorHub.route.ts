@@ -98,6 +98,19 @@ class CreatorHubRoutes implements Routes {
       this.validatorMiddleware.validateRequestBody(createJobSchema),
       asyncWrapper(this.creatorHubController.createJob),
     );
+
+    // Registered last on purpose. Express matches in registration order, so a
+    // `/:shortId` declared above would swallow `/brand` and route a brand's
+    // own listing into the job lookup as a job with short_id "brand".
+    this.router.get(
+      `${prefix}/:shortId`,
+      this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.INFLUENCER],
+        [privilegesEnum.EXPLORE_JOBS],
+      ),
+      asyncWrapper(this.creatorHubController.getJobDetails),
+    );
   }
 
   private initializeJobApplicationRoutes(prefix: string) {
