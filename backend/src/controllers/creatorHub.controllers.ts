@@ -108,6 +108,26 @@ class CreatorHubControllers {
   };
 
   /**
+   * A creator's own earnings — lifetime totals plus a per-job breakdown.
+   * Scoped to the authenticated user; nothing about whose earnings to return
+   * is accepted from the request.
+   */
+  public getCreatorEarnings = async (
+    req: Request,
+    res: Response,
+  ): Promise<any> => {
+    if (!req.user?._id) {
+      return res.status(401);
+    }
+
+    const earnings = await this.creatorHubService.getCreatorEarnings(
+      req.user._id,
+    );
+
+    return res.send({ status: "success", data: earnings });
+  };
+
+  /**
    * Full detail for one job, for the creator viewing it.
    */
   public getJobDetails = async (

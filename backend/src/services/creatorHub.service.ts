@@ -2,6 +2,8 @@ import JobDao from "@/dao/job.dao";
 import JobApplicationDao from "@/dao/jobApplication.dao";
 import LinkDao from "@/dao/link.dao";
 import EarningDao from "@/dao/earning.dao";
+import { formatMoney } from "@/helper/money.helper";
+import { ICreatorEarningsResponse } from "@/interfaces/job.interface";
 import UserDao from "@/dao/user.dao";
 import {
   isJobOpenForApplication,
@@ -306,6 +308,81 @@ class CreatorHubService {
         total: count,
         total_pages: Math.ceil(count / pagination.limit),
       },
+    };
+  };
+
+  /**
+   * A creator's earnings: the headline totals, and the same figures broken
+   * down per job.
+   *
+   * Both aggregates are computed in Postgres; the job names, brands and
+   * artwork come from Mongo and are joined here, resolved in two batched
+   * lookups rather than one per job.
+   */
+  public getCreatorEarnings = async (
+    userId: string,
+  ): Promise<ICreatorEarningsResponse> => {
+    // Coerced at the Mongo -> Postgres boundary. req.user._id is a real
+    // ObjectId at runtime even though IUser types it as a string, and
+    // Sequelize cannot bind one to a text column — it rejects the query with
+    // "Invalid value new ObjectId(...)" rather than casting.
+    const creatorId = String(userId);
+
+    const [summary, byJob] = await Promise.all([
+      this.earningDao.getEarningsSummaryForUser(creatorId),
+      this.earningDao.getEarningsByJobForUser(creatorId),
+    ]);
+
+    const jobShortIds = byJob
+      .map((row) => row.job_short_id)
+      .filter(Boolean) as string[];
+
+    const jobs = jobShortIds.length
+      ? await this.jobDao.getJobsByShortIds(jobShortIds, [
+          "short_id",
+          "product_name",
+          "preview_urls",
+          "seller_id",
+        ])
+      : [];
+    const jobByShortId = new Map(jobs.map((job) => [job.short_id, job]));
+
+    const sellerById = await this.resolveSellersBySellerId(
+      jobs.map((job) => job.seller_id),
+    );
+
+    return {
+      total_amount: summary.total_amount,
+      total_display: formatMoney(summary.total_amount),
+      paid_amount: summary.paid_amount,
+      paid_display: formatMoney(summary.paid_amount),
+      pending_amount: summary.pending_amount,
+      pending_display: formatMoney(summary.pending_amount),
+      conversion_count: summary.conversion_count,
+      job_count: summary.job_count,
+
+      jobs: byJob.map((row) => {
+        const job = jobByShortId.get(row.job_short_id);
+
+        return {
+          job_short_id: row.job_short_id,
+          // A job the brand has since deleted still has earnings against it,
+          // so the row is kept and the client falls back on the name.
+          product_name: job?.product_name,
+          brand_name: this.getBrandName(
+            sellerById.get(String(job?.seller_id)),
+          ),
+          preview_urls: job?.preview_urls,
+
+          total_amount: row.total_amount,
+          total_display: formatMoney(row.total_amount),
+          paid_amount: row.paid_amount,
+          pending_amount: row.pending_amount,
+          pending_display: formatMoney(row.pending_amount),
+          conversion_count: row.conversion_count,
+          last_earned_at: row.last_earned_at,
+        };
+      }),
     };
   };
 

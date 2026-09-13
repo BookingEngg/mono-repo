@@ -5,6 +5,7 @@ import {
   ICreateJobPayload,
   IJobApplicationListResponse,
   IJobCheckoutDetails,
+  ICreatorEarnings,
   IJobDetails,
   IJobListResponse,
 } from "@/typings/creatorHub";
@@ -44,6 +45,16 @@ export const listBrandJobs = async (params: {
   });
 
   return response.data;
+};
+
+// A creator's own earnings — lifetime totals plus a per-job breakdown.
+// Influencer only; the server rejects a brand hitting this.
+export const getCreatorEarnings = async (): Promise<ICreatorEarnings> => {
+  const response = await axiosClient.get({
+    url: "/creator/earnings",
+  });
+
+  return response.data.data;
 };
 
 // Full detail for one job — what the job page renders. Influencer only.

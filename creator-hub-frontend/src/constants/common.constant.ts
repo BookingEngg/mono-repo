@@ -30,6 +30,7 @@ export const ROUTE_PATHS = {
   MY_APPLICATIONS: "/applications",
   // Brand-only: what they've paid creators and what's still owed.
   SETTLEMENT: "/settlement",
+  EARNINGS: "/earnings",
   // Route pattern for React Router registration — use getJobCheckoutPath()
   // to build an actual link with a real short_id.
   JOB_DETAILS: "/jobs/:shortId",

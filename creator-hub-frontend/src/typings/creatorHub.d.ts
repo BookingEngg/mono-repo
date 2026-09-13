@@ -113,6 +113,39 @@ export interface IJobDetails extends IJobCheckoutDetails {
   is_open: boolean;
 }
 
+/**
+ * Mirrors backend's ICreatorJobEarning — one job's contribution to a
+ * creator's earnings. The *_display strings are formatted server-side, so
+ * render those rather than reformatting the raw amounts.
+ */
+export interface ICreatorJobEarning {
+  job_short_id: string;
+  product_name?: string;
+  brand_name?: string;
+  preview_urls?: IJobMedia[];
+
+  total_amount: number;
+  total_display: string;
+  paid_amount: number;
+  pending_amount: number;
+  pending_display: string;
+  conversion_count: number;
+  last_earned_at?: string | null;
+}
+
+/** Mirrors backend's ICreatorEarningsResponse — GET /creator/earnings. */
+export interface ICreatorEarnings {
+  total_amount: number;
+  total_display: string;
+  paid_amount: number;
+  paid_display: string;
+  pending_amount: number;
+  pending_display: string;
+  conversion_count: number;
+  job_count: number;
+  jobs: ICreatorJobEarning[];
+}
+
 export interface IJobListPagination {
   page: number;
   limit: number;

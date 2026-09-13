@@ -15,6 +15,7 @@ import CreateJobPage from "@/pages/CreateJob";
 import ApplicationsPage from "@/pages/Applications";
 import SettlementPage from "@/pages/Settlement";
 import CheckoutPage from "@/pages/Checkout";
+import EarningsPage from "@/pages/Earnings";
 import JobDetailsPage from "@/pages/JobDetails";
 import PaymentCheckoutPage from "@/pages/PaymentCheckout";
 import NotFoundPage from "@/pages/NotFound";
@@ -119,6 +120,10 @@ const App = () => {
               <Route
                 path={ROUTE_PATHS.MY_APPLICATIONS}
                 element={<ApplicationsPage />}
+              />
+              <Route
+                path={ROUTE_PATHS.EARNINGS}
+                element={<EarningsPage />}
               />
               <Route
                 path={ROUTE_PATHS.SETTLEMENT}

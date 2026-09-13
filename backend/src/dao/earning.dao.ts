@@ -96,6 +96,98 @@ class EarningDao {
     ] as [ReturnType<typeof literal>, string];
   };
 
+  /**
+   * The statuses that count as money a creator has actually earned.
+   *
+   * `reversed` is absent on purpose and everywhere: a cancelled order was
+   * never earned, so including it would show a creator money that is not
+   * coming.
+   */
+  private earnedStatuses = [
+    EarningStatusEnum.ACCRUED,
+    EarningStatusEnum.BILLED,
+    EarningStatusEnum.PAID,
+  ];
+
+  /**
+   * A creator's lifetime earnings, aggregated in SQL rather than by loading
+   * rows — the ledger grows with every conversion, and this screen has to
+   * stay flat as that number climbs.
+   */
+  public getEarningsSummaryForUser = async (userId: string) => {
+    // Coerced even though the signature says string: IUser types _id as a
+    // string while Mongo hands back an ObjectId, so the compiler cannot
+    // protect this boundary. Sequelize rejects an ObjectId against a text
+    // column outright rather than casting it.
+    const creatorId = String(userId);
+
+    const [row] = (await this.earningModel.findAll({
+      attributes: [
+        this.sumWhereStatus(this.earnedStatuses, "total_amount"),
+        this.sumWhereStatus([EarningStatusEnum.PAID], "paid_amount"),
+        this.sumWhereStatus(
+          [EarningStatusEnum.ACCRUED, EarningStatusEnum.BILLED],
+          "pending_amount",
+        ),
+        [fn("COUNT", col("id")), "conversion_count"],
+        [fn("COUNT", fn("DISTINCT", col("job_short_id"))), "job_count"],
+      ] as any,
+      where: {
+        user_id: creatorId,
+        earning_status: this.earnedStatuses as any,
+      } as any,
+      raw: true,
+    })) as unknown as Record<string, unknown>[];
+
+    // Postgres hands SUM over DECIMAL back as a string rather than narrowing
+    // to a float and losing precision, so these have to be parsed.
+    return {
+      total_amount: Number(row?.total_amount ?? 0),
+      paid_amount: Number(row?.paid_amount ?? 0),
+      pending_amount: Number(row?.pending_amount ?? 0),
+      conversion_count: Number(row?.conversion_count ?? 0),
+      job_count: Number(row?.job_count ?? 0),
+    };
+  };
+
+  /** The same figures, one row per job the creator has earned from. */
+  public getEarningsByJobForUser = async (userId: string) => {
+    // See getEarningsSummaryForUser — the id may arrive as an ObjectId.
+    const creatorId = String(userId);
+
+    const rows = (await this.earningModel.findAll({
+      attributes: [
+        "job_short_id",
+        this.sumWhereStatus(this.earnedStatuses, "total_amount"),
+        this.sumWhereStatus([EarningStatusEnum.PAID], "paid_amount"),
+        this.sumWhereStatus(
+          [EarningStatusEnum.ACCRUED, EarningStatusEnum.BILLED],
+          "pending_amount",
+        ),
+        [fn("COUNT", col("id")), "conversion_count"],
+        [fn("MAX", col("recorded_at")), "last_earned_at"],
+      ] as any,
+      where: {
+        user_id: creatorId,
+        earning_status: this.earnedStatuses as any,
+      } as any,
+      group: ["job_short_id"],
+      // Most recent activity first: someone opening this screen is looking for
+      // what just happened, not their oldest job.
+      order: [[literal("MAX(recorded_at)"), "DESC"]] as any,
+      raw: true,
+    })) as unknown as Record<string, unknown>[];
+
+    return rows.map((row) => ({
+      job_short_id: String(row.job_short_id ?? ""),
+      total_amount: Number(row.total_amount ?? 0),
+      paid_amount: Number(row.paid_amount ?? 0),
+      pending_amount: Number(row.pending_amount ?? 0),
+      conversion_count: Number(row.conversion_count ?? 0),
+      last_earned_at: (row.last_earned_at as Date | null) ?? null,
+    }));
+  };
+
   /** One row per creator who has earned from this brand. */
   public getSettlementByCreator = async (sellerId: string) => {
     return (await this.earningModel.findAll({

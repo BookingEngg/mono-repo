@@ -33,6 +33,7 @@ class CreatorHubRoutes implements Routes {
     this.initializePostRoutes(`${this.path}/post`);
 
     this.initializeCheckoutRoutes(`${this.path}/checkout`);
+    this.initializeEarningsRoutes(`${this.path}/earnings`);
     this.initializeJobRoutes(`${this.path}/job`);
     this.initializeJobApplicationRoutes(`${this.path}/job-application`);
     this.initializeConversionRoutes(`${this.internalPath}/conversion`);
@@ -56,6 +57,23 @@ class CreatorHubRoutes implements Routes {
       ),
       this.validatorMiddleware.validateRequestParams(resolveLinkParamsSchema),
       asyncWrapper(this.creatorHubController.getJobCheckoutDetails),
+    );
+  }
+
+  /**
+   * Influencer only — a brand pays earnings out, it doesn't have any. The
+   * role check is what enforces that; the tab being hidden in the client is
+   * presentation, not access control.
+   */
+  private initializeEarningsRoutes(prefix: string) {
+    this.router.get(
+      `${prefix}`,
+      this.authMiddleware.getAuthUser,
+      this.authMiddleware.checkRoles(
+        [rolesEnum.INFLUENCER],
+        [privilegesEnum.APPLY_JOBS],
+      ),
+      asyncWrapper(this.creatorHubController.getCreatorEarnings),
     );
   }
 

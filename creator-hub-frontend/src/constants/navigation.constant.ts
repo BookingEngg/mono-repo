@@ -2,6 +2,7 @@ import {
   ClipboardListIcon,
   CompassIcon,
   HouseIcon,
+  IndianRupeeIcon,
   PlusIcon,
   UserRoundIcon,
   WalletIcon,
@@ -36,6 +37,16 @@ export const NAV_ITEMS: TNavItem[] = [
     to: ROUTE_PATHS.MY_APPLICATIONS,
     label: "Applications",
     icon: ClipboardListIcon,
+    end: false,
+    privilege: PRIVILEGES.APPLY_JOBS,
+  },
+  {
+    // Influencer only — a brand pays earnings out, it doesn't have any.
+    // APPLY_JOBS is the same privilege that gates Applications, so the two
+    // creator tabs appear and disappear together.
+    to: ROUTE_PATHS.EARNINGS,
+    label: "Earnings",
+    icon: IndianRupeeIcon,
     end: false,
     privilege: PRIVILEGES.APPLY_JOBS,
   },

@@ -112,3 +112,43 @@ export interface IJobCheckoutDetails extends IJobListItem {
   selling_price?: number;
   due_date?: number;
 }
+
+/**
+ * One job's contribution to a creator's earnings.
+ *
+ * Amounts are aggregated from the earnings ledger (Postgres) while the job's
+ * name and media come from the job document (Mongo), so the two are joined in
+ * the service rather than by a query.
+ */
+export interface ICreatorJobEarning {
+  job_short_id: string;
+  product_name?: string;
+  brand_name?: string;
+  preview_urls?: IJobMedia[];
+
+  /** Earned and not reversed — paid plus still owed. */
+  total_amount: number;
+  total_display: string;
+  paid_amount: number;
+  /** Earned but not yet settled by the brand. */
+  pending_amount: number;
+  pending_display: string;
+  conversion_count: number;
+  last_earned_at?: Date | null;
+}
+
+/** Served by GET /creator/earnings. */
+export interface ICreatorEarningsResponse {
+  /** Lifetime earnings across every job. */
+  total_amount: number;
+  total_display: string;
+  paid_amount: number;
+  paid_display: string;
+  /** What the brands still owe. */
+  pending_amount: number;
+  pending_display: string;
+  conversion_count: number;
+  job_count: number;
+
+  jobs: ICreatorJobEarning[];
+}
