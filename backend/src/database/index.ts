@@ -26,7 +26,9 @@ const getDataBaseConnection = (config: IDataBase) => {
       console.debug(logMessage);
     });
   }
-  return mongoose.createConnection(getConnectionUrl(config));
+
+  const url = getConnectionUrl(config);
+  return mongoose.createConnection(url);
 };
 
 const initMongoInstances = () => {

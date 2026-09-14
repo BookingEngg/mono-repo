@@ -12,10 +12,12 @@ fi
 # --push publishes straight from the builder since buildx can't --load a
 # non-host-platform (arm64) image into the local docker daemon.
 docker buildx build --platform linux/arm64 \
+  --no-cache \
   -t "$BACKEND_IMAGE" \
   --build-arg GITHUB_PAT="$GITHUB_PAT" \
   --push \
   ./
 
 # docker login
+# GITHUB_PAT="GITHUB_PAT" ./build.sh
 # docker push <<image_name>>

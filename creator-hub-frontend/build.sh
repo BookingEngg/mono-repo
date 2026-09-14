@@ -12,10 +12,12 @@ fi
 # --push publishes straight from the builder since buildx can't --load a
 # non-host-platform (arm64) image into the local docker daemon.
 docker buildx build --platform linux/arm64 \
+  --no-cache \
   -t "$FRONTEND_IMAGE" \
   --build-arg VITE_API_URL="$VITE_API_URL" \
   --push \
   ./
 
 # docker login
+# VITE_API_URL="NGINX_BASE_URL" ./build.sh
 # docker push <<image_name>>
