@@ -1,12 +1,38 @@
 import { Request, Response } from "express";
+import { MONGO_INSTANCES } from "@/database";
+import { sequelize } from "@/database/postgres";
 
 class IndexController {
   public healthController = async (
-    _req: Request,
-    res: Response
+    req: Request<{}, {}, {}, { db: string | boolean }>,
+    res: Response,
   ): Promise<any> => {
-    // TODO: need to remove any
-    return res.send({ message: "success" });
+    const { db } = req.query;
+    const checkDb = db === true || db === "true";
+
+    if (!checkDb) {
+      // TODO: need to remove any
+      return res.send({ message: "success" });
+    }
+
+    const mongoConnected = MONGO_INSTANCES["praman"]?.readyState === 1;
+
+    let postgresConnected = true;
+    try {
+      await sequelize.authenticate();
+    } catch {
+      postgresConnected = false;
+    }
+
+    const healthy = mongoConnected && postgresConnected;
+
+    return res.status(healthy ? 200 : 503).send({
+      message: healthy ? "success" : "failure",
+      database: {
+        mongo: mongoConnected ? "up" : "down",
+        postgres: postgresConnected ? "up" : "down",
+      },
+    });
   };
 
   public dichkaController = async (
@@ -21,7 +47,7 @@ class IndexController {
         is_cookie_testing: string | boolean;
       }
     >,
-    res: Response
+    res: Response,
   ): Promise<any> => {
     const { secure, token, same_site, is_cookie_testing } = req.query;
 
